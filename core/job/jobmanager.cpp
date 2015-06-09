@@ -1,0 +1,114 @@
+/*
+ * Copyright (C) 2015 Gracjan Orzechowski
+ *
+ * This file is part of GWatchD
+ *
+ * GWatchD is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GWatchD; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ */
+
+#include <QPluginLoader>
+#include <QDir>
+#include <QFile>
+#include <QMap>
+
+#include "job/jobmanager.h"
+#include "job/job.h"
+#include "config/yamlconfig.h"
+#include "logger/filelogger.h"
+#include "logger/decorator/loggertimestampdecorator.h"
+
+JobManager::JobManager(QObject *parent) :
+    QObject(parent)
+{
+
+}
+
+void JobManager::loadAvailableJobs()
+{
+    foreach(JobManager::availableJob job, this->getAvailableJobs()) {
+        this->loadJob(job);
+    }
+}
+
+bool JobManager::loadJob(JobManager::availableJob job)
+{
+    QPluginLoader loader(job.value("pluginPath"));
+
+    QObject *jobInstance = loader.instance();
+
+    if(jobInstance) {
+        Job *loadedJob = dynamic_cast<Job*>(jobInstance);
+
+        if(loadedJob) {
+            YamlConfig *config = new YamlConfig(job.value("configPath"));
+            FileLogger *logger = new FileLogger(tr("/var/log/gwatchd/job/%1.log").arg(job.value("name")), config);
+            LoggerTimestampDecorator *timestampLogger = new LoggerTimestampDecorator(logger);
+
+            loadedJob->setConfig(config);
+            loadedJob->setLogger(timestampLogger);
+
+            this->m_loaded.insert(
+                loader.metaData().value("MetaData").toObject().value("name").toString(),
+                loadedJob
+            );
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+QList<JobManager::availableJob> JobManager::getAvailableJobs()
+{
+    QList<JobManager::availableJob> jobs;
+    JobManager::availableJob job;
+
+    QDir configsDir("/etc/gwatchd/job");
+
+    foreach(QString file, configsDir.entryList(QDir::Files | QDir::Readable)) {
+        if(!file.contains(QRegExp("^\\w+\\.yml$"))) {
+            continue;
+        }
+
+        job.clear();
+
+        job.insert("configPath", configsDir.absolutePath() + "/" + file);
+
+        file.remove(".yml");
+
+        QFile libFile(tr("/usr/lib/gwatchd/job/lib%1job.so").arg(file));
+
+        if(libFile.open(QIODevice::ReadOnly) && libFile.isReadable()) {
+            job.insert("pluginPath", libFile.fileName());
+            job.insert("name", file);
+            jobs << job;
+        }
+    }
+
+    return jobs;
+}
+
+QHash<QString, Job*> JobManager::getLoadedJobs()
+{
+    return this->m_loaded;
+}
+
+void JobManager::slot_runJobs(QString data)
+{
+    foreach(Job *job, this->getLoadedJobs().values()) {
+        job->run(data);
+    }
+}

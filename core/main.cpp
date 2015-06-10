@@ -61,12 +61,8 @@ void showHelp()
 
 void unixSignalHandler(int)
 {
-    if(!pidFile.remove() && !qApp->arguments().contains("--no-daemon")) {
-        printf(
-            "Could not remove PID file%s: %s\n",
-            qPrintable(pidFile.fileName()),
-            qPrintable(pidFile.errorString())
-        );
+    if(qApp->property("isDaemon").toBool()) {
+        pidFile.remove();
     }
 
     qApp->quit();
@@ -89,12 +85,14 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
+    app.setProperty("isDaemon", !app.arguments().contains("--no-daemon"));
+
     int pipefd[2];
     pid_t pid, sid;
     char buf[6];
     char pipeMsg[6] = "ready";
 
-    if(!app.arguments().contains("--no-daemon")) {
+    if(app.property("isDaemon").toBool()) {
         pipe(pipefd);
 
         pid = fork();
@@ -167,7 +165,7 @@ int main(int argc, char *argv[])
         loop.exec();
     }
 
-    if(!app.arguments().contains("--no-daemon")) {
+    if(app.property("isDaemon").toBool()) {
         write(pipefd[1], pipeMsg, sizeof(pipeMsg));
 
         close(pipefd[1]);

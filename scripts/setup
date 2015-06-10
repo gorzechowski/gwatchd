@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Startup script used with makeself.sh
+
+if [ $EUID != 0 ]; then
+    echo "You must be root user"
+    exit 1
+fi
+
+mkdir -p /var/log/gwatchd/job
+mkdir -p /etc/gwatchd/job
+mkdir -p /usr/lib/gwatchd/job
+
+cp gwatchd /usr/bin/gwatchd && chmod +rx /usr/bin/gwatchd
+cp jobs/* /usr/lib/gwatchd/job/ && cp libs/* /usr/lib/gwatchd/ && chmod +rx /usr/lib/gwatchd/

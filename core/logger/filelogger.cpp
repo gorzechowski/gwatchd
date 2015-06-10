@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
+#include <QCoreApplication>
 #include <QTextStream>
 #include <QDir>
 #include <stdio.h>
@@ -56,7 +57,9 @@ void FileLogger::log(QString content)
 
     stream << content << endl;
 
-    printf("%s\n", qPrintable(content));
+    if(!qApp->property("isDaemon").toBool()) {
+        printf("%s\n", qPrintable(content));
+    }
 }
 
 int FileLogger::getIndex()

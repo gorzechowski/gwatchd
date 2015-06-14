@@ -57,7 +57,7 @@ void FileLogger::log(QString content)
 
     stream << content << endl;
 
-    if(!qApp->property("isDaemon").toBool()) {
+    if(qApp->property("stdoutAvailable").toBool()) {
         printf("%s\n", qPrintable(content));
     }
 }

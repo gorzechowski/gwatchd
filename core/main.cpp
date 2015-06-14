@@ -26,7 +26,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <stdio.h>
-#include <QDebug>
 
 #include "watcher/inotify/inotifywatcher.h"
 #include "job/jobmanager.h"
@@ -86,6 +85,7 @@ int main(int argc, char *argv[])
     }
 
     app.setProperty("isDaemon", !app.arguments().contains("--no-daemon"));
+    app.setProperty("stdoutAvailable", true);
 
     int pipefd[2];
     pid_t pid, sid;
@@ -173,6 +173,8 @@ int main(int argc, char *argv[])
         close(STDIN_FILENO);
         close(STDOUT_FILENO);
         close(STDERR_FILENO);
+
+        app.setProperty("stdoutAvailable", false);
     }
 
     return app.exec();

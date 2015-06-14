@@ -33,7 +33,7 @@
 #include "logger/filelogger.h"
 #include "logger/decorator/loggertimestampdecorator.h"
 
-QFile pidFile("/var/run/gwatchd.pid");
+QFile pidFile;
 
 void showVersion()
 {
@@ -82,6 +82,19 @@ int main(int argc, char *argv[])
     if(app.arguments().contains("--version")) {
         showVersion();
         exit(0);
+    }
+
+    if(app.arguments().contains("--pid-file")) {
+        int index = app.arguments().indexOf("--pid-file") + 1;
+
+        if(app.arguments().count() - 1 < index) {
+            printf("--pid-file requires 1 argument\n");
+            exit(1);
+        }
+
+        pidFile.setFileName(app.arguments().at(index));
+    } else {
+        pidFile.setFileName("/var/run/gwatchd.pid");
     }
 
     app.setProperty("isDaemon", !app.arguments().contains("--no-daemon"));

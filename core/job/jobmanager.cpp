@@ -29,10 +29,10 @@
 #include "logger/filelogger.h"
 #include "logger/decorator/loggertimestampdecorator.h"
 
-JobManager::JobManager(QObject *parent) :
+JobManager::JobManager(Config *config, QObject *parent) :
     QObject(parent)
 {
-
+    this->m_config = config;
 }
 
 void JobManager::loadAvailableJobs()
@@ -52,8 +52,13 @@ bool JobManager::loadJob(JobManager::availableJob job)
         Job *loadedJob = dynamic_cast<Job*>(jobInstance);
 
         if(loadedJob) {
+            QString logDirPath = this->m_config->value("log.dirPath", "/var/log/gwatchd").toString();
+
             YamlConfig *config = new YamlConfig(job.value("configPath"));
-            FileLogger *logger = new FileLogger(tr("/var/log/gwatchd/job/%1.log").arg(job.value("name")), config);
+            FileLogger *logger = new FileLogger(
+                QString("%1/job/%2.log").arg(logDirPath).arg(job.value("name")),
+                config
+            );
             LoggerTimestampDecorator *timestampLogger = new LoggerTimestampDecorator(logger);
 
             loadedJob->setConfig(config);
@@ -76,7 +81,7 @@ QList<JobManager::availableJob> JobManager::getAvailableJobs()
     QList<JobManager::availableJob> jobs;
     JobManager::availableJob job;
 
-    QDir configsDir("/etc/gwatchd/job");
+    QDir configsDir(this->m_config->fileInfo().path() + "/job");
 
     foreach(QString file, configsDir.entryList(QDir::Files | QDir::Readable)) {
         if(!file.contains(QRegExp("^\\w+\\.yml$"))) {
@@ -89,7 +94,11 @@ QList<JobManager::availableJob> JobManager::getAvailableJobs()
 
         file.remove(".yml");
 
-        QFile libFile(tr("/usr/lib/gwatchd/job/lib%1job.so").arg(file));
+        QString libDirPath = this->m_config->value("lib.dirPath", "/usr/lib/gwatchd").toString();
+
+        QFile libFile(
+            libDirPath + QString("/job/lib%1job.so").arg(file)
+        );
 
         if(libFile.open(QIODevice::ReadOnly) && libFile.isReadable()) {
             job.insert("pluginPath", libFile.fileName());

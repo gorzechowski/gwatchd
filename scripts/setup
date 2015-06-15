@@ -7,9 +7,9 @@ if [ $EUID != 0 ]; then
     exit 1
 fi
 
-mkdir -p /var/log/gwatchd/job
+mkdir -p /var/log/gwatchd/job && chmod -R 755 /var/log/gwatchd/
 mkdir -p /etc/gwatchd/job
 mkdir -p /usr/lib/gwatchd/job
 
-cp gwatchd /usr/bin/gwatchd && chmod +rx /usr/bin/gwatchd
-cp jobs/* /usr/lib/gwatchd/job/ && cp libs/* /usr/lib/gwatchd/ && chmod +rx /usr/lib/gwatchd/
+cp gwatchd /usr/bin/gwatchd && chmod 755 /usr/bin/gwatchd
+cp jobs/* /usr/lib/gwatchd/job/ && cp libs/* /usr/lib/gwatchd/ && chmod -R 755 /usr/lib/gwatchd/

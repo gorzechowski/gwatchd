@@ -47,12 +47,15 @@ void showVersion()
 void showHelp()
 {
     printf(
-        "Usage: gwatchd [--no-daemon]\n\n"
+        "Usage: gwatchd [--pid-file <file_path>] [--config-dir <dir_path>] [--no-daemon]\n\n"
 
         "Options:\n"
-        "  --no-daemon    Do not detach and logs to stdout/stderr\n\n"
-        "  --help         Print options\n"
-        "  --version      Print version\n\n"
+        "  --pid-file <file_path>    Set PID file path\n"
+        "  --config-dir <dir_path>   Set config dir path\n"
+        "  --no-daemon               Do not detach and logs to stdout/stderr\n\n"
+
+        "  --help                    Print options\n"
+        "  --version                 Print version\n\n"
 
         "License:\n"
         "  GPLv2 or any later version.\n"

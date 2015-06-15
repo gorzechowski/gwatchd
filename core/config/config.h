@@ -21,16 +21,23 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <QObject>
 #include <QVariant>
 #include <QStringList>
+#include <QFileInfo>
 
-class Config
+class Config : public QObject
 {
 public:
+    Config(QString filePath, QObject *parent = 0) : QObject(parent), m_fileInfo(QFileInfo(filePath)) {}
     virtual ~Config() {}
 
     virtual QVariant value(QString key, QVariant defaultValue = QVariant()) = 0;
     virtual QStringList listValue(QString key, QStringList defaultValue = QStringList()) = 0;
+    QFileInfo fileInfo() { return m_fileInfo; }
+
+protected:
+    QFileInfo m_fileInfo;
 };
 
 #endif // CONFIG_H

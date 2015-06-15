@@ -22,10 +22,10 @@
 
 #include "config/yamlconfig.h"
 
-YamlConfig::YamlConfig(QString fileName, QObject *parent) :
-    QObject(parent)
+YamlConfig::YamlConfig(QString filePath, QObject *parent) :
+    Config(filePath, parent)
 {
-    QFile file(fileName);
+    QFile file(filePath);
 
     if(file.exists()) {
         file.open(QIODevice::ReadOnly);

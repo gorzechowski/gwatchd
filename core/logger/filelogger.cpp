@@ -32,6 +32,15 @@ FileLogger::FileLogger(QString path, Config *config, QObject *parent) :
 
     this->m_file = new QFile(path);
 
+    QDir dir(QFileInfo(path).path());
+
+    if(!dir.mkpath(".")) {
+        printf(
+            "Could not create log dir %s\n",
+            qPrintable(dir.absolutePath())
+        );
+    }
+
     if(!this->m_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
         printf(
             "Could not open log file %s: %s\n",
@@ -57,7 +66,7 @@ void FileLogger::log(QString content)
 
     stream << content << endl;
 
-    if(!qApp->property("isDaemon").toBool()) {
+    if(qApp->property("stdoutAvailable").toBool()) {
         printf("%s\n", qPrintable(content));
     }
 }

@@ -22,6 +22,7 @@
 #include <QObject>
 #include <QTime>
 #include <QEventLoop>
+#include <QFileInfo>
 #include <sys/signal.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -33,7 +34,7 @@
 #include "logger/filelogger.h"
 #include "logger/decorator/loggertimestampdecorator.h"
 
-QFile pidFile("/var/run/gwatchd.pid");
+QFile pidFile;
 
 void showVersion()
 {
@@ -46,12 +47,15 @@ void showVersion()
 void showHelp()
 {
     printf(
-        "Usage: gwatchd [--no-daemon]\n\n"
+        "Usage: gwatchd [--pid-file <file_path>] [--config-dir <dir_path>] [--no-daemon]\n\n"
 
         "Options:\n"
-        "  --no-daemon    Do not detach and logs to stdout/stderr\n\n"
-        "  --help         Print options\n"
-        "  --version      Print version\n\n"
+        "  --pid-file <file_path>    Set PID file path\n"
+        "  --config-dir <dir_path>   Set config dir path\n"
+        "  --no-daemon               Do not detach and logs to stdout/stderr\n\n"
+
+        "  --help                    Print options\n"
+        "  --version                 Print version\n\n"
 
         "License:\n"
         "  GPLv2 or any later version.\n"
@@ -82,6 +86,34 @@ int main(int argc, char *argv[])
     if(app.arguments().contains("--version")) {
         showVersion();
         exit(0);
+    }
+
+    if(app.arguments().contains("--pid-file")) {
+        int index = app.arguments().indexOf("--pid-file") + 1;
+
+        if(app.arguments().count() - 1 < index) {
+            printf("--pid-file requires 1 argument\n");
+            exit(1);
+        }
+
+        pidFile.setFileName(app.arguments().at(index));
+    } else {
+        pidFile.setFileName("/var/run/gwatchd.pid");
+    }
+
+    QString configDirPath;
+
+    if(app.arguments().contains("--config-dir")) {
+        int index = app.arguments().indexOf("--config-dir") + 1;
+
+        if(app.arguments().count() - 1 < index) {
+            printf("--config-file requires 1 argument\n");
+            exit(1);
+        }
+
+        configDirPath = app.arguments().at(index);
+    } else {
+        configDirPath = "/etc/gwatchd";
     }
 
     app.setProperty("isDaemon", !app.arguments().contains("--no-daemon"));
@@ -143,10 +175,13 @@ int main(int argc, char *argv[])
     signal(SIGTERM, unixSignalHandler);
     signal(SIGTSTP, unixSignalHandler);
 
-    YamlConfig *config = new YamlConfig("/etc/gwatchd/config.yml");
+    YamlConfig *config = new YamlConfig(configDirPath + "/config.yml");
 
-    LoggerTimestampDecorator *logger = new LoggerTimestampDecorator(new FileLogger("/var/log/gwatchd/gwatchd.log", config));
-    JobManager *manager = new JobManager();
+    LoggerTimestampDecorator *logger = new LoggerTimestampDecorator(
+        new FileLogger(config->value("log.dirPath", "/var/log/gwatchd").toString() + "/gwatchd.log", config)
+    );
+
+    JobManager *manager = new JobManager(config);
     INotifyWatcher *watcher = new INotifyWatcher(logger);
 
     manager->loadAvailableJobs();

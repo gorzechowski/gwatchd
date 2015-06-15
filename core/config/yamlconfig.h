@@ -28,11 +28,11 @@
 
 #include "yaml-cpp/yaml.h"
 
-class YamlConfig : public QObject, public Config
+class YamlConfig : public Config
 {
     Q_OBJECT
 public:
-    YamlConfig(QString fileName, QObject *parent = 0);
+    YamlConfig(QString filePath, QObject *parent = 0);
 
     QVariant value(QString key, QVariant defaultValue = QVariant());
     QStringList listValue(QString key, QStringList defaultValue = QStringList());

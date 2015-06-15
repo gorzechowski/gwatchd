@@ -25,6 +25,7 @@
 #include <QHash>
 
 #include "job/job.h"
+#include "config/config.h"
 
 class JobManager : public QObject
 {
@@ -32,7 +33,7 @@ class JobManager : public QObject
 public:
     typedef QHash<QString, QString> availableJob;
 
-    JobManager(QObject *parent = 0);
+    JobManager(Config *config, QObject *parent = 0);
 
     QHash<QString, Job*> getLoadedJobs();
     void loadAvailableJobs();
@@ -42,6 +43,8 @@ protected:
     QList<JobManager::availableJob> getAvailableJobs();
 
     QHash<QString, Job*> m_loaded;
+
+    Config *m_config;
 
 public slots:
     void slot_runJobs(QString data);

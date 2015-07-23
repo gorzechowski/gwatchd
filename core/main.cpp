@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     QCoreApplication app(argc, argv);
 
     app.setApplicationName("GWatchD");
-    app.setApplicationVersion("1.0.2");
+    app.setApplicationVersion("1.0.3");
 
     if(app.arguments().contains("--help")) {
         showHelp();

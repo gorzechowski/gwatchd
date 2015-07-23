@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+#### **1.0.3** _(23-07-2015)_
+- [Bug][[#5](https://github.com/gorzechowski/gwatchd/issues/5)] Fixed watching new directories
+
 #### **1.0.2** _(15-06-2015)_
 - [Bug][[#3](https://github.com/gorzechowski/gwatchd/issues/3)] Customizable paths
 - [Bug][[#2](https://github.com/gorzechowski/gwatchd/issues/2)] Lack of startup logs in daemon mode

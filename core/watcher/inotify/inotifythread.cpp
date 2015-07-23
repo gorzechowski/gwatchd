@@ -89,6 +89,7 @@ void INotifyThread::run()
     char buffer[BUF_LEN];
 
     QMap<uint, QString> fileMoving;
+    QString path;
 
     while(true) {
         i = 0;
@@ -115,6 +116,33 @@ void INotifyThread::run()
                         ));
 
                         fileMoving.remove(event->cookie);
+                        break;
+
+                    case IN_CREATE | IN_ISDIR:
+                        path = this->m_watches.value(event->wd) + event->name;
+
+                        if(!path.endsWith("/")) {
+                            path.append("/");
+                        }
+
+                        watchDescriptor = inotify_add_watch(this->m_fd, path.toUtf8(), WATCH_FLAGS);
+
+                        if(watchDescriptor >= 0) {
+                            this->m_watches.insert(watchDescriptor, path);
+                        }
+
+                        emit(fileChanged(path));
+                        break;
+
+                    case IN_DELETE | IN_ISDIR:
+                        path = this->m_watches.value(event->wd) + event->name;
+
+                        watchDescriptor = this->m_watches.key(path);
+
+                        inotify_rm_watch(this->m_fd, watchDescriptor);
+                        this->m_watches.remove(watchDescriptor);
+
+                        emit(fileChanged(path));
                         break;
 
                     default:

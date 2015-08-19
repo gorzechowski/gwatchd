@@ -18,20 +18,39 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef WATCHER_H
-#define WATCHER_H
+#ifndef KQUEUEWATCHER_H
+#define KQUEUEWATCHER_H
 
-#include <QString>
+#include <QObject>
+#include <QThread>
 
 #include "job/jobmanager.h"
+#include "watcher/watcher.h"
+#include "logger/logger.h"
 
-class Watcher
+class Watcher : public QObject
 {
+    Q_OBJECT
 public:
-    virtual ~Watcher() {}
+    Watcher(Logger *logger, QObject *parent = 0);
 
-    virtual bool init() = 0;
-    virtual void addDirs(QStringList dirs) = 0;
+    bool init();
+    void addDirs(QStringList dirs);
+
+protected:
+    QThread *m_thread;
+
+    QStringList m_dirs;
+    Logger *m_logger;
+
+signals:
+    void fileChanged(QString data);
+    void initialized();
+
+private slots:
+    void slot_watchAdded(QString dir);
+    void slot_watchAddFailed(QString dir, int error);
+    void slot_watchAddDone();
 };
 
-#endif // WATCHER_H
+#endif // KQUEUEWATCHER_H

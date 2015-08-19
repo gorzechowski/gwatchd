@@ -28,11 +28,11 @@
 #include <sys/types.h>
 #include <stdio.h>
 
-#include "watcher/inotify/inotifywatcher.h"
 #include "job/jobmanager.h"
 #include "config/yamlconfig.h"
 #include "logger/filelogger.h"
 #include "logger/decorator/loggertimestampdecorator.h"
+#include "watcher/watcher.h"
 
 QFile pidFile;
 
@@ -182,7 +182,8 @@ int main(int argc, char *argv[])
     );
 
     JobManager *manager = new JobManager(config);
-    INotifyWatcher *watcher = new INotifyWatcher(logger);
+
+    Watcher *watcher = new Watcher(logger);
 
     manager->loadAvailableJobs();
 

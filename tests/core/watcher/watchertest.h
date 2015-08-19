@@ -18,39 +18,36 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYWATCHER_H
-#define INOTIFYWATCHER_H
+#ifndef WATCHERTEST_H
+#define WATCHERTEST_H
 
 #include <QObject>
+#include <QDir>
 
-#include "job/jobmanager.h"
-#include "watcher/inotify/inotifythread.h"
-#include "watcher/watcher.h"
-#include "logger/logger.h"
+#include "../../../core/watcher/watcher.h"
 
-class INotifyWatcher : public QObject, public Watcher
+class WatcherTest : public QObject
 {
     Q_OBJECT
 public:
-    INotifyWatcher(Logger *logger, QObject *parent = 0);
+    WatcherTest(QObject *parent = 0);
 
-    bool init();
-    void addDirs(QStringList dirs);
+private:
+    QDir m_dir;
 
-protected:
-    INotifyThread *m_watcherThread;
+    Watcher *m_watcher;
 
-    QStringList m_dirs;
-    Logger *m_logger;
-
-signals:
-    void fileChanged(QString data);
-    void initialized();
+    QMap<QString, QString> m_files;
 
 private slots:
-    void slot_watchAdded(QString dir);
-    void slot_watchAddFailed(QString dir, int error);
-    void slot_watchAddDone();
+    void initTestCase();
+    void cleanupTestCase();
+
+    void testCreateFile();
+    void testModifyFile();
+    void testCopyFile();
+    void testMoveFile();
+
 };
 
-#endif // INOTIFYENGINE_H
+#endif // WATCHERTEST_H

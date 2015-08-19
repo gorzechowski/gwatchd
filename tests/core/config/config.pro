@@ -10,16 +10,13 @@ TARGET = configTest
 
 SOURCES += \
     main.cpp \
-    yamlconfigtest.cpp \
-    ../../../core/config/yamlconfig.cpp
+    yamlconfigtest.cpp
 
 HEADERS += \
-    yamlconfigtest.h \
-    ../../../core/config/yamlconfig.h \
-    ../../../core/config/config.h
+    yamlconfigtest.h
 
-RESOURCES += \
-    resources.qrc
+include(../../../core/config/config.pri)
+include(../../mockups/mockups.pri)
 
 INCLUDEPATH += \
     ../../../core/ \
@@ -28,6 +25,3 @@ INCLUDEPATH += \
 QMAKE_RPATHDIR += /usr/lib/gwatchd/
 
 LIBS += -L$$OUT_PWD/../../../libs/yaml-cpp -lyaml-cpp
-
-OTHER_FILES += \
-    config.yml

@@ -22,15 +22,16 @@
 #include <QSignalSpy>
 #include <QEventLoop>
 
-#include "inotifythreadtest.h"
+#include "watchertest.h"
+#include "../../mockups/loggermock.h"
 
-INotifyThreadTest::INotifyThreadTest(QObject *parent) :
+WatcherTest::WatcherTest(QObject *parent) :
     QObject(parent)
 {
     this->m_dir = QDir("/tmp/gwatchd-test/");
 }
 
-void INotifyThreadTest::initTestCase()
+void WatcherTest::initTestCase()
 {
     if(this->m_dir.exists()) {
         this->m_dir.removeRecursively();
@@ -49,26 +50,30 @@ void INotifyThreadTest::initTestCase()
     this->m_files.insert("/dir1/dir1/dir1/file2", "/dir1/dir1/file3");
     this->m_files.insert("/dir1/dir1/dir1/file3", "/dir2/file2");
 
-    this->m_thread = new INotifyThread(QStringList() << this->m_dir.absolutePath());
+    LoggerMock *logger = new LoggerMock();
+
+    this->m_watcher = new Watcher(logger);
+
+    this->m_watcher->addDirs(QStringList() << this->m_dir.absolutePath());
 
     QEventLoop loop;
 
-    connect(this->m_thread, SIGNAL(watchesAddDone()), &loop, SLOT(quit()));
+    connect(this->m_watcher, SIGNAL(initialized()), &loop, SLOT(quit()));
 
-    this->m_thread->start();
+    this->m_watcher->init();
 
     loop.exec();
 }
 
-void INotifyThreadTest::cleanupTestCase()
+void WatcherTest::cleanupTestCase()
 {
-    this->m_thread->slot_stop();
+//    this->m_watcher->slot_stop();
     this->m_dir.removeRecursively();
 }
 
-void INotifyThreadTest::testCreateFile()
+void WatcherTest::testCreateFile()
 {
-    QSignalSpy spy(this->m_thread, SIGNAL(fileChanged(QString)));
+    QSignalSpy spy(this->m_watcher, SIGNAL(fileChanged(QString)));
 
     QFile file;
 
@@ -85,9 +90,9 @@ void INotifyThreadTest::testCreateFile()
     }
 }
 
-void INotifyThreadTest::testModifyFile()
+void WatcherTest::testModifyFile()
 {
-    QSignalSpy spy(this->m_thread, SIGNAL(fileChanged(QString)));
+    QSignalSpy spy(this->m_watcher, SIGNAL(fileChanged(QString)));
 
     QFile file;
 
@@ -107,9 +112,9 @@ void INotifyThreadTest::testModifyFile()
     }
 }
 
-void INotifyThreadTest::testCopyFile()
+void WatcherTest::testCopyFile()
 {
-    QSignalSpy spy(this->m_thread, SIGNAL(fileChanged(QString)));
+    QSignalSpy spy(this->m_watcher, SIGNAL(fileChanged(QString)));
 
     QFile file;
 
@@ -140,9 +145,9 @@ void INotifyThreadTest::testCopyFile()
     }
 }
 
-void INotifyThreadTest::testMoveFile()
+void WatcherTest::testMoveFile()
 {
-    QSignalSpy spy(this->m_thread, SIGNAL(fileChanged(QString)));
+    QSignalSpy spy(this->m_watcher, SIGNAL(fileChanged(QString)));
 
     QFile file;
 
@@ -173,4 +178,4 @@ void INotifyThreadTest::testMoveFile()
     }
 }
 
-#include "moc_inotifythreadtest.cpp"
+#include "moc_watchertest.cpp"

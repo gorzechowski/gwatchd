@@ -26,7 +26,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "watcher/inotify/inotifythread.h"
+#include "watcher/inotifythread.h"
 
 #define MAX_EVENTS 1024
 #define LEN_NAME   16

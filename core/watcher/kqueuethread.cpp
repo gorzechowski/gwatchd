@@ -128,7 +128,6 @@ void KQueueThread::run()
         struct kevent event;
 
         if (kevent(this->m_kq, NULL, 0, &event, 1, NULL) == -1) {
-            qApp->quit();
             break;
         }
 

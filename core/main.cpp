@@ -68,7 +68,7 @@ void unixSignalHandler(int)
         pidFile.remove();
     }
 
-    qApp->quit();
+    exit(0);
 }
 
 int main(int argc, char *argv[])

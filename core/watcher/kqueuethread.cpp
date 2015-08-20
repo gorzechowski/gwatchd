@@ -50,7 +50,7 @@ void KQueueThread::run()
     int dirDescriptor;
     struct kevent direvent;
     const char *dirname;
-qDebug() << "dirs" << this->m_dirs;
+
     foreach(QString dir, this->m_dirs) {
         if(!dir.startsWith("/")) {
             continue;
@@ -58,8 +58,9 @@ qDebug() << "dirs" << this->m_dirs;
 
         dirname = dir.toUtf8();
         dirDescriptor = open(dir.toUtf8(), O_RDONLY);
-qDebug() << dir << dirDescriptor << strerror(errno);
+
         if(dirDescriptor <= -1) {
+            emit(watchAddFailed(dir, errno));
             continue;
         }
 
@@ -93,6 +94,7 @@ qDebug() << dir << dirDescriptor << strerror(errno);
             dirDescriptor = open(subDir.toUtf8(), O_RDONLY);
 
             if(dirDescriptor <= -1) {
+                emit(watchAddFailed(subDir, errno));
                 continue;
             }
 

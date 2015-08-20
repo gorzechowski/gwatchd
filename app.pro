@@ -34,3 +34,16 @@ defineTest(minQtVersion) {
 CONFIG += ordered
 TEMPLATE = subdirs
 SUBDIRS += libs core jobs tests
+
+unix {
+    core.path = /usr/bin
+    core.files = $$OUT_PWD/core/gwatchd
+
+    jobs.path = /usr/lib/gwatchd/job
+    jobs.files = $$OUT_PWD/jobs/synchronize/*.so
+
+    libs.path = /usr/lib/gwatchd
+    libs.files = $$OUT_PWD/libs/yaml-cpp/*.so
+
+    INSTALLS += core jobs libs
+}

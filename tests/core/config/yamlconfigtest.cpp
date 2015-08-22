@@ -57,7 +57,7 @@ void YamlConfigTest::testListValue()
 {
     QCOMPARE(
         this->m_config->listValue("dirs"),
-        QStringList() << "/dir2/" << "/dir1/"
+        QStringList() << "/dir1/" << "/dir2/"
     );
 
     QCOMPARE(

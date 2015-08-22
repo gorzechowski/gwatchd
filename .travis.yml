@@ -1,0 +1,49 @@
+language: cpp
+
+os: linux
+
+compiler:
+  - gcc
+
+env:
+  global:
+    - ppa_5_2="ppa:beineri/opt-qt521"
+    - ppa_5_3="ppa:beineri/opt-qt532"
+    - ppa_5_4="ppa:beineri/opt-qt541"
+    - ppa_5_5="ppa:beineri/opt-qt55"
+
+    - pkg_5_2="qt52base; source /opt/qt52/bin/qt52-env.sh"
+    - pkg_5_3="qt53base; source /opt/qt53/bin/qt53-env.sh"
+    - pkg_5_4="qt54base; source /opt/qt54/bin/qt54-env.sh"
+    - pkg_5_5="qt55base; source /opt/qt55/bin/qt55-env.sh"
+  matrix:
+    - QT_VERSION="5_2"
+    - QT_VERSION="5_3"
+    - QT_VERSION="5_4"
+    - QT_VERSION="5_5"
+
+sudo: required
+
+before_install:
+  - if [ "$CXX" = "g++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+      ppa="ppa_"$QT_VERSION;
+      cmd="sudo add-apt-repository ${!ppa} -y";
+      eval $cmd && sudo apt-get update -qq;
+    fi
+
+install:
+  - if [ "$CXX" = "g++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -qq g++ gcc; export CXX="g++" CC="gcc"; $CXX --version; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libboost-all-dev; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+      pkg="pkg_"$QT_VERSION;
+      cmd="sudo apt-get install -qq ${!pkg}"
+      eval $cmd;
+    fi
+
+before_script: 
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then qmake -recursive QMAKE_RPATHDIR+="`pwd`/libs/yaml-cpp/ `pwd`/jobs/synchronize/"; fi
+
+script:
+  - make
+  - for test in `find tests/ -name '*Test'`; do ./$test; done

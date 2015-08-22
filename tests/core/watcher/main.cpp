@@ -30,7 +30,5 @@ int main(int argc, char *argv[])
 
     INotifyThreadTest inotifyTest;
 
-    QTest::qExec(&inotifyTest, argc, argv);
-
-    return 0;
+    return QTest::qExec(&inotifyTest, argc, argv);
 }

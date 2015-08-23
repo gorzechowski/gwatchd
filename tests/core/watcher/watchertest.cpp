@@ -82,7 +82,7 @@ void WatcherTest::testCreateFile()
         file.open(QIODevice::ReadWrite);
 
         spy.wait(100);
-        QCOMPARE(spy.count(), 1);
+        QCOMPARE(spy.count() > 0, true);
 
         spy.clear();
 
@@ -104,7 +104,7 @@ void WatcherTest::testModifyFile()
         file.flush();
 
         spy.wait(100);
-        QCOMPARE(spy.count(), 1);
+        QCOMPARE(spy.count() > 0, true);
 
         spy.clear();
 
@@ -126,7 +126,7 @@ void WatcherTest::testCopyFile()
         file.copy(src, dest);
 
         spy.wait(100);
-        QCOMPARE(spy.count(), 3);
+        QCOMPARE(spy.count() > 0, true);
 
         spy.clear();
 
@@ -137,7 +137,7 @@ void WatcherTest::testCopyFile()
         file.flush();
 
         spy.wait(100);
-        QCOMPARE(spy.count(), 1);
+        QCOMPARE(spy.count() > 0, true);
 
         spy.clear();
 
@@ -161,7 +161,7 @@ void WatcherTest::testMoveFile()
         file.rename(dest);
 
         spy.wait(100);
-        QCOMPARE(spy.count(), 1);
+        QCOMPARE(spy.count() > 0, true);
 
         spy.clear();
 
@@ -170,7 +170,7 @@ void WatcherTest::testMoveFile()
         file.flush();
 
         spy.wait(100);
-        QCOMPARE(spy.count(), 1);
+        QCOMPARE(spy.count() > 0, true);
 
         spy.clear();
 

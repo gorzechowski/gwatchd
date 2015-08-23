@@ -40,6 +40,11 @@ protected:
 
     int m_kq;
 
+    QStringList findNewEntries(QString);
+    QStringList getEntriesForDir(QString, QMap<int, QString>);
+    QStringList getEntriesForDir(QString);
+    bool addWatcher(QString, bool emitSignal = true);
+
 signals:
     void fileChanged(QString data);
     void watchesAddDone();

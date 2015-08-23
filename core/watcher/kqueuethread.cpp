@@ -21,7 +21,7 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QCoreApplication>
-#include <QDebug>
+#include <QSet>
 
 #include <unistd.h>
 #include <errno.h>
@@ -47,78 +47,24 @@ void KQueueThread::run()
     }
 
     this->m_kq = kqueue();
-    int dirDescriptor;
-    struct kevent direvent;
-    const char *dirname;
 
     foreach(QString dir, this->m_dirs) {
         if(!dir.startsWith("/")) {
             continue;
         }
 
-        dirname = dir.toUtf8();
-        dirDescriptor = open(dir.toUtf8(), O_RDONLY);
-
-        if(dirDescriptor <= -1) {
-            emit(watchAddFailed(dir, errno));
-            continue;
-        }
-
-        EV_SET(
-            &direvent,
-            dirDescriptor,
-            EVFILT_VNODE,
-            FLAGS,
-            FILTER_FLAGS,
-            0,
-            (void *) dirname
-        );
-
-        if(kevent(this->m_kq, &direvent, 1, NULL, 0, NULL) >= 0) {
-            this->m_watches.insert(dirDescriptor, dir);
-            emit(watchAdded(dir));
-        } else {
-            emit(watchAddFailed(dir, errno));
-        }
+        this->addWatcher(dir);
 
         QDirIterator it(dir, QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
 
         while(it.hasNext()) {
-            QString subDir = it.next();
+            QString path = it.next();
 
-            bool isFile = QFileInfo(subDir).isFile();
+            bool isFile = QFileInfo(path).isFile();
 
-            if(!subDir.endsWith("/") && !isFile) subDir.append("/");
+            if(!path.endsWith("/") && !isFile) path.append("/");
 
-            dirname = subDir.toUtf8();
-            dirDescriptor = open(subDir.toUtf8(), O_RDONLY);
-
-            if(dirDescriptor <= -1) {
-                emit(watchAddFailed(subDir, errno));
-                continue;
-            }
-
-            EV_SET(
-                &direvent,
-                dirDescriptor,
-                EVFILT_VNODE,
-                FLAGS,
-                FILTER_FLAGS,
-                0,
-                (void *) dirname
-            );
-
-            if(kevent(this->m_kq, &direvent, 1, NULL, 0, NULL) >= 0) {
-                this->m_watches.insert(dirDescriptor, subDir);
-
-                if(!isFile) {
-                    emit(watchAdded(subDir));
-                }
-            } else {
-                if(!isFile) {
-                    emit(watchAddFailed(subDir, errno));
-                }
-            }
+            this->addWatcher(path, !isFile);
         }
     }
 
@@ -131,10 +77,113 @@ void KQueueThread::run()
             break;
         }
 
-        if (event.udata != NULL) {
-            emit(fileChanged(this->m_watches.value((int) event.ident)));
+        if(event.udata == NULL) {
+            continue;
+        }
+
+        int ident = (int) event.ident;
+        QString path = this->m_watches.value(ident);
+
+        if (event.fflags & NOTE_WRITE) {
+            if(QFileInfo(path).isDir()) {
+                QStringList entries = this->findNewEntries(path);
+
+                foreach(QString entry, entries) {
+                    this->addWatcher(entry, false);
+
+                    emit(fileChanged(entry));
+                }
+            } else {
+                emit(fileChanged(path));
+            }
+        }
+
+        if(event.fflags & NOTE_DELETE || event.fflags & NOTE_RENAME) {
+            emit(fileChanged(path));
+            this->m_watches.remove(ident);
+            close(ident);
         }
     }
+}
+
+bool KQueueThread::addWatcher(QString path, bool emitSignal)
+{
+    struct kevent direvent;
+    const char *dirname = path.toUtf8();
+    int dirDescriptor = open(path.toUtf8(), O_RDONLY);
+
+    if(dirDescriptor <= -1) {
+        emit(watchAddFailed(path, errno));
+        return false;
+    }
+
+    EV_SET(
+        &direvent,
+        dirDescriptor,
+        EVFILT_VNODE,
+        FLAGS,
+        FILTER_FLAGS,
+        0,
+        (void *) dirname
+    );
+
+    if(kevent(this->m_kq, &direvent, 1, NULL, 0, NULL) >= 0) {
+        this->m_watches.insert(dirDescriptor, path);
+
+        if(emitSignal) {
+            emit(watchAdded(path));
+        }
+    } else {
+        if(emitSignal) {
+           emit(watchAddFailed(path, errno));
+        }
+
+        return false;
+    }
+
+    return true;
+}
+
+QStringList KQueueThread::findNewEntries(QString dir)
+{
+    QStringList watchedEntries = this->getEntriesForDir(dir, this->m_watches);
+    QStringList entries = this->getEntriesForDir(dir);
+
+    QSet<QString> diff = entries.toSet().subtract(watchedEntries.toSet());
+
+    return QStringList::fromSet(diff);
+}
+
+QStringList KQueueThread::getEntriesForDir(QString dir, QMap<int, QString> watchers)
+{
+    QStringList result;
+
+    int dirParts = dir.split("/", QString::SkipEmptyParts).count();
+
+    foreach(QString path, watchers.values()) {
+        int pathParts = path.split("/", QString::SkipEmptyParts).count();
+     
+        if(path.startsWith(dir) && (pathParts - dirParts) == 1) result << path;
+    }
+
+    return result;
+}
+
+QStringList KQueueThread::getEntriesForDir(QString dir)
+{
+    QStringList result;
+
+    QDirIterator it(dir, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+
+    while(it.hasNext()) {
+        QString path = it.next();
+
+        if(QFileInfo(path).isDir()) path.append("/");
+
+        result << path;
+    }
+
+    return result;
 }
 
 void KQueueThread::slot_stop()

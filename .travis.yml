@@ -4,6 +4,7 @@ os: linux
 
 compiler:
   - gcc
+  - clang
 
 env:
   global:
@@ -26,6 +27,7 @@ sudo: required
 
 before_install:
   - if [ "$CXX" = "g++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y; fi
+  - if [ "$CXX" = "clang++" ]; then sudo add-apt-repository ppa:h-rayflood/llvm -y; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
       ppa="ppa_"$QT_VERSION;
       cmd="sudo add-apt-repository ${!ppa} -y";
@@ -34,6 +36,20 @@ before_install:
 
 install:
   - if [ "$CXX" = "g++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -qq g++ gcc; export CXX="g++" CC="gcc"; $CXX --version; fi
+  - if [ "$CXX" = "clang++" ]; then
+      sudo apt-get install --allow-unauthenticated -qq clang-3.4;
+      export CXXFLAGS="-std=c++0x -stdlib=libc++";
+
+      svn co --quiet http://llvm.org/svn/llvm-project/libcxx/trunk libcxx;
+      cd libcxx/lib && bash buildit;
+      sudo cp ./libc++.so.1.0 /usr/lib/;
+      sudo mkdir /usr/include/c++/v1;
+      cd .. && sudo cp -r include/* /usr/include/c++/v1/;
+      cd /usr/lib && sudo ln -sf libc++.so.1.0 libc++.so && sudo ln -sf libc++.so.1.0 libc++.so.1;
+      cd $TRAVIS_BUILD_DIR;
+
+      export CXX="clang++-3.4";
+    fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libboost-all-dev; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
       pkg="pkg_"$QT_VERSION;

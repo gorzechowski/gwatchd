@@ -1,6 +1,6 @@
 HEADERS += \
-    config/yamlconfig.h \
-    config/config.h
+    $$PWD/yamlconfig.h \
+    $$PWD/config.h
 
 SOURCES += \
-    config/yamlconfig.cpp
+    $$PWD/yamlconfig.cpp

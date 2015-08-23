@@ -21,14 +21,14 @@
 #include <QCoreApplication>
 #include <QTest>
 
-#include "inotifythreadtest.h"
+#include "watchertest.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
     app.setAttribute(Qt::AA_Use96Dpi, true);
 
-    INotifyThreadTest inotifyTest;
+    WatcherTest test;
 
-    return QTest::qExec(&inotifyTest, argc, argv);
+    return QTest::qExec(&test, argc, argv);
 }

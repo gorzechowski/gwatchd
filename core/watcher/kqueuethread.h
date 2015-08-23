@@ -18,35 +18,41 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYTHREADTEST_H
-#define INOTIFYTHREADTEST_H
+#ifndef KQUEUETHREAD_H
+#define KQUEUETHREAD_H
 
-#include <QObject>
-#include <QDir>
+#include <QThread>
+#include <QStringList>
+#include <QMap>
 
-#include "../../../core/watcher/inotify/inotifythread.h"
-
-class INotifyThreadTest : public QObject
+class KQueueThread : public QThread
 {
     Q_OBJECT
 public:
-    INotifyThreadTest(QObject *parent = 0);
+    KQueueThread(QStringList dirs, QObject *parent = 0);
 
-private:
-    QDir m_dir;
-    INotifyThread *m_thread;
+    void run();
 
-    QMap<QString, QString> m_files;
+protected:
+    QStringList m_dirs;
 
-private slots:
-    void initTestCase();
-    void cleanupTestCase();
+    QMap<int, QString> m_watches;
 
-    void testCreateFile();
-    void testModifyFile();
-    void testCopyFile();
-    void testMoveFile();
+    int m_kq;
 
+    QStringList findNewEntries(QString);
+    QStringList getEntriesForDir(QString, QMap<int, QString>);
+    QStringList getEntriesForDir(QString);
+    bool addWatcher(QString, bool emitSignal = true);
+
+signals:
+    void fileChanged(QString data);
+    void watchesAddDone();
+    void watchAdded(QString dir);
+    void watchAddFailed(QString dir, int error);
+
+public slots:
+    void slot_stop();
 };
 
-#endif // INOTIFYTHREADTEST_H
+#endif // KQUEUETHREAD_H

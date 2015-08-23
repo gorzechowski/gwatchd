@@ -8,13 +8,30 @@ CONFIG -= app_bundle
 
 TARGET = watcherTest
 
-SOURCES += \
-    inotifythreadtest.cpp \
-    ../../../core/watcher/inotify/inotifythread.cpp \
-    main.cpp
+INCLUDEPATH += ../../../core/
 
 HEADERS += \
-    inotifythreadtest.h \
-    ../../../core/watcher/inotify/inotifythread.h
+    watchertest.h
+#    ../../../core/watcher/watcher.h
 
-INCLUDEPATH += ../../../core/
+SOURCES += \
+    main.cpp \
+    watchertest.cpp
+#    ../../../core/watcher/watcher.cpp
+
+#linux {
+#    HEADERS += \
+#        ../../../core/watcher/inotifythread.h
+
+#    SOURCES += \
+#        ../../../core/watcher/inotifythread.cpp
+#} else:macx|freebsd|openbsd|netbsd {
+#    HEADERS += \
+#        ../../../core/watcher/kqueuethread.h
+
+#    SOURCES += \
+#        ../../../core/watcher/kqueuethread.cpp
+#}
+
+include(../../mockups/mockups.pri)
+include(../../../core/watcher/watcher.pri)

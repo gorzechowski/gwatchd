@@ -1,6 +1,6 @@
 HEADERS += \
-    job/jobmanager.h \
-    job/job.h
+    $$PWD/jobmanager.h \
+    $$PWD/job.h
 
 SOURCES += \
-    job/jobmanager.cpp
+    $$PWD/jobmanager.cpp

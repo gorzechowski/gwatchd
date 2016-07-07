@@ -18,17 +18,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef COMMANDBUILDER_H
-#define COMMANDBUILDER_H
+#ifndef SOCKETSERVER_H
+#define SOCKETSERVER_H
 
-#include <QString>
+#include <QWebSocketServer>
+#include <QWebSocket>
 
-class CommandBuilder
+#include "logger/logger.h"
+
+class SocketServer : public QWebSocketServer
 {
+    Q_OBJECT
 public:
-    virtual ~CommandBuilder() {}
+    SocketServer(Logger *logger, QString serverName = "default");
 
-    virtual QStringList build() = 0;
+    bool listen(QString, int);
+
+    QList<QWebSocket*> m_clients;
+
+    void sendMessageToAllClients(QString);
+
+protected:
+    Logger *m_logger;
+
+public slots:
+    void slot_addClient();
+    void slot_removeClient();
 };
 
-#endif // COMMANDBUILDER_H
+#endif // SOCKETSERVER_H

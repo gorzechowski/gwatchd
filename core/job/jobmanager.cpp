@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -22,12 +22,15 @@
 #include <QDir>
 #include <QFile>
 #include <QMap>
+#include <QDebug>
 
 #include "job/jobmanager.h"
 #include "job/job.h"
 #include "config/yamlconfig.h"
 #include "logger/filelogger.h"
 #include "logger/decorator/loggertimestampdecorator.h"
+#include "notification/finishednotification.h"
+#include "notification/startednotification.h"
 
 JobManager::JobManager(Config *config, QObject *parent) :
     QObject(parent)
@@ -54,6 +57,7 @@ bool JobManager::loadJob(JobManager::availableJob job)
         if(loadedJob) {
             QString logDirPath = this->m_config->value("log.dirPath", "/var/log/gwatchd").toString();
 
+            QJsonObject metaData = loader.metaData().value("MetaData").toObject();
             YamlConfig *config = new YamlConfig(job.value("configPath"));
             FileLogger *logger = new FileLogger(
                 QString("%1/job/%2.log").arg(logDirPath).arg(job.value("name")),
@@ -64,8 +68,13 @@ bool JobManager::loadJob(JobManager::availableJob job)
             loadedJob->setConfig(config);
             loadedJob->setLogger(timestampLogger);
 
+            jobInstance->setProperty("metaData", metaData);
+
+            connect(jobInstance, SIGNAL(started()), this, SLOT(slot_jobStarted()));
+            connect(jobInstance, SIGNAL(finished(int)), this, SLOT(slot_jobFinished(int)));
+
             this->m_loaded.insert(
-                loader.metaData().value("MetaData").toObject().value("name").toString(),
+                metaData.value("name").toString(),
                 loadedJob
             );
 
@@ -120,4 +129,24 @@ void JobManager::slot_runJobs(QString data)
     foreach(Job *job, this->getLoadedJobs().values()) {
         job->run(data);
     }
+}
+
+void JobManager::slot_jobStarted()
+{
+    QObject *job = static_cast<QObject*>(this->sender());
+    QJsonObject data = job->property("metaData").toJsonObject();
+
+    Notification *n = new StartedNotification(data.value("name").toString());
+
+    emit(notification(n));
+}
+
+void JobManager::slot_jobFinished(int status)
+{
+    QObject *job = static_cast<QObject*>(this->sender());
+    QJsonObject data = job->property("metaData").toJsonObject();
+
+    Notification *n = new FinishedNotification(data.value("name").toString(), status);
+
+    emit(notification(n));
 }

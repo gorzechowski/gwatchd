@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -39,6 +39,10 @@ public:
 protected:
     Config *m_config;
     Logger *m_logger;
+
+signals:
+    void started();
+    void finished(int);
 };
 
 Q_DECLARE_INTERFACE(Job, "job/1.0")

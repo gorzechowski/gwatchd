@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *

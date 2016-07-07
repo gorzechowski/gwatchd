@@ -18,17 +18,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef COMMANDBUILDER_H
-#define COMMANDBUILDER_H
+#ifndef NOTIFICATIONMANAGER_H
+#define NOTIFICATIONMANAGER_H
 
-#include <QString>
+#include <QObject>
+#include <QList>
 
-class CommandBuilder
+#include "notification/notification.h"
+#include "notification/notifier/notifier.h"
+
+class NotificationManager : public QObject
 {
+    Q_OBJECT
 public:
-    virtual ~CommandBuilder() {}
+    NotificationManager(QObject *parent = 0);
 
-    virtual QStringList build() = 0;
+    void addNotifier(Notifier*);
+
+protected:
+    QList<Notifier*> m_notifiers;
+
+public slots:
+    void slot_notification(Notification*);
 };
 
-#endif // COMMANDBUILDER_H
+#endif // NOTIFICATIONMANAGER_H

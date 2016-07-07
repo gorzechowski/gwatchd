@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -33,13 +33,15 @@
 #include "logger/filelogger.h"
 #include "logger/decorator/loggertimestampdecorator.h"
 #include "watcher/watcher.h"
+#include "notification/notificationmanager.h"
+#include "notification/notifier/socketnotifier.h"
 
 QFile pidFile;
 
 void showVersion()
 {
     printf(
-        "GWatchD %s Copyright (c) 2015 Gracjan Orzechowski\n",
+        "GWatchD %s Copyright (C) 2015 - 2016 Gracjan Orzechowski\n",
         qPrintable(qApp->applicationVersion())
     );
 }
@@ -200,6 +202,12 @@ int main(int argc, char *argv[])
     if(watcher->init()) {
         loop.exec();
     }
+
+    NotificationManager *notificationManager = new NotificationManager();
+
+    notificationManager->addNotifier(new SocketNotifier(config, logger));
+
+    QObject::connect(manager, SIGNAL(notification(Notification*)), notificationManager, SLOT(slot_notification(Notification*)));
 
     if(app.property("isDaemon").toBool()) {
         write(pipefd[1], pipeMsg, sizeof(pipeMsg));

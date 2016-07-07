@@ -18,17 +18,33 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef COMMANDBUILDER_H
-#define COMMANDBUILDER_H
+#ifndef SOCKETNOTIFIER_H
+#define SOCKETNOTIFIER_H
 
-#include <QString>
+#include <QObject>
 
-class CommandBuilder
+#include "notification/notifier/socketserver.h"
+#include "notification/startednotification.h"
+#include "notification/finishednotification.h"
+#include "notification/notifier/notifier.h"
+#include "logger/logger.h"
+#include "config/config.h"
+
+class SocketNotifier : public QObject, public Notifier
 {
+    Q_OBJECT
 public:
-    virtual ~CommandBuilder() {}
+    SocketNotifier(Config *config, Logger *logger, QObject *parent = 0);
 
-    virtual QStringList build() = 0;
+    bool notify(Notification*);
+
+    bool startServer(QString, int);
+
+protected:
+    SocketServer *m_server;
+
+    Config *m_config;
+    Logger *m_logger;
 };
 
-#endif // COMMANDBUILDER_H
+#endif // SOCKETNOTIFIER_H

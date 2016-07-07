@@ -18,17 +18,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef COMMANDBUILDER_H
-#define COMMANDBUILDER_H
+#include <QDebug>
+#include <QNetworkInterface>
 
-#include <QString>
+#include "notification/notifier/socketnotifier.h"
 
-class CommandBuilder
+SocketNotifier::SocketNotifier(Config *config, Logger *logger, QObject *parent) : QObject(parent)
 {
-public:
-    virtual ~CommandBuilder() {}
+    this->m_config = config;
+    this->m_logger = logger;
 
-    virtual QStringList build() = 0;
-};
+    this->startServer(
+        this->m_config->value("tcp.listenAddress", "").toString(),
+        this->m_config->value("tcp.listenPort", 0).toInt()
+    );
+}
 
-#endif // COMMANDBUILDER_H
+bool SocketNotifier::startServer(QString address, int port)
+{
+    if(port > 0 && !address.isEmpty()) {
+        this->m_server = new SocketServer(this->m_logger);
+
+        return this->m_server->listen(address, port);
+    }
+
+    return false;
+}
+
+bool SocketNotifier::notify(Notification *notification)
+{
+    this->m_server->sendMessageToAllClients(notification->toJson());
+}

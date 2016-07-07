@@ -18,17 +18,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef COMMANDBUILDER_H
-#define COMMANDBUILDER_H
+#ifndef FINISHEDNOTIFICATION_H
+#define FINISHEDNOTIFICATION_H
 
 #include <QString>
 
-class CommandBuilder
+#include "notification/notification.h"
+
+class FinishedNotification: public Notification
 {
 public:
-    virtual ~CommandBuilder() {}
+    FinishedNotification(QString jobName, int status);
 
-    virtual QStringList build() = 0;
+    QString getJobName();
+    QString toJson();
+    int getStatus();
+
+protected:
+    QString m_jobName;
+    int m_status;
 };
 
-#endif // COMMANDBUILDER_H
+#endif // FINISHEDNOTIFICATION_H

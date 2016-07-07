@@ -18,17 +18,35 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef COMMANDBUILDER_H
-#define COMMANDBUILDER_H
+#include <QJsonDocument>
+#include <QJsonObject>
 
-#include <QString>
+#include "finishednotification.h"
 
-class CommandBuilder
+FinishedNotification::FinishedNotification(QString jobName, int status)
 {
-public:
-    virtual ~CommandBuilder() {}
+    this->m_jobName = jobName;
+    this->m_status = status;
+}
 
-    virtual QStringList build() = 0;
-};
+QString FinishedNotification::getJobName()
+{
+    return this->m_jobName;
+}
 
-#endif // COMMANDBUILDER_H
+QString FinishedNotification::toJson()
+{
+    QJsonObject object;
+    object.insert("job", this->getJobName());
+    object.insert("status", this->getStatus());
+
+    QJsonDocument document(object);
+
+    return QString(document.toJson());
+}
+
+int FinishedNotification::getStatus()
+{
+    return this->m_status;
+}
+

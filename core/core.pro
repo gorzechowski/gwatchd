@@ -1,4 +1,4 @@
-QT       += core
+QT       += core websockets
 QT       -= gui
 
 TEMPLATE = app
@@ -20,3 +20,4 @@ include(config/config.pri)
 include(job/job.pri)
 include(watcher/watcher.pri)
 include(logger/logger.pri)
+include(notification/notification.pri)

@@ -8,11 +8,11 @@ compiler:
 
 env:
   global:
-    - ppa_5_3="ppa:beineri/opt-qt532"
-    - ppa_5_4="ppa:beineri/opt-qt542"
-    - ppa_5_5="ppa:beineri/opt-qt551"
-    - ppa_5_6="ppa:beineri/opt-qt561"
-    - ppa_5_7="ppa:beineri/opt-qt57"
+    - ppa_5_3="ppa:beineri/opt-qt532-trusty"
+    - ppa_5_4="ppa:beineri/opt-qt542-trusty"
+    - ppa_5_5="ppa:beineri/opt-qt551-trusty"
+    - ppa_5_6="ppa:beineri/opt-qt561-trusty"
+    - ppa_5_7="ppa:beineri/opt-qt57-trusty"
 
     - pkg_5_3="qt53base qt53websockets; source /opt/qt53/bin/qt53-env.sh"
     - pkg_5_4="qt54base qt54websockets; source /opt/qt54/bin/qt54-env.sh"

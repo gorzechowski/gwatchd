@@ -8,21 +8,18 @@ compiler:
 
 env:
   global:
-    - ppa_5_2="ppa:beineri/opt-qt521"
     - ppa_5_3="ppa:beineri/opt-qt532"
     - ppa_5_4="ppa:beineri/opt-qt542"
     - ppa_5_5="ppa:beineri/opt-qt55"
     - ppa_5_6="ppa:beineri/opt-qt561"
     - ppa_5_7="ppa:beineri/opt-qt57"
 
-    - pkg_5_2="qt52base; source /opt/qt52/bin/qt52-env.sh"
-    - pkg_5_3="qt53base; source /opt/qt53/bin/qt53-env.sh"
-    - pkg_5_4="qt54base; source /opt/qt54/bin/qt54-env.sh"
-    - pkg_5_5="qt55base; source /opt/qt55/bin/qt55-env.sh"
-    - pkg_5_6="qt56base; source /opt/qt56/bin/qt56-env.sh"
-    - pkg_5_7="qt57base; source /opt/qt57/bin/qt57-env.sh"
+    - pkg_5_3="qt53base qt53websockets; source /opt/qt53/bin/qt53-env.sh"
+    - pkg_5_4="qt54base qt54websockets; source /opt/qt54/bin/qt54-env.sh"
+    - pkg_5_5="qt55base qt55websockets; source /opt/qt55/bin/qt55-env.sh"
+    - pkg_5_6="qt56base qt56websockets; source /opt/qt56/bin/qt56-env.sh"
+    - pkg_5_7="qt57base qt57websockets; source /opt/qt57/bin/qt57-env.sh"
   matrix:
-    - QT_VERSION="5_2"
     - QT_VERSION="5_3"
     - QT_VERSION="5_4"
     - QT_VERSION="5_5"

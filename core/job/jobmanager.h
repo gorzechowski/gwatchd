@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -26,6 +26,7 @@
 
 #include "job/job.h"
 #include "config/config.h"
+#include "notification/notification.h"
 
 class JobManager : public QObject
 {
@@ -48,6 +49,12 @@ protected:
 
 public slots:
     void slot_runJobs(QString data);
+
+    void slot_jobStarted();
+    void slot_jobFinished(int);
+
+signals:
+    void notification(Notification*);
 };
 
 #endif // JOBMANAGER_H

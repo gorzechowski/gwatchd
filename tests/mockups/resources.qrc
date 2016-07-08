@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>config.yml</file>
+        <file>synchronize.yml</file>
     </qresource>
 </RCC>

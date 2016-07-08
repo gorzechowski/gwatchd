@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -65,6 +65,11 @@ private slots:
     void slot_read();
 
     void slot_synchronize();
+
+signals:
+    void started();
+    void finished(int);
+    void stateChanged(QString);
 };
 
 #endif // SYNCHRONIZEJOB_H

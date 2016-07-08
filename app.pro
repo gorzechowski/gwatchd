@@ -26,9 +26,9 @@ defineTest(minQtVersion) {
     return(false)
 }
 
-!minQtVersion(5, 2, 0) {
+!minQtVersion(5, 3, 0) {
     message("Current Qt version is $${QT_VERSION}")
-    error("GWatchD requires at least Qt 5.2.0")
+    error("GWatchD requires at least Qt 5.3.0")
 }
 
 CONFIG += ordered

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -59,6 +59,12 @@ void SynchronizeJob::run(QString data)
 
 void SynchronizeJob::slot_synchronize()
 {
+    if(this->m_timer->isActive()) {
+        this->m_timer->stop();
+    }
+
+    emit(started());
+
     QStringList dirs;
 
     foreach(QString dir, this->getDirs()) {
@@ -126,6 +132,10 @@ void SynchronizeJob::slot_finished(int code)
     }
 
     this->m_activeProcessList.remove(process->property("hash").toString());
+
+    if(this->m_activeProcessList.isEmpty()) {
+        emit(finished(code));
+    }
 }
 
 void SynchronizeJob::slot_read()

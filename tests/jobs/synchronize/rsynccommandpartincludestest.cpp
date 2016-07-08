@@ -29,7 +29,7 @@ RsyncCommandPartIncludesTest::RsyncCommandPartIncludesTest(QObject *parent) :
 
 void RsyncCommandPartIncludesTest::initTestCase()
 {
-    this->m_config = new YamlConfig(":/config.yml");
+    this->m_config = new YamlConfig(":/synchronize.yml");
 
     this->m_commandPart = new RsyncCommandPartIncludes("/dir1/", this->m_config);
 }

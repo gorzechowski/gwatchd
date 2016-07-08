@@ -38,7 +38,7 @@ bool SocketServer::listen(QString addr, int port)
     bool status = QWebSocketServer::listen(address, port);
 
     if(!status) {
-        this->m_logger->log("Could not create tcp server: " + this->errorString());
+        this->m_logger->log("Could not create websocket server: " + this->errorString());
     }
 
     return status;

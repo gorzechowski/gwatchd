@@ -29,7 +29,7 @@ YamlConfigTest::YamlConfigTest(QObject *parent) :
 
 void YamlConfigTest::initTestCase()
 {
-    this->m_config = new YamlConfig(":/config.yml");
+    this->m_config = new YamlConfig(":/synchronize.yml");
 }
 
 void YamlConfigTest::cleanupTestCase()

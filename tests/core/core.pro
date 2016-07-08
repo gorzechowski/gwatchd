@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS += watcher config
+SUBDIRS += watcher config notification

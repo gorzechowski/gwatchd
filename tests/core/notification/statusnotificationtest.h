@@ -18,25 +18,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include <QtTest>
+#ifndef STATUSNOTIFICATIONTEST_H
+#define STATUSNOTIFICATIONTEST_H
 
-#include "rsynccommandpartexcludestest.h"
+#include <QObject>
 
-RsyncCommandPartExcludesTest::RsyncCommandPartExcludesTest(QObject *parent) :
-    QObject(parent)
+#include "notification/statusnotification.h"
+
+class StatusNotificationTest : public QObject
 {
-}
+    Q_OBJECT
+public:
+    StatusNotificationTest();
 
-void RsyncCommandPartExcludesTest::initTestCase()
-{
-    this->m_config = new YamlConfig(":/synchronize.yml");
+private slots:
+    void testCreateInstance_data();
+    void testCreateInstance();
+};
 
-    this->m_commandPart = new RsyncCommandPartExcludes("/dir1/", this->m_config);
-}
-
-void RsyncCommandPartExcludesTest::testBuild()
-{
-    QCOMPARE(this->m_commandPart->build(), QString("--exclude=\"*.git\" --exclude=\"*.local\""));
-}
-
-#include "moc_rsynccommandpartexcludestest.cpp"
+#endif // STATUSNOTIFICATIONTEST_H

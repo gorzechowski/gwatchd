@@ -18,25 +18,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include <QtTest>
+#include <QCoreApplication>
+#include <QTest>
 
-#include "rsynccommandpartexcludestest.h"
+#include "statusnotificationtest.h"
 
-RsyncCommandPartExcludesTest::RsyncCommandPartExcludesTest(QObject *parent) :
-    QObject(parent)
+int main(int argc, char *argv[])
 {
+    QCoreApplication app(argc, argv);
+    app.setAttribute(Qt::AA_Use96Dpi, true);
+
+    StatusNotificationTest test;
+
+    return QTest::qExec(&test, argc, argv);
 }
-
-void RsyncCommandPartExcludesTest::initTestCase()
-{
-    this->m_config = new YamlConfig(":/synchronize.yml");
-
-    this->m_commandPart = new RsyncCommandPartExcludes("/dir1/", this->m_config);
-}
-
-void RsyncCommandPartExcludesTest::testBuild()
-{
-    QCOMPARE(this->m_commandPart->build(), QString("--exclude=\"*.git\" --exclude=\"*.local\""));
-}
-
-#include "moc_rsynccommandpartexcludestest.cpp"

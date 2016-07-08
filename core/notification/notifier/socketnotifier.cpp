@@ -29,8 +29,8 @@ SocketNotifier::SocketNotifier(Config *config, Logger *logger, QObject *parent) 
     this->m_logger = logger;
 
     this->startServer(
-        this->m_config->value("tcp.listenAddress", "").toString(),
-        this->m_config->value("tcp.listenPort", 0).toInt()
+        this->m_config->value("notifiers.socket.address", "").toString(),
+        this->m_config->value("notifiers.socket.port", 0).toInt()
     );
 }
 

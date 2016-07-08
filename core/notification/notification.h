@@ -26,10 +26,15 @@
 class Notification
 {
 public:
+    Notification(QString jobName): m_jobName(jobName) {}
     virtual ~Notification() {}
 
-    virtual QString getJobName() = 0;
+    QString getJobName() { return m_jobName; }
+
     virtual QString toJson() = 0;
+
+protected:
+    QString m_jobName;
 };
 
 #endif // NOTIFICATION

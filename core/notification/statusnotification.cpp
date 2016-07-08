@@ -21,20 +21,39 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "finishednotification.h"
+#include "statusnotification.h"
 
-FinishedNotification::FinishedNotification(QString jobName, int status)
+StatusNotification::StatusNotification(QString jobName, int status) : Notification(jobName)
 {
-    this->m_jobName = jobName;
     this->m_status = status;
 }
 
-QString FinishedNotification::getJobName()
+QString StatusNotification::getStatus()
 {
-    return this->m_jobName;
+    QString status;
+
+    switch(this->m_status) {
+        case StatusNotification::Started:
+            status = "started";
+            break;
+
+        case StatusNotification::Finished:
+            status = "finished";
+            break;
+
+        case StatusNotification::Failed:
+            status = "failed";
+            break;
+
+        default:
+            status = "unknown";
+            break;
+    }
+
+    return status;
 }
 
-QString FinishedNotification::toJson()
+QString StatusNotification::toJson()
 {
     QJsonObject object;
     object.insert("job", this->getJobName());
@@ -44,9 +63,3 @@ QString FinishedNotification::toJson()
 
     return QString(document.toJson());
 }
-
-int FinishedNotification::getStatus()
-{
-    return this->m_status;
-}
-

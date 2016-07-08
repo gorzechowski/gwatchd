@@ -24,8 +24,6 @@
 #include <QObject>
 
 #include "notification/notifier/socketserver.h"
-#include "notification/startednotification.h"
-#include "notification/finishednotification.h"
 #include "notification/notifier/notifier.h"
 #include "logger/logger.h"
 #include "config/config.h"

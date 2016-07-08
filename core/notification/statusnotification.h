@@ -18,23 +18,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef STARTEDNOTIFICATION_H
-#define STARTEDNOTIFICATION_H
-
-#include <QString>
+#ifndef STATUSNOTIFICATION_H
+#define STATUSNOTIFICATION_H
 
 #include "notification/notification.h"
 
-class StartedNotification: public Notification
+class StatusNotification: public Notification
 {
 public:
-    StartedNotification(QString jobName);
+    StatusNotification(QString jobName, int status);
 
-    QString getJobName();
+    enum Status {
+        Started = 0,
+        Finished,
+        Failed
+    };
+
+    QString getStatus();
     QString toJson();
 
 protected:
-    QString m_jobName;
+    int m_status;
 };
 
-#endif // STARTEDNOTIFICATION_H
+#endif // STATUSNOTIFICATION_H

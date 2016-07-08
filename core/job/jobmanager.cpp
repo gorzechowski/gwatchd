@@ -22,15 +22,13 @@
 #include <QDir>
 #include <QFile>
 #include <QMap>
-#include <QDebug>
 
 #include "job/jobmanager.h"
 #include "job/job.h"
 #include "config/yamlconfig.h"
 #include "logger/filelogger.h"
 #include "logger/decorator/loggertimestampdecorator.h"
-#include "notification/finishednotification.h"
-#include "notification/startednotification.h"
+#include "notification/statusnotification.h"
 
 JobManager::JobManager(Config *config, QObject *parent) :
     QObject(parent)
@@ -136,17 +134,23 @@ void JobManager::slot_jobStarted()
     QObject *job = static_cast<QObject*>(this->sender());
     QJsonObject data = job->property("metaData").toJsonObject();
 
-    Notification *n = new StartedNotification(data.value("name").toString());
+    Notification *n = new StatusNotification(
+        data.value("name").toString(),
+        StatusNotification::Started
+    );
 
     emit(notification(n));
 }
 
-void JobManager::slot_jobFinished(int status)
+void JobManager::slot_jobFinished(int code)
 {
     QObject *job = static_cast<QObject*>(this->sender());
     QJsonObject data = job->property("metaData").toJsonObject();
 
-    Notification *n = new FinishedNotification(data.value("name").toString(), status);
+    Notification *n = new StatusNotification(
+        data.value("name").toString(),
+        code == 0 ? StatusNotification::Finished : StatusNotification::Failed
+    );
 
     emit(notification(n));
 }

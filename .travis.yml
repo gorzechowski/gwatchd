@@ -10,7 +10,7 @@ env:
   global:
     - ppa_5_3="ppa:beineri/opt-qt532"
     - ppa_5_4="ppa:beineri/opt-qt542"
-    - ppa_5_5="ppa:beineri/opt-qt55"
+    - ppa_5_5="ppa:beineri/opt-qt551"
     - ppa_5_6="ppa:beineri/opt-qt561"
     - ppa_5_7="ppa:beineri/opt-qt57"
 

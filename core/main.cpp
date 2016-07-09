@@ -35,6 +35,7 @@
 #include "watcher/watcher.h"
 #include "notification/notificationmanager.h"
 #include "notification/notifier/socketnotifier.h"
+#include "socket/socketserver.h"
 
 QFile pidFile;
 
@@ -205,7 +206,11 @@ int main(int argc, char *argv[])
 
     NotificationManager *notificationManager = new NotificationManager();
 
-    notificationManager->addNotifier(new SocketNotifier(config, logger));
+    SocketServer *socketServer = new SocketServer(config, logger);
+
+    socketServer->start();
+
+    notificationManager->addNotifier(new SocketNotifier(socketServer));
 
     QObject::connect(manager, SIGNAL(notification(Notification*)), notificationManager, SLOT(slot_notification(Notification*)));
 

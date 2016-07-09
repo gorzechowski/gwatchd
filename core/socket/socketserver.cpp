@@ -19,29 +19,38 @@
  */
 
 #include <QHostAddress>
+#include <QDebug>
 
 #include "socketserver.h"
 
-SocketServer::SocketServer(Logger *logger, QString serverName) :
+SocketServer::SocketServer(Config *config, Logger *logger, QString serverName) :
     QWebSocketServer(serverName, QWebSocketServer::NonSecureMode)
 {
+    this->m_config = config;
     this->m_logger = logger;
 
     connect(this, SIGNAL(newConnection()), this, SLOT(slot_addClient()));
 }
 
-bool SocketServer::listen(QString addr, int port)
+bool SocketServer::start()
 {
-    QHostAddress address;
-    address.setAddress(addr);
+    QString addr = this->m_config->value("socket.address", "").toString();
+    int port = this->m_config->value("socket.port", 0).toInt();
 
-    bool status = QWebSocketServer::listen(address, port);
+    if(port > 0 && !addr.isEmpty()) {
+        QHostAddress address;
+        address.setAddress(addr);
 
-    if(!status) {
-        this->m_logger->log("Could not create websocket server: " + this->errorString());
+        bool status = QWebSocketServer::listen(address, port);
+
+        if(status) {
+            this->m_logger->log(tr("Websocket listening on %1:%2").arg(addr).arg(port));
+        } else {
+            this->m_logger->log("Could not create websocket server: " + this->errorString());
+        }
+
+        return status;
     }
-
-    return status;
 }
 
 void SocketServer::sendMessageToAllClients(QString message)

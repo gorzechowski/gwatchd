@@ -23,26 +23,19 @@
 
 #include <QObject>
 
-#include "notification/notifier/socketserver.h"
+#include "socket/socketserver.h"
 #include "notification/notifier/notifier.h"
-#include "logger/logger.h"
-#include "config/config.h"
 
 class SocketNotifier : public QObject, public Notifier
 {
     Q_OBJECT
 public:
-    SocketNotifier(Config *config, Logger *logger, QObject *parent = 0);
+    SocketNotifier(SocketServer *server, QObject *parent = 0);
 
     bool notify(Notification*);
 
-    bool startServer(QString, int);
-
 protected:
     SocketServer *m_server;
-
-    Config *m_config;
-    Logger *m_logger;
 };
 
 #endif // SOCKETNOTIFIER_H

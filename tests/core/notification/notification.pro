@@ -18,3 +18,4 @@ SOURCES += \
     statusnotificationtest.cpp
 
 include(../../../core/notification/notification.pri)
+include(../../../core/socket/socket.pri)

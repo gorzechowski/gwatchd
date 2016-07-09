@@ -24,21 +24,23 @@
 #include <QWebSocketServer>
 #include <QWebSocket>
 
+#include "config/config.h"
 #include "logger/logger.h"
 
 class SocketServer : public QWebSocketServer
 {
     Q_OBJECT
 public:
-    SocketServer(Logger *logger, QString serverName = "default");
+    SocketServer(Config *config, Logger *logger, QString serverName = "default");
 
-    bool listen(QString, int);
+    bool start();
 
     QList<QWebSocket*> m_clients;
 
     void sendMessageToAllClients(QString);
 
 protected:
+    Config *m_config;
     Logger *m_logger;
 
 public slots:

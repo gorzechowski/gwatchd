@@ -23,26 +23,9 @@
 
 #include "notification/notifier/socketnotifier.h"
 
-SocketNotifier::SocketNotifier(Config *config, Logger *logger, QObject *parent) : QObject(parent)
+SocketNotifier::SocketNotifier(SocketServer *server, QObject *parent) : QObject(parent)
 {
-    this->m_config = config;
-    this->m_logger = logger;
-
-    this->startServer(
-        this->m_config->value("notifiers.socket.address", "").toString(),
-        this->m_config->value("notifiers.socket.port", 0).toInt()
-    );
-}
-
-bool SocketNotifier::startServer(QString address, int port)
-{
-    if(port > 0 && !address.isEmpty()) {
-        this->m_server = new SocketServer(this->m_logger);
-
-        return this->m_server->listen(address, port);
-    }
-
-    return false;
+    this->m_server = server;
 }
 
 bool SocketNotifier::notify(Notification *notification)

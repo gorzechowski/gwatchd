@@ -23,6 +23,8 @@
 #include <QTime>
 #include <QEventLoop>
 #include <QFileInfo>
+#include <QCommandLineParser>
+#include <QCommandLineOption>
 #include <sys/signal.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -42,26 +44,9 @@ QFile pidFile;
 void showVersion()
 {
     printf(
-        "GWatchD %s Copyright (C) 2015 - 2016 Gracjan Orzechowski\n",
+        "%s %s Copyright (C) 2015 - 2016 Gracjan Orzechowski\n",
+        qPrintable(qApp->applicationName()),
         qPrintable(qApp->applicationVersion())
-    );
-}
-
-void showHelp()
-{
-    printf(
-        "Usage: gwatchd [--pid-file <file_path>] [--config-dir <dir_path>] [--no-daemon]\n\n"
-
-        "Options:\n"
-        "  --pid-file <file_path>    Set PID file path\n"
-        "  --config-dir <dir_path>   Set config dir path\n"
-        "  --no-daemon               Do not detach and logs to stdout/stderr\n\n"
-
-        "  --help                    Print options\n"
-        "  --version                 Print version\n\n"
-
-        "License:\n"
-        "  GPLv2 or any later version.\n"
     );
 }
 
@@ -81,45 +66,30 @@ int main(int argc, char *argv[])
     app.setApplicationName("GWatchD");
     app.setApplicationVersion("1.0.3");
 
-    if(app.arguments().contains("--help")) {
-        showHelp();
-        exit(0);
-    }
+    QCommandLineParser clParser;
 
-    if(app.arguments().contains("--version")) {
+    QCommandLineOption noDaemonOption("no-daemon", "Do not detach and logs to stdout/stderr.");
+    QCommandLineOption pidFileOption(QStringList() << "p" << "pid-file", "Set PID file path.", "file_path", "/var/run/gwatchd.pid");
+    QCommandLineOption configDirOption(QStringList() << "c" << "config-dir", "Set config dir path.", "dir_path", "/etc/gwatchd");
+    QCommandLineOption versionOption(QStringList() << "v" << "version", "Displays version information.");
+
+    clParser.addOption(noDaemonOption);
+    clParser.addOption(pidFileOption);
+    clParser.addOption(configDirOption);
+
+    clParser.addHelpOption();
+    clParser.addOption(versionOption);
+
+    clParser.process(app);
+
+    if(clParser.isSet(versionOption)) {
         showVersion();
         exit(0);
     }
 
-    if(app.arguments().contains("--pid-file")) {
-        int index = app.arguments().indexOf("--pid-file") + 1;
+    pidFile.setFileName(clParser.value(pidFileOption));
 
-        if(app.arguments().count() - 1 < index) {
-            printf("--pid-file requires 1 argument\n");
-            exit(1);
-        }
-
-        pidFile.setFileName(app.arguments().at(index));
-    } else {
-        pidFile.setFileName("/var/run/gwatchd.pid");
-    }
-
-    QString configDirPath;
-
-    if(app.arguments().contains("--config-dir")) {
-        int index = app.arguments().indexOf("--config-dir") + 1;
-
-        if(app.arguments().count() - 1 < index) {
-            printf("--config-file requires 1 argument\n");
-            exit(1);
-        }
-
-        configDirPath = app.arguments().at(index);
-    } else {
-        configDirPath = "/etc/gwatchd";
-    }
-
-    app.setProperty("isDaemon", !app.arguments().contains("--no-daemon"));
+    app.setProperty("isDaemon", !clParser.isSet(noDaemonOption));
     app.setProperty("stdoutAvailable", true);
 
     int pipefd[2];
@@ -178,7 +148,7 @@ int main(int argc, char *argv[])
     signal(SIGTERM, unixSignalHandler);
     signal(SIGTSTP, unixSignalHandler);
 
-    YamlConfig *config = new YamlConfig(configDirPath + "/config.yml");
+    YamlConfig *config = new YamlConfig(clParser.value(configDirOption) + "/config.yml");
 
     LoggerTimestampDecorator *logger = new LoggerTimestampDecorator(
         new FileLogger(config->value("log.dirPath", "/var/log/gwatchd").toString() + "/gwatchd.log", config)

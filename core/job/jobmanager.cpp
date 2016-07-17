@@ -22,11 +22,14 @@
 #include <QDir>
 #include <QFile>
 #include <QMap>
+#include <QDebug>
 
 #include "job/jobmanager.h"
 #include "job/job.h"
 #include "config/yamlconfig.h"
 #include "logger/filelogger.h"
+#include "logger/simplelogger.h"
+#include "logger/loggercomposite.h"
 #include "logger/decorator/loggertimestampdecorator.h"
 #include "notification/statusnotification.h"
 
@@ -57,14 +60,23 @@ bool JobManager::loadJob(JobManager::availableJob job)
 
             QJsonObject metaData = loader.metaData().value("MetaData").toObject();
             YamlConfig *config = new YamlConfig(job.value("configPath"));
-            FileLogger *logger = new FileLogger(
-                QString("%1/job/%2.log").arg(logDirPath).arg(job.value("name")),
-                config
+
+            LoggerTimestampDecorator *fileLogger = new LoggerTimestampDecorator(
+                new FileLogger(
+                    QString("%1/job/%2.log").arg(logDirPath).arg(job.value("name")),
+                    config
+                )
             );
-            LoggerTimestampDecorator *timestampLogger = new LoggerTimestampDecorator(logger);
+
+            LoggerTimestampDecorator *simpleLogger = new LoggerTimestampDecorator(new SimpleLogger());
+
+            LoggerComposite *logger = new LoggerComposite();
+
+            logger->add(fileLogger);
+            logger->add(simpleLogger);
 
             loadedJob->setConfig(config);
-            loadedJob->setLogger(timestampLogger);
+            loadedJob->setLogger(logger);
 
             jobInstance->setProperty("metaData", metaData);
 
@@ -81,6 +93,32 @@ bool JobManager::loadJob(JobManager::availableJob job)
     }
 
     return false;
+}
+
+void JobManager::startJob(QString name, QStringList dirs)
+{
+    Job *j = 0;
+
+    foreach(Job *job, this->getLoadedJobs().values()) {
+        if(this->m_loaded.key(job).toLower() == name.toLower()) {
+            j = job;
+            break;
+        }
+    }
+
+    if(dirs.isEmpty()) {
+        dirs = j->getDirs();
+    }
+
+    if(j) {
+        foreach(QString dir, dirs) {
+            if(!dir.endsWith("/")) {
+                dir.append("/");
+            }
+
+            j->run(dir);
+        }
+    }
 }
 
 QList<JobManager::availableJob> JobManager::getAvailableJobs()

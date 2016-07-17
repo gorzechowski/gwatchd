@@ -16,8 +16,10 @@ LIBS += -L$$OUT_PWD/../libs/yaml-cpp -lyaml-cpp
 
 SOURCES += main.cpp
 
+include(application/application.pri)
 include(config/config.pri)
 include(job/job.pri)
 include(watcher/watcher.pri)
 include(logger/logger.pri)
 include(notification/notification.pri)
+include(socket/socket.pri)

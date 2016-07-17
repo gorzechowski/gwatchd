@@ -65,10 +65,6 @@ void FileLogger::log(QString content)
     QTextStream stream(this->m_file);
 
     stream << content << endl;
-
-    if(qApp->property("stdoutAvailable").toBool()) {
-        printf("%s\n", qPrintable(content));
-    }
 }
 
 int FileLogger::getIndex()

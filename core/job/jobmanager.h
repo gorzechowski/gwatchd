@@ -36,6 +36,7 @@ public:
 
     JobManager(Config *config, QObject *parent = 0);
 
+    void startJob(QString name, QStringList dirs);
     QHash<QString, Job*> getLoadedJobs();
     void loadAvailableJobs();
 

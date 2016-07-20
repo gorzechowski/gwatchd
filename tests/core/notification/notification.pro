@@ -11,11 +11,11 @@ TARGET = notificationTest
 INCLUDEPATH += ../../../core/
 
 HEADERS += \
-    statusnotificationtest.h
+    statenotificationtest.h
 
 SOURCES += \
     main.cpp \
-    statusnotificationtest.cpp
+    statenotificationtest.cpp
 
 include(../../../core/notification/notification.pri)
 include(../../../core/socket/socket.pri)

@@ -31,7 +31,7 @@
 #include "logger/simplelogger.h"
 #include "logger/loggercomposite.h"
 #include "logger/decorator/loggertimestampdecorator.h"
-#include "notification/statusnotification.h"
+#include "notification/statenotification.h"
 
 JobManager::JobManager(Config *config, QObject *parent) :
     QObject(parent)
@@ -81,6 +81,7 @@ bool JobManager::loadJob(JobManager::availableJob job)
             jobInstance->setProperty("metaData", metaData);
 
             connect(jobInstance, SIGNAL(started()), this, SLOT(slot_jobStarted()));
+            connect(jobInstance, SIGNAL(running(Payload*)), this, SLOT(slot_jobRunning(Payload*)));
             connect(jobInstance, SIGNAL(finished(int)), this, SLOT(slot_jobFinished(int)));
 
             this->m_loaded.insert(
@@ -172,9 +173,23 @@ void JobManager::slot_jobStarted()
     QObject *job = static_cast<QObject*>(this->sender());
     QJsonObject data = job->property("metaData").toJsonObject();
 
-    Notification *n = new StatusNotification(
+    Notification *n = new StateNotification(
         data.value("name").toString(),
-        StatusNotification::Started
+        StateNotification::Started
+    );
+
+    emit(notification(n));
+}
+
+void JobManager::slot_jobRunning(Payload *payload)
+{
+    QObject *job = static_cast<QObject*>(this->sender());
+    QJsonObject data = job->property("metaData").toJsonObject();
+
+    Notification *n = new StateNotification(
+        data.value("name").toString(),
+        StateNotification::Running,
+        payload
     );
 
     emit(notification(n));
@@ -185,9 +200,9 @@ void JobManager::slot_jobFinished(int code)
     QObject *job = static_cast<QObject*>(this->sender());
     QJsonObject data = job->property("metaData").toJsonObject();
 
-    Notification *n = new StatusNotification(
+    Notification *n = new StateNotification(
         data.value("name").toString(),
-        code == 0 ? StatusNotification::Finished : StatusNotification::Failed
+        code == 0 ? StateNotification::Finished : StateNotification::Failed
     );
 
     emit(notification(n));

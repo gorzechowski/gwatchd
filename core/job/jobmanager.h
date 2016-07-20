@@ -27,6 +27,7 @@
 #include "job/job.h"
 #include "config/config.h"
 #include "notification/notification.h"
+#include "notification/payload.h"
 
 class JobManager : public QObject
 {
@@ -52,6 +53,7 @@ public slots:
     void slot_runJobs(QString data);
 
     void slot_jobStarted();
+    void slot_jobRunning(Payload*);
     void slot_jobFinished(int);
 
 signals:

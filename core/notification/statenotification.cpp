@@ -21,45 +21,59 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "statusnotification.h"
+#include "statenotification.h"
 
-StatusNotification::StatusNotification(QString jobName, int status) : Notification(jobName)
+StateNotification::StateNotification(QString jobName, int state, Payload *payload) : Notification(jobName)
 {
-    this->m_status = status;
+    this->m_state = state;
+    this->m_payload = payload;
 }
 
-QString StatusNotification::getStatus()
+QString StateNotification::getState()
 {
-    QString status;
+    QString state;
 
-    switch(this->m_status) {
-        case StatusNotification::Started:
-            status = "started";
+    switch(this->m_state) {
+        case StateNotification::Started:
+            state = "started";
             break;
 
-        case StatusNotification::Finished:
-            status = "finished";
+        case StateNotification::Running:
+            state = "running";
             break;
 
-        case StatusNotification::Failed:
-            status = "failed";
+        case StateNotification::Finished:
+            state = "finished";
+            break;
+
+        case StateNotification::Failed:
+            state = "failed";
             break;
 
         default:
-            status = "unknown";
+            state = "unknown";
             break;
     }
 
-    return status;
+    return state;
 }
 
-QString StatusNotification::toJson()
+Payload* StateNotification::getPayload()
 {
-    QJsonObject object;
-    object.insert("job", this->getJobName());
-    object.insert("status", this->getStatus());
+    return this->m_payload;
+}
 
-    QJsonDocument document(object);
+QString StateNotification::toJson()
+{
+    QJsonObject root;
+    root.insert("job", this->getJobName());
+    root.insert("state", this->getState());
+
+    if(this->getPayload()) {
+        root.insert("payload", this->getPayload()->toJsonObject());
+    }
+
+    QJsonDocument document(root);
 
     return QString(document.toJson());
 }

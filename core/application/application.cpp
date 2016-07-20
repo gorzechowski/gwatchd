@@ -2,7 +2,7 @@
 #include <QSystemSemaphore>
 #include <stdio.h>
 #include <sys/stat.h>
-#include <sys/unistd.h>
+#include <unistd.h>
 
 #include "application.h"
 #include "job/jobmanager.h"

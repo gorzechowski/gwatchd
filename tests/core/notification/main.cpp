@@ -21,14 +21,14 @@
 #include <QCoreApplication>
 #include <QTest>
 
-#include "statusnotificationtest.h"
+#include "statenotificationtest.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
     app.setAttribute(Qt::AA_Use96Dpi, true);
 
-    StatusNotificationTest test;
+    StateNotificationTest test;
 
     return QTest::qExec(&test, argc, argv);
 }

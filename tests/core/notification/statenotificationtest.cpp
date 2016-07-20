@@ -23,31 +23,31 @@
 #include <QJsonObject>
 #include <QString>
 
-#include "statusnotificationtest.h"
+#include "statenotificationtest.h"
 
-StatusNotificationTest::StatusNotificationTest()
+StateNotificationTest::StateNotificationTest()
 {
 
 }
 
-void StatusNotificationTest::testCreateInstance_data()
+void StateNotificationTest::testCreateInstance_data()
 {
     QTest::addColumn<QString>("job");
     QTest::addColumn<int>("status");
     QTest::addColumn<QString>("expectedStatus");
 
-    QTest::newRow("started") << "test" << (int) StatusNotification::Started << "started";
-    QTest::newRow("finished") << "test" << (int) StatusNotification::Finished << "finished";
-    QTest::newRow("failed") << "test" << (int) StatusNotification::Failed << "failed";
+    QTest::newRow("started") << "test" << (int) StateNotification::Started << "started";
+    QTest::newRow("finished") << "test" << (int) StateNotification::Finished << "finished";
+    QTest::newRow("failed") << "test" << (int) StateNotification::Failed << "failed";
 }
 
-void StatusNotificationTest::testCreateInstance()
+void StateNotificationTest::testCreateInstance()
 {
     QFETCH(QString, job);
     QFETCH(int, status);
     QFETCH(QString, expectedStatus);
 
-    StatusNotification *notification = new StatusNotification(job, status);
+    StateNotification *notification = new StateNotification(job, status);
 
     QJsonObject object;
     object.insert("job", job);
@@ -58,4 +58,4 @@ void StatusNotificationTest::testCreateInstance()
     QCOMPARE(notification->toJson(), QString(document.toJson()));
 }
 
-#include "moc_statusnotificationtest.cpp"
+#include "moc_statenotificationtest.cpp"

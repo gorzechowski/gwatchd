@@ -18,35 +18,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef JOB_H
-#define JOB_H
+#ifndef STATENOTIFICATIONTEST_H
+#define STATENOTIFICATIONTEST_H
 
-#include <QtPlugin>
+#include <QObject>
 
-#include "config/config.h"
-#include "logger/logger.h"
-#include "notification/payload.h"
+#include "notification/statenotification.h"
 
-class Job
+class StateNotificationTest : public QObject
 {
+    Q_OBJECT
 public:
-    virtual ~Job() {}
+    StateNotificationTest();
 
-    virtual QStringList getDirs() = 0;
-    virtual void run(QString data) = 0;
-    virtual void setConfig(Config *config) = 0;
-    virtual void setLogger(Logger *logger) = 0;
-
-protected:
-    Config *m_config;
-    Logger *m_logger;
-
-signals:
-    void started();
-    void running(Payload*);
-    void finished(int);
+private slots:
+    void testCreateInstance_data();
+    void testCreateInstance();
 };
 
-Q_DECLARE_INTERFACE(Job, "job/1.0")
-
-#endif // JOB_H
+#endif // STATENOTIFICATIONTEST_H

@@ -18,22 +18,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef STATUSNOTIFICATIONTEST_H
-#define STATUSNOTIFICATIONTEST_H
+#ifndef PAYLOAD
+#define PAYLOAD
 
-#include <QObject>
+#include <QJsonObject>
 
-#include "notification/statusnotification.h"
-
-class StatusNotificationTest : public QObject
+class Payload
 {
-    Q_OBJECT
 public:
-    StatusNotificationTest();
+    virtual ~Payload() {}
 
-private slots:
-    void testCreateInstance_data();
-    void testCreateInstance();
+    virtual QJsonObject toJsonObject() = 0;
 };
 
-#endif // STATUSNOTIFICATIONTEST_H
+#endif // PAYLOAD
+

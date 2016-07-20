@@ -18,35 +18,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef JOB_H
-#define JOB_H
+#ifndef STATENOTIFICATION_H
+#define STATENOTIFICATION_H
 
-#include <QtPlugin>
-
-#include "config/config.h"
-#include "logger/logger.h"
+#include "notification/notification.h"
 #include "notification/payload.h"
 
-class Job
+class StateNotification: public Notification
 {
 public:
-    virtual ~Job() {}
+    StateNotification(QString jobName, int state, Payload *payload = 0);
 
-    virtual QStringList getDirs() = 0;
-    virtual void run(QString data) = 0;
-    virtual void setConfig(Config *config) = 0;
-    virtual void setLogger(Logger *logger) = 0;
+    enum State {
+        Started = 0,
+        Running,
+        Finished,
+        Failed
+    };
+
+    QString getState();
+    Payload* getPayload();
+    QString toJson();
 
 protected:
-    Config *m_config;
-    Logger *m_logger;
+    int m_state;
 
-signals:
-    void started();
-    void running(Payload*);
-    void finished(int);
+    Payload *m_payload;
 };
 
-Q_DECLARE_INTERFACE(Job, "job/1.0")
-
-#endif // JOB_H
+#endif // STATENOTIFICATION_H

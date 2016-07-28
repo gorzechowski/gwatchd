@@ -23,6 +23,7 @@
 #include <QFile>
 #include <QMap>
 #include <QDebug>
+#include <QEventLoop>
 
 #include "job/jobmanager.h"
 #include "job/job.h"
@@ -32,6 +33,7 @@
 #include "logger/loggercomposite.h"
 #include "logger/decorator/loggertimestampdecorator.h"
 #include "notification/statenotification.h"
+#include "notification/factory/statenotificationfactory.h"
 
 JobManager::JobManager(Config *config, QObject *parent) :
     QObject(parent)
@@ -96,32 +98,6 @@ bool JobManager::loadJob(JobManager::availableJob job)
     return false;
 }
 
-void JobManager::startJob(QString name, QStringList dirs)
-{
-    Job *j = 0;
-
-    foreach(Job *job, this->getLoadedJobs().values()) {
-        if(this->m_loaded.key(job).toLower() == name.toLower()) {
-            j = job;
-            break;
-        }
-    }
-
-    if(dirs.isEmpty()) {
-        dirs = j->getDirs();
-    }
-
-    if(j) {
-        foreach(QString dir, dirs) {
-            if(!dir.endsWith("/")) {
-                dir.append("/");
-            }
-
-            j->run(dir);
-        }
-    }
-}
-
 QList<JobManager::availableJob> JobManager::getAvailableJobs()
 {
     QList<JobManager::availableJob> jobs;
@@ -161,6 +137,34 @@ QHash<QString, Job*> JobManager::getLoadedJobs()
     return this->m_loaded;
 }
 
+void JobManager::runJob(QString name, QStringList dirs)
+{
+    Job *job = this->getLoadedJobs().value(name.toLower());
+
+    if(!job) {
+        return;
+    }
+
+    QObject *jobObject = dynamic_cast<QObject*>(job);
+    QEventLoop loop;
+
+    connect(jobObject, SIGNAL(finished(int)), &loop, SLOT(quit()));
+
+    if(dirs.isEmpty()) {
+        dirs = job->getDirs();
+    }
+
+    foreach(QString dir, dirs) {
+        if(!dir.endsWith("/")) {
+            dir.append("/");
+        }
+
+        job->run(dir);
+    }
+
+    loop.exec();
+}
+
 void JobManager::slot_runJobs(QString data)
 {
     foreach(Job *job, this->getLoadedJobs().values()) {
@@ -168,42 +172,26 @@ void JobManager::slot_runJobs(QString data)
     }
 }
 
-void JobManager::slot_jobStarted()
+QString JobManager::getJobName(QObject *job)
 {
-    QObject *job = static_cast<QObject*>(this->sender());
     QJsonObject data = job->property("metaData").toJsonObject();
 
-    Notification *n = new StateNotification(
-        data.value("name").toString(),
-        StateNotification::Started
-    );
+    return data.value("name").toString();
+}
 
-    emit(notification(n));
+void JobManager::slot_jobStarted()
+{
+    emit(notification(StateNotificationFactory::create(this->getJobName(this->sender()))));
 }
 
 void JobManager::slot_jobRunning(Payload *payload)
 {
-    QObject *job = static_cast<QObject*>(this->sender());
-    QJsonObject data = job->property("metaData").toJsonObject();
-
-    Notification *n = new StateNotification(
-        data.value("name").toString(),
-        StateNotification::Running,
-        payload
-    );
-
-    emit(notification(n));
+    emit(notification(StateNotificationFactory::create(this->getJobName(this->sender()), payload)));
 }
 
 void JobManager::slot_jobFinished(int code)
 {
-    QObject *job = static_cast<QObject*>(this->sender());
-    QJsonObject data = job->property("metaData").toJsonObject();
+    bool success = code == 0 ? true : false;
 
-    Notification *n = new StateNotification(
-        data.value("name").toString(),
-        code == 0 ? StateNotification::Finished : StateNotification::Failed
-    );
-
-    emit(notification(n));
+    emit(notification(StateNotificationFactory::create(this->getJobName(this->sender()), success)));
 }

@@ -130,7 +130,9 @@ void Application::initSingleMode(Config *config)
     QString runJobName = this->m_parser->runJobName();
     QStringList runJobArgs = this->m_parser->runJobArgs();
 
-    manager->startJob(runJobName, runJobArgs);
+    manager->runJob(runJobName, runJobArgs);
+
+    ::exit(0);
 }
 
 void Application::initDaemonMode(Config *config)

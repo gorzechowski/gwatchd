@@ -18,22 +18,35 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef STATUSNOTIFICATIONTEST_H
-#define STATUSNOTIFICATIONTEST_H
+#ifndef RUNNINGPAYLOAD_H
+#define RUNNINGPAYLOAD_H
 
-#include <QObject>
+#include <QtPlugin>
 
-#include "notification/statusnotification.h"
+#include "../../core/notification/payload.h"
 
-class StatusNotificationTest : public QObject
+class RunningPayload: public Payload
 {
-    Q_OBJECT
-public:
-    StatusNotificationTest();
 
-private slots:
-    void testCreateInstance_data();
-    void testCreateInstance();
+    Q_INTERFACES(Payload)
+
+public:
+    RunningPayload();
+
+    void addDirInfo(QString dir, int state);
+
+    enum State {
+        Started = 0,
+        Finished,
+        Failed
+    };
+
+    QJsonObject toJsonObject();
+
+protected:
+    QHash<QString, QHash<QString, QString> > m_payload;
+
+    QString stateToString(int state);
 };
 
-#endif // STATUSNOTIFICATIONTEST_H
+#endif // RUNNINGPAYLOAD_H

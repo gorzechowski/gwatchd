@@ -22,13 +22,18 @@
 #include <QDir>
 #include <QFile>
 #include <QMap>
+#include <QDebug>
+#include <QEventLoop>
 
 #include "job/jobmanager.h"
 #include "job/job.h"
 #include "config/yamlconfig.h"
 #include "logger/filelogger.h"
+#include "logger/simplelogger.h"
+#include "logger/loggercomposite.h"
 #include "logger/decorator/loggertimestampdecorator.h"
-#include "notification/statusnotification.h"
+#include "notification/statenotification.h"
+#include "notification/factory/statenotificationfactory.h"
 
 JobManager::JobManager(Config *config, QObject *parent) :
     QObject(parent)
@@ -57,18 +62,28 @@ bool JobManager::loadJob(JobManager::availableJob job)
 
             QJsonObject metaData = loader.metaData().value("MetaData").toObject();
             YamlConfig *config = new YamlConfig(job.value("configPath"));
-            FileLogger *logger = new FileLogger(
-                QString("%1/job/%2.log").arg(logDirPath).arg(job.value("name")),
-                config
+
+            LoggerTimestampDecorator *fileLogger = new LoggerTimestampDecorator(
+                new FileLogger(
+                    QString("%1/job/%2.log").arg(logDirPath).arg(job.value("name")),
+                    config
+                )
             );
-            LoggerTimestampDecorator *timestampLogger = new LoggerTimestampDecorator(logger);
+
+            LoggerTimestampDecorator *simpleLogger = new LoggerTimestampDecorator(new SimpleLogger());
+
+            LoggerComposite *logger = new LoggerComposite();
+
+            logger->add(fileLogger);
+            logger->add(simpleLogger);
 
             loadedJob->setConfig(config);
-            loadedJob->setLogger(timestampLogger);
+            loadedJob->setLogger(logger);
 
             jobInstance->setProperty("metaData", metaData);
 
             connect(jobInstance, SIGNAL(started()), this, SLOT(slot_jobStarted()));
+            connect(jobInstance, SIGNAL(running(Payload*)), this, SLOT(slot_jobRunning(Payload*)));
             connect(jobInstance, SIGNAL(finished(int)), this, SLOT(slot_jobFinished(int)));
 
             this->m_loaded.insert(
@@ -122,6 +137,34 @@ QHash<QString, Job*> JobManager::getLoadedJobs()
     return this->m_loaded;
 }
 
+void JobManager::runJob(QString name, QStringList dirs)
+{
+    Job *job = this->getLoadedJobs().value(name.toLower());
+
+    if(!job) {
+        return;
+    }
+
+    QObject *jobObject = dynamic_cast<QObject*>(job);
+    QEventLoop loop;
+
+    connect(jobObject, SIGNAL(finished(int)), &loop, SLOT(quit()));
+
+    if(dirs.isEmpty()) {
+        dirs = job->getDirs();
+    }
+
+    foreach(QString dir, dirs) {
+        if(!dir.endsWith("/")) {
+            dir.append("/");
+        }
+
+        job->run(dir);
+    }
+
+    loop.exec();
+}
+
 void JobManager::slot_runJobs(QString data)
 {
     foreach(Job *job, this->getLoadedJobs().values()) {
@@ -129,28 +172,26 @@ void JobManager::slot_runJobs(QString data)
     }
 }
 
-void JobManager::slot_jobStarted()
+QString JobManager::getJobName(QObject *job)
 {
-    QObject *job = static_cast<QObject*>(this->sender());
     QJsonObject data = job->property("metaData").toJsonObject();
 
-    Notification *n = new StatusNotification(
-        data.value("name").toString(),
-        StatusNotification::Started
-    );
+    return data.value("name").toString();
+}
 
-    emit(notification(n));
+void JobManager::slot_jobStarted()
+{
+    emit(notification(StateNotificationFactory::create(this->getJobName(this->sender()))));
+}
+
+void JobManager::slot_jobRunning(Payload *payload)
+{
+    emit(notification(StateNotificationFactory::create(this->getJobName(this->sender()), payload)));
 }
 
 void JobManager::slot_jobFinished(int code)
 {
-    QObject *job = static_cast<QObject*>(this->sender());
-    QJsonObject data = job->property("metaData").toJsonObject();
+    bool success = code == 0 ? true : false;
 
-    Notification *n = new StatusNotification(
-        data.value("name").toString(),
-        code == 0 ? StatusNotification::Finished : StatusNotification::Failed
-    );
-
-    emit(notification(n));
+    emit(notification(StateNotificationFactory::create(this->getJobName(this->sender()), success)));
 }

@@ -23,6 +23,7 @@
 
 #include "synchronizejob.h"
 #include "command/rsync/rsynccommandbuilder.h"
+#include "notification/runningpayload.h"
 
 SynchronizeJob::SynchronizeJob()
 {
@@ -114,8 +115,15 @@ void SynchronizeJob::slot_synchronize()
 void SynchronizeJob::slot_start()
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
+    QString dir = process->property("dir").toString();
 
-    this->m_logger->log(QString("Synchronizing %1 dir...").arg(process->property("dir").toString()));
+    this->m_logger->log(QString("Synchronizing %1 dir...").arg(dir));
+
+    RunningPayload *payload = new RunningPayload();
+
+    payload->addDirInfo(dir, RunningPayload::Started);
+
+    emit(running(payload));
 }
 
 void SynchronizeJob::slot_finished(int code)
@@ -124,12 +132,22 @@ void SynchronizeJob::slot_finished(int code)
 
     QString dir = process->property("dir").toString();
     QString error = QString(process->readAllStandardError()).trimmed().remove("\n");
+    RunningPayload *payload = new RunningPayload();
+    int status;
 
     if(code > 0) {
         this->m_logger->log(QString("Synchronizing %1 dir failed: %2").arg(dir).arg(error));
+
+        status = RunningPayload::Failed;
     } else {
         this->m_logger->log(QString("Synchronizing %1 dir done").arg(process->property("dir").toString()));
+
+        status = RunningPayload::Finished;
     }
+
+    payload->addDirInfo(dir, status);
+
+    emit(running(payload));
 
     this->m_activeProcessList.remove(process->property("hash").toString());
 

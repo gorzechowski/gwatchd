@@ -18,32 +18,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef SOCKETSERVER_H
-#define SOCKETSERVER_H
+#ifndef PAYLOAD
+#define PAYLOAD
 
-#include <QWebSocketServer>
-#include <QWebSocket>
+#include <QJsonObject>
 
-#include "logger/logger.h"
-
-class SocketServer : public QWebSocketServer
+class Payload
 {
-    Q_OBJECT
 public:
-    SocketServer(Logger *logger, QString serverName = "default");
+    virtual ~Payload() {}
 
-    bool listen(QString, int);
-
-    QList<QWebSocket*> m_clients;
-
-    void sendMessageToAllClients(QString);
-
-protected:
-    Logger *m_logger;
-
-public slots:
-    void slot_addClient();
-    void slot_removeClient();
+    virtual QJsonObject toJsonObject() = 0;
 };
 
-#endif // SOCKETSERVER_H
+#endif // PAYLOAD
+

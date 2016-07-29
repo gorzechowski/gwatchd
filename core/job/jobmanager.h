@@ -27,6 +27,7 @@
 #include "job/job.h"
 #include "config/config.h"
 #include "notification/notification.h"
+#include "notification/payload.h"
 
 class JobManager : public QObject
 {
@@ -39,9 +40,12 @@ public:
     QHash<QString, Job*> getLoadedJobs();
     void loadAvailableJobs();
 
+    void runJob(QString name, QStringList dirs);
+
 protected:
     bool loadJob(JobManager::availableJob job);
     QList<JobManager::availableJob> getAvailableJobs();
+    QString getJobName(QObject*);
 
     QHash<QString, Job*> m_loaded;
 
@@ -51,6 +55,7 @@ public slots:
     void slot_runJobs(QString data);
 
     void slot_jobStarted();
+    void slot_jobRunning(Payload*);
     void slot_jobFinished(int);
 
 signals:

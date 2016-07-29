@@ -18,35 +18,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef JOB_H
-#define JOB_H
+#ifndef SOCKETSERVER_H
+#define SOCKETSERVER_H
 
-#include <QtPlugin>
+#include <QWebSocketServer>
+#include <QWebSocket>
 
 #include "config/config.h"
 #include "logger/logger.h"
-#include "notification/payload.h"
 
-class Job
+class SocketServer : public QWebSocketServer
 {
+    Q_OBJECT
 public:
-    virtual ~Job() {}
+    SocketServer(Config *config, Logger *logger, QString serverName = "default");
 
-    virtual QStringList getDirs() = 0;
-    virtual void run(QString data) = 0;
-    virtual void setConfig(Config *config) = 0;
-    virtual void setLogger(Logger *logger) = 0;
+    bool start();
+
+    QList<QWebSocket*> m_clients;
+
+    void sendMessageToAllClients(QString);
 
 protected:
     Config *m_config;
     Logger *m_logger;
 
-signals:
-    void started();
-    void running(Payload*);
-    void finished(int);
+public slots:
+    void slot_addClient();
+    void slot_removeClient();
 };
 
-Q_DECLARE_INTERFACE(Job, "job/1.0")
-
-#endif // JOB_H
+#endif // SOCKETSERVER_H

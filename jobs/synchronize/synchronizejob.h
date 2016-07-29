@@ -27,6 +27,7 @@
 #include <QTimer>
 
 #include "../../core/job/job.h"
+#include "../../core/notification/payload.h"
 
 class SynchronizeJob : public QObject, public Job
 {
@@ -68,8 +69,8 @@ private slots:
 
 signals:
     void started();
+    void running(Payload*);
     void finished(int);
-    void stateChanged(QString);
 };
 
 #endif // SYNCHRONIZEJOB_H

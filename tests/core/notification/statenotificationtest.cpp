@@ -33,8 +33,8 @@ StateNotificationTest::StateNotificationTest()
 void StateNotificationTest::testCreateInstance_data()
 {
     QTest::addColumn<QString>("job");
-    QTest::addColumn<int>("status");
-    QTest::addColumn<QString>("expectedStatus");
+    QTest::addColumn<int>("state");
+    QTest::addColumn<QString>("expectedState");
 
     QTest::newRow("started") << "test" << (int) StateNotification::Started << "started";
     QTest::newRow("finished") << "test" << (int) StateNotification::Finished << "finished";
@@ -44,14 +44,14 @@ void StateNotificationTest::testCreateInstance_data()
 void StateNotificationTest::testCreateInstance()
 {
     QFETCH(QString, job);
-    QFETCH(int, status);
-    QFETCH(QString, expectedStatus);
+    QFETCH(int, state);
+    QFETCH(QString, expectedState);
 
-    StateNotification *notification = new StateNotification(job, status);
+    StateNotification *notification = new StateNotification(job, state);
 
     QJsonObject object;
     object.insert("job", job);
-    object.insert("status", expectedStatus);
+    object.insert("state", expectedState);
 
     QJsonDocument document(object);
 

@@ -59,7 +59,12 @@ void Application::parseArguments()
     this->m_parser->process(this->arguments());
 
     if(this->m_parser->isSetHelp()) {
-        this->showHelp();
+        if(this->m_parser->isSetRun()) {
+            this->showRunHelp();
+        } else {
+            this->showHelp();
+        }
+
         ::exit(0);
     }
 
@@ -202,7 +207,7 @@ void Application::showVersion()
 void Application::showHelp()
 {
     printf(
-        "Usage: gwatchd [--pid-file <file_path>] [--config-dir <dir_path>] [--no-daemon]\n\n"
+        "Usage: gwatchd [options] [command]\n\n"
 
         "Options:\n"
         "  --pid-file <file_path>    Set PID file path\n"
@@ -211,6 +216,22 @@ void Application::showHelp()
 
         "  --help                    Print options\n"
         "  --version                 Print version\n\n"
+
+        "Commands:\n"
+        "  run <job_name> [<args>]   Execute the job once\n\n"
+
+        "License:\n"
+        "  GPLv2 or any later version.\n"
+    );
+}
+
+void Application::showRunHelp()
+{
+    printf(
+        "Usage: gwatchd [options] run <job_name> [<args>]\n\n"
+
+        "Options:\n"
+        "  --config-dir <dir_path>   Set config dir path\n\n"
 
         "License:\n"
         "  GPLv2 or any later version.\n"

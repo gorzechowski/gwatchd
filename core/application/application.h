@@ -40,6 +40,7 @@ protected:
 
     void showVersion();
     void showHelp();
+    void showRunHelp();
 
 };
 

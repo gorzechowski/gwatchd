@@ -58,7 +58,7 @@ bool JobManager::loadJob(JobManager::availableJob job)
         Job *loadedJob = dynamic_cast<Job*>(jobInstance);
 
         if(loadedJob) {
-            QString logDirPath = this->m_config->value("log.dirPath", "/var/log/gwatchd").toString();
+            QString logDirPath = this->m_config->value("log.dirPath", "logs").toString();
 
             QJsonObject metaData = loader.metaData().value("MetaData").toObject();
             YamlConfig *config = new YamlConfig(job.value("configPath"));
@@ -116,10 +116,8 @@ QList<JobManager::availableJob> JobManager::getAvailableJobs()
 
         file.remove(".yml");
 
-        QString libDirPath = this->m_config->value("lib.dirPath", "/usr/lib/gwatchd").toString();
-
         QFile libFile(
-            libDirPath + QString("/job/lib%1job.so").arg(file)
+            QString("jobs/lib%1job.so").arg(file)
         );
 
         if(libFile.open(QIODevice::ReadOnly) && libFile.isReadable()) {

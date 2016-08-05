@@ -1,10 +1,4 @@
-QT -= gui
-QT += testlib
-
-TEMPLATE = app
-
-CONFIG += console
-CONFIG -= app_bundle
+include(../../common.pri)
 
 TARGET = synchronizeTest
 
@@ -28,10 +22,8 @@ include(../../../core/config/config.pri)
 include(../../mockups/mockups.pri)
 
 INCLUDEPATH += \
-    ../../../core/ \
-    ../../../jobs/synchronize/ \
-    $$PWD/../../../libs/yaml-cpp/include
+    ../../../jobs/synchronize/
 
-QMAKE_RPATHDIR += /usr/lib/gwatchd/
+QMAKE_RPATHDIR += $$OUT_PWD/../../../libs/yaml-cpp
 
 LIBS += -L$$OUT_PWD/../../../libs/yaml-cpp -lyaml-cpp

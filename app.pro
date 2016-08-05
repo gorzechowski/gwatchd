@@ -36,13 +36,13 @@ TEMPLATE = subdirs
 SUBDIRS += libs core jobs tests
 
 unix {
-    core.path = /usr/bin
+    core.path = $$OUT_PWD/bin
     core.files = $$OUT_PWD/core/gwatchd
 
-    jobs.path = /usr/lib/gwatchd/job
+    jobs.path = $$OUT_PWD/bin/jobs
     jobs.files = $$OUT_PWD/jobs/synchronize/*.so
 
-    libs.path = /usr/lib/gwatchd
+    libs.path = $$OUT_PWD/bin/libs
     libs.files = $$OUT_PWD/libs/yaml-cpp/*.so
 
     INSTALLS += core jobs libs

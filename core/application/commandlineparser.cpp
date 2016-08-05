@@ -2,8 +2,8 @@
 
 CommandLineParser::CommandLineParser() : QCommandLineParser(),
     m_noDaemon(QCommandLineOption("no-daemon", "Do not detach and logs to stdout/stderr.")),
-    m_pidFile(QCommandLineOption(QStringList() << "p" << "pid-file", "Set PID file path.", "file_path", "/var/run/gwatchd.pid")),
-    m_configDir(QCommandLineOption(QStringList() << "c" << "config-dir", "Set config dir path.", "dir_path", "/etc/gwatchd")),
+    m_pidFile(QCommandLineOption(QStringList() << "p" << "pid-file", "Set PID file path.", "file_path", "gwatchd.pid")),
+    m_configDir(QCommandLineOption(QStringList() << "c" << "config-dir", "Set config dir path.", "dir_path", "config")),
     m_help(QCommandLineOption(QStringList() << "h" << "help", "Displays this help.")),
     m_version(QCommandLineOption(QStringList() << "v" << "version", "Displays version information."))
 {

@@ -1,10 +1,4 @@
-QT -= gui
-QT += testlib
-
-TEMPLATE = app
-
-CONFIG += console
-CONFIG -= app_bundle
+include(../../common.pri)
 
 TARGET = configTest
 
@@ -17,11 +11,5 @@ HEADERS += \
 
 include(../../../core/config/config.pri)
 include(../../mockups/mockups.pri)
-
-INCLUDEPATH += \
-    ../../../core/ \
-    $$PWD/../../../libs/yaml-cpp/include
-
-QMAKE_RPATHDIR += /usr/lib/gwatchd/
 
 LIBS += -L$$OUT_PWD/../../../libs/yaml-cpp -lyaml-cpp

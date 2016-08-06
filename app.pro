@@ -35,6 +35,14 @@ CONFIG += ordered
 TEMPLATE = subdirs
 SUBDIRS += libs core jobs tests
 
+OTHER_FILES += \
+    CHANGELOG.md \
+    COPYING \
+    README.md \
+    .gitignore \
+    .travis.yml \
+    scripts/*
+
 unix {
     core.path = $$OUT_PWD/bin
     core.files = $$OUT_PWD/core/gwatchd

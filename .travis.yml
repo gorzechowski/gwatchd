@@ -58,8 +58,9 @@ install:
     fi
 
 before_script: 
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then qmake -recursive QMAKE_RPATHDIR+="`pwd`/libs/yaml-cpp/ `pwd`/jobs/synchronize/"; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then qmake -recursive; fi
 
 script:
   - make
-  - for test in `find tests/ -name '*Test'`; do ./$test; done
+  - make install
+  - for test in `find bin/tests/ -type f`; do ./$test; done

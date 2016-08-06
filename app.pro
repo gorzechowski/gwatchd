@@ -45,14 +45,25 @@ unix {
     libs.path = $$OUT_PWD/bin/libs
     libs.files = $$OUT_PWD/libs/yaml-cpp/lib*
 
-    INSTALLS += core jobs libs
+    tests.path = $$OUT_PWD/bin/tests
+    tests.files = \
+        $$OUT_PWD/tests/core/config/*Test \
+        $$OUT_PWD/tests/core/notification/*Test \
+        $$OUT_PWD/tests/core/watcher/*Test \
+        $$OUT_PWD/tests/jobs/synchronize/*Test
+
+    INSTALLS += core jobs libs tests
 }
 
 macx {
     install_name_tool.target = install_name_tool
     install_name_tool.commands = \
         install_name_tool -change libyaml-cpp.dylib @executable_path/libs/libyaml-cpp.dylib $$OUT_PWD/core/gwatchd && \
-        install_name_tool -change libyaml-cpp.dylib @executable_path/libs/libyaml-cpp.dylib $$OUT_PWD/jobs/synchronize/lib*
+        install_name_tool -change libyaml-cpp.dylib @executable_path/libs/libyaml-cpp.dylib $$OUT_PWD/jobs/synchronize/lib* && \
+        install_name_tool -change libyaml-cpp.dylib @executable_path/../libs/libyaml-cpp.dylib $$OUT_PWD/tests/core/config/*Test && \
+        install_name_tool -change libyaml-cpp.dylib @executable_path/../libs/libyaml-cpp.dylib $$OUT_PWD/tests/core/notification/*Test && \
+        install_name_tool -change libyaml-cpp.dylib @executable_path/../libs/libyaml-cpp.dylib $$OUT_PWD/tests/core/watcher/*Test && \
+        install_name_tool -change libyaml-cpp.dylib @executable_path/../libs/libyaml-cpp.dylib $$OUT_PWD/tests/jobs/*/*Test
 
     QMAKE_EXTRA_TARGETS += install_name_tool
 

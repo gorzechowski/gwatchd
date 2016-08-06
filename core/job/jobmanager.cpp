@@ -24,6 +24,7 @@
 #include <QMap>
 #include <QDebug>
 #include <QEventLoop>
+#include <QCoreApplication>
 
 #include "job/jobmanager.h"
 #include "job/job.h"
@@ -117,7 +118,7 @@ QList<JobManager::availableJob> JobManager::getAvailableJobs()
         file.remove(".yml");
 
         QFile libFile(
-            QString("jobs/lib%1job.so").arg(file)
+            qApp->applicationDirPath() + QString("/jobs/lib%1job.so").arg(file)
         );
 
         if(libFile.open(QIODevice::ReadOnly) && libFile.isReadable()) {

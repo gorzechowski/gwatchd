@@ -1,14 +1,8 @@
-QT -= gui
-QT += testlib websockets
+include(../../common.pri)
 
-TEMPLATE = app
-
-CONFIG += console
-CONFIG -= app_bundle
+QT += websockets
 
 TARGET = notificationTest
-
-INCLUDEPATH += ../../../core/
 
 HEADERS += \
     statenotificationtest.h

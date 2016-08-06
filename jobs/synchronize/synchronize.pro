@@ -1,20 +1,6 @@
-QT       += core
-QT       -= gui
+include(../common.pri)
 
-TEMPLATE = lib
-
-CONFIG   += plugin
-
-TARGET = $$qtLibraryTarget(synchronizejob)
-
-INCLUDEPATH += \
-    ../../core/ \
-    $$PWD/../../libs/yaml-cpp/include
-
-
-QMAKE_RPATHDIR += /usr/lib/gwatchd/
-
-LIBS += -L$$OUT_PWD/../../libs/yaml-cpp -lyaml-cpp
+TARGET = synchronizejob
 
 SOURCES += synchronizejob.cpp
 

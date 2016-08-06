@@ -34,7 +34,6 @@ YamlConfig::YamlConfig(QString filePath, QObject *parent) :
     } else {
         this->m_config = YAML::Load("{}");
     }
-
 }
 
 QVariant YamlConfig::value(QString key, QVariant defaultValue)

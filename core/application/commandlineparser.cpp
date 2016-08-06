@@ -1,9 +1,11 @@
+#include <QCoreApplication>
+
 #include "commandlineparser.h"
 
 CommandLineParser::CommandLineParser() : QCommandLineParser(),
     m_noDaemon(QCommandLineOption("no-daemon", "Do not detach and logs to stdout/stderr.")),
-    m_pidFile(QCommandLineOption(QStringList() << "p" << "pid-file", "Set PID file path.", "file_path", "/var/run/gwatchd.pid")),
-    m_configDir(QCommandLineOption(QStringList() << "c" << "config-dir", "Set config dir path.", "dir_path", "/etc/gwatchd")),
+    m_pidFile(QCommandLineOption(QStringList() << "p" << "pid-file", "Set PID file path.", "file_path")),
+    m_configDir(QCommandLineOption(QStringList() << "c" << "config-dir", "Set config dir path.", "dir_path")),
     m_help(QCommandLineOption(QStringList() << "h" << "help", "Displays this help.")),
     m_version(QCommandLineOption(QStringList() << "v" << "version", "Displays version information."))
 {
@@ -19,12 +21,24 @@ CommandLineParser::CommandLineParser() : QCommandLineParser(),
 
 QString CommandLineParser::pidFile()
 {
-    return this->value(this->m_pidFile);
+    QString path = this->value(this->m_pidFile);
+
+    if(!path.isEmpty()) {
+        return path;
+    }
+
+    return qApp->applicationDirPath() + "/gwatchd.pid";
 }
 
 QString CommandLineParser::configDir()
 {
-    return this->value(this->m_configDir);
+    QString path = this->value(this->m_configDir);
+
+    if(!path.isEmpty()) {
+        return path;
+    }
+
+    return qApp->applicationDirPath() + "/config";
 }
 
 QString CommandLineParser::runJobName()

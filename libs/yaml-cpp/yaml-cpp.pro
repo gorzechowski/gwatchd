@@ -2,9 +2,9 @@ QT -= gui core
 
 TEMPLATE = lib
 
-CONFIG   += plugin
+CONFIG += plugin
 
-TARGET = $$qtLibraryTarget(yaml-cpp)
+TARGET = yaml-cpp
 
 SOURCES += \
     src/binary.cpp \
@@ -62,4 +62,6 @@ HEADERS += \
     src/token.h \
     src/contrib/graphbuilderadapter.h
 
-INCLUDEPATH += $$PWD/include
+INCLUDEPATH += \
+    $$PWD/include \
+    /usr/local/include

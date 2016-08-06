@@ -37,14 +37,17 @@ void RunningPayload::addDirInfo(QString dir, int state)
 QJsonObject RunningPayload::toJsonObject()
 {
     QJsonObject root;
+    QJsonObject dirs;
 
     foreach(QString dir, this->m_payload.keys()) {
         QJsonObject details;
 
         details.insert("state", this->stateToString(this->m_payload.value(dir).value("state").toInt()));
 
-        root.insert(dir, details);
+        dirs.insert(dir, details);
     }
+
+    root.insert("dirs", dirs);
 
     return root;
 }

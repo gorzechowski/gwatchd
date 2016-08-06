@@ -24,6 +24,7 @@
 #include <QMap>
 #include <QDebug>
 #include <QEventLoop>
+#include <QCoreApplication>
 
 #include "job/jobmanager.h"
 #include "job/job.h"
@@ -58,7 +59,7 @@ bool JobManager::loadJob(JobManager::availableJob job)
         Job *loadedJob = dynamic_cast<Job*>(jobInstance);
 
         if(loadedJob) {
-            QString logDirPath = this->m_config->value("log.dirPath", "/var/log/gwatchd").toString();
+            QString logDirPath = this->m_config->value("log.dirPath", "logs").toString();
 
             QJsonObject metaData = loader.metaData().value("MetaData").toObject();
             YamlConfig *config = new YamlConfig(job.value("configPath"));
@@ -100,10 +101,13 @@ bool JobManager::loadJob(JobManager::availableJob job)
 
 QList<JobManager::availableJob> JobManager::getAvailableJobs()
 {
-    QList<JobManager::availableJob> jobs;
+    QList<JobManager::availableJob> availableJobs;
     JobManager::availableJob job;
 
     QDir configsDir(this->m_config->fileInfo().path() + "/job");
+    QDir jobsDir = qApp->applicationDirPath() + QString("/jobs");
+
+    QStringList jobs = jobsDir.entryList(QDir::Files | QDir::Readable);
 
     foreach(QString file, configsDir.entryList(QDir::Files | QDir::Readable)) {
         if(!file.contains(QRegExp("^\\w+\\.yml$"))) {
@@ -116,20 +120,21 @@ QList<JobManager::availableJob> JobManager::getAvailableJobs()
 
         file.remove(".yml");
 
-        QString libDirPath = this->m_config->value("lib.dirPath", "/usr/lib/gwatchd").toString();
+        file = jobs.at(jobs.indexOf(QRegExp(QString("^lib%1.*").arg(file))));
 
         QFile libFile(
-            libDirPath + QString("/job/lib%1job.so").arg(file)
+            jobsDir.absolutePath() + QString("/%1").arg(file)
         );
 
         if(libFile.open(QIODevice::ReadOnly) && libFile.isReadable()) {
             job.insert("pluginPath", libFile.fileName());
             job.insert("name", file);
-            jobs << job;
+
+            availableJobs << job;
         }
     }
 
-    return jobs;
+    return availableJobs;
 }
 
 QHash<QString, Job*> JobManager::getLoadedJobs()

@@ -85,7 +85,7 @@ void Application::parseArguments()
 void Application::initStandardMode(Config *config)
 {
     LoggerTimestampDecorator *fileLogger = new LoggerTimestampDecorator(
-        new FileLogger(config->value("log.dirPath", "/var/log/gwatchd").toString() + "/gwatchd.log", config)
+        new FileLogger(config->value("log.dirPath", "logs").toString() + "/gwatchd.log", config)
     );
 
     LoggerTimestampDecorator *simpleLogger = new LoggerTimestampDecorator(new SimpleLogger());

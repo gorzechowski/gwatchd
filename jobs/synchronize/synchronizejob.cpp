@@ -88,6 +88,8 @@ void SynchronizeJob::slot_synchronize()
 
             QProcess *process = new QProcess();
 
+            process->setProcessChannelMode(QProcess::MergedChannels);
+
             if(this->m_activeProcessList.keys().contains(hash)) {
                 process = this->m_activeProcessList.value(hash);
 

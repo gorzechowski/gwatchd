@@ -18,19 +18,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef SIMPLELOGGER_H
-#define SIMPLELOGGER_H
+#include "loggerleveldecorator.h"
 
-#include <QObject>
-
-#include "logger/logger.h"
-
-class SimpleLogger: public QObject, public Logger
+LoggerLevelDecorator::LoggerLevelDecorator(Logger *logger, QObject *parent): QObject(parent)
 {
-public:
-    SimpleLogger(QObject *parent = 0);
+    this->m_logger = logger;
+}
 
-    void log(QString content);
-};
+void LoggerLevelDecorator::log(QString content)
+{
+    content.prepend("<info>  ");
 
-#endif // SIMPLELOGGER_H
+    this->m_logger->log(content);
+}
+
+void LoggerLevelDecorator::debug(QString content)
+{
+    if(!this->m_isDebug) return;
+
+    content.prepend("<debug> ");
+
+    this->m_logger->log(content);
+}
+
+void LoggerLevelDecorator::error(QString content)
+{
+    content.prepend("<error> ");
+
+    this->m_logger->log(content);
+}

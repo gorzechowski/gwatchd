@@ -10,6 +10,7 @@
 #include "logger/filelogger.h"
 #include "logger/simplelogger.h"
 #include "logger/decorator/loggertimestampdecorator.h"
+#include "logger/decorator/loggerleveldecorator.h"
 #include "watcher/watcher.h"
 #include "notification/notificationmanager.h"
 #include "notification/notifier/socketnotifier.h"
@@ -84,11 +85,17 @@ void Application::parseArguments()
 
 void Application::initStandardMode(Config *config)
 {
-    LoggerTimestampDecorator *fileLogger = new LoggerTimestampDecorator(
-        new FileLogger(config->value("log.dirPath", "logs").toString() + "/gwatchd.log", config)
+    LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
+        new LoggerTimestampDecorator(
+            new FileLogger(config->value("log.dirPath", "logs").toString() + "/gwatchd.log", config)
+        )
     );
 
-    LoggerTimestampDecorator *simpleLogger = new LoggerTimestampDecorator(new SimpleLogger());
+    LoggerLevelDecorator *simpleLogger = new LoggerLevelDecorator(
+        new LoggerTimestampDecorator(
+            new SimpleLogger()
+        )
+    );
 
     LoggerComposite *logger = new LoggerComposite();
 

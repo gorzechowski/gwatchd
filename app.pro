@@ -40,10 +40,21 @@ unix {
     core.files = $$OUT_PWD/core/gwatchd
 
     jobs.path = $$OUT_PWD/bin/jobs
-    jobs.files = $$OUT_PWD/jobs/synchronize/*.so
+    jobs.files = $$OUT_PWD/jobs/synchronize/lib*
 
     libs.path = $$OUT_PWD/bin/libs
-    libs.files = $$OUT_PWD/libs/yaml-cpp/*.so
+    libs.files = $$OUT_PWD/libs/yaml-cpp/lib*
 
     INSTALLS += core jobs libs
+}
+
+macx {
+    install_name_tool.target = install_name_tool
+    install_name_tool.commands = \
+        install_name_tool -change libyaml-cpp.dylib @executable_path/libs/libyaml-cpp.dylib $$OUT_PWD/core/gwatchd && \
+        install_name_tool -change libyaml-cpp.dylib @executable_path/libs/libyaml-cpp.dylib $$OUT_PWD/jobs/synchronize/lib*
+
+    QMAKE_EXTRA_TARGETS += install_name_tool
+
+    POST_TARGETDEPS += install_name_tool
 }

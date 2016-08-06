@@ -1,6 +1,6 @@
 include(../common.pri)
 
-TARGET = $$qtLibraryTarget(synchronizejob)
+TARGET = synchronizejob
 
 SOURCES += synchronizejob.cpp
 

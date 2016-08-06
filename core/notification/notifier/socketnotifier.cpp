@@ -31,4 +31,6 @@ SocketNotifier::SocketNotifier(SocketServer *server, QObject *parent) : QObject(
 bool SocketNotifier::notify(Notification *notification)
 {
     this->m_server->sendMessageToAllClients(notification->toJson());
+
+    return true;
 }

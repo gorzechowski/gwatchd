@@ -51,6 +51,8 @@ bool SocketServer::start()
 
         return status;
     }
+
+    return false;
 }
 
 void SocketServer::sendMessageToAllClients(QString message)

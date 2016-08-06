@@ -95,6 +95,8 @@ void Application::initStandardMode(Config *config)
     logger->add(fileLogger);
     logger->add(simpleLogger);
 
+    logger->setDebug(this->isDebug());
+
     JobManager *manager = new JobManager(config);
 
     manager->loadAvailableJobs();
@@ -195,6 +197,11 @@ bool Application::isDaemon()
     return this->m_mode == Application::Daemon;
 }
 
+bool Application::isDebug()
+{
+    return this->m_parser->isSetDebug();
+}
+
 void Application::showVersion()
 {
     printf(
@@ -210,15 +217,16 @@ void Application::showHelp()
         "Usage: gwatchd [options] [command]\n\n"
 
         "Options:\n"
-        "  --pid-file <file_path>    Set PID file path\n"
-        "  --config-dir <dir_path>   Set config dir path\n"
-        "  --no-daemon               Do not detach and logs to stdout/stderr\n\n"
+        "  -p, --pid-file <file_path>    Set PID file path.\n"
+        "  -c, --config-dir <dir_path>   Set config dir path.\n"
+        "  --no-daemon                   Do not detach and logs to stdout/stderr.\n"
+        "  -d, --debug                   Run with debug/verbose mode.\n\n"
 
-        "  --help                    Print options\n"
-        "  --version                 Print version\n\n"
+        "  -h, --help                    Displays this help.\n"
+        "  -v, --version                 Displays version information.\n\n"
 
         "Commands:\n"
-        "  run <job_name> [<args>]   Execute the job once\n\n"
+        "  run <job_name> [<args>]       Run given job and quit.\n\n"
 
         "License:\n"
         "  GPLv2 or any later version.\n"

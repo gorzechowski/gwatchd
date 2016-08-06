@@ -24,6 +24,7 @@ public:
     QString configDir();
 
     bool isDaemon();
+    bool isDebug();
 
 protected:
     CommandLineParser *m_parser;

@@ -12,6 +12,9 @@ public:
     LoggerComposite();
 
     void log(QString content);
+    void debug(QString content);
+
+    void setDebug(bool isDebug);
 
     void add(Logger *logger);
 

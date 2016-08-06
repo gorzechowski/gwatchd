@@ -7,7 +7,8 @@ CommandLineParser::CommandLineParser() : QCommandLineParser(),
     m_pidFile(QCommandLineOption(QStringList() << "p" << "pid-file", "Set PID file path.", "file_path")),
     m_configDir(QCommandLineOption(QStringList() << "c" << "config-dir", "Set config dir path.", "dir_path")),
     m_help(QCommandLineOption(QStringList() << "h" << "help", "Displays this help.")),
-    m_version(QCommandLineOption(QStringList() << "v" << "version", "Displays version information."))
+    m_version(QCommandLineOption(QStringList() << "v" << "version", "Displays version information.")),
+    m_debug(QCommandLineOption(QStringList() << "d" << "debug", "Run with debug/verbose mode."))
 {
     this->addPositionalArgument("run", "Run given job and quit.", "[run <job_name>]");
 
@@ -15,6 +16,7 @@ CommandLineParser::CommandLineParser() : QCommandLineParser(),
     this->addOption(this->m_pidFile);
     this->addOption(this->m_configDir);
 
+    this->addOption(this->m_debug);
     this->addOption(this->m_help);
     this->addOption(this->m_version);
 }
@@ -97,4 +99,9 @@ bool CommandLineParser::isSetHelp()
 bool CommandLineParser::isSetVersion()
 {
     return this->isSet(this->m_version);
+}
+
+bool CommandLineParser::isSetDebug()
+{
+    return this->isSet(this->m_debug);
 }

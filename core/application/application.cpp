@@ -55,6 +55,30 @@ QString Application::configDir()
     return this->m_parser->configDir();
 }
 
+Logger* Application::getLogger(Config *config)
+{
+    LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
+        new LoggerTimestampDecorator(
+            new FileLogger(config->value("log.dirPath", "logs").toString() + "/gwatchd.log", config)
+        )
+    );
+
+    LoggerLevelDecorator *simpleLogger = new LoggerLevelDecorator(
+        new LoggerTimestampDecorator(
+            new SimpleLogger()
+        )
+    );
+
+    LoggerComposite *logger = new LoggerComposite();
+
+    logger->add(fileLogger);
+    logger->add(simpleLogger);
+
+    logger->setDebug(this->isDebug());
+
+    return logger;
+}
+
 void Application::parseArguments()
 {
     this->m_parser->process(this->arguments());
@@ -85,26 +109,9 @@ void Application::parseArguments()
 
 void Application::initStandardMode(Config *config)
 {
-    LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
-        new LoggerTimestampDecorator(
-            new FileLogger(config->value("log.dirPath", "logs").toString() + "/gwatchd.log", config)
-        )
-    );
+    Logger *logger = this->getLogger(config);
 
-    LoggerLevelDecorator *simpleLogger = new LoggerLevelDecorator(
-        new LoggerTimestampDecorator(
-            new SimpleLogger()
-        )
-    );
-
-    LoggerComposite *logger = new LoggerComposite();
-
-    logger->add(fileLogger);
-    logger->add(simpleLogger);
-
-    logger->setDebug(this->isDebug());
-
-    JobManager *manager = new JobManager(config);
+    JobManager *manager = new JobManager(this->isDebug(), logger, config);
 
     manager->loadAvailableJobs();
 
@@ -137,7 +144,9 @@ void Application::initStandardMode(Config *config)
 
 void Application::initSingleMode(Config *config)
 {
-    JobManager *manager = new JobManager(config);
+    Logger *logger = this->getLogger(config);
+
+    JobManager *manager = new JobManager(this->isDebug(), logger, config);
 
     manager->loadAvailableJobs();
 

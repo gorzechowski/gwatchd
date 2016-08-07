@@ -42,6 +42,8 @@ bool Watcher::init()
 {
     this->m_dirs.removeDuplicates();
 
+    this->m_logger->debug("Init watcher for dirs: " + this->m_dirs.join(", "));
+
     foreach(QString dir, this->m_dirs) {
         if(!QDir(dir).exists()) {
             this->m_logger->log(tr("Dir not found: %1. Skipped.").arg(dir));
@@ -55,8 +57,10 @@ bool Watcher::init()
     }
 
 #ifdef Q_OS_LINUX
+    this->m_logger->debug("Initializing inotify thread");
     this->m_thread = new INotifyThread(this->m_dirs);
 #elif defined(Q_OS_MAC) || defined(Q_OS_FREEBSD) || defined(Q_OS_NETBSD) || defined(Q_OS_OPENBSD)
+    this->m_logger->debug("Initializing kqueue thread");
     this->m_thread = new KQueueThread(this->m_dirs);
 #endif
 
@@ -88,7 +92,7 @@ void Watcher::slot_watchAdded(QString dir)
 
 void Watcher::slot_watchAddFailed(QString dir, int error)
 {
-    this->m_logger->log(tr("Failed to add watcher for dir: %1 - %2").arg(dir).arg(strerror(error)));
+    this->m_logger->error(tr("Failed to add watcher for dir: %1 - %2").arg(dir).arg(strerror(error)));
 }
 
 void Watcher::slot_watchAddDone()

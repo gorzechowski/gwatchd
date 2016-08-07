@@ -41,15 +41,19 @@ bool SocketServer::start()
         QHostAddress address;
         address.setAddress(addr);
 
+        this->m_logger->debug("Initializing Websocket server");
+
         bool status = QWebSocketServer::listen(address, port);
 
         if(status) {
             this->m_logger->log(tr("Websocket listening on %1:%2").arg(addr).arg(port));
         } else {
-            this->m_logger->log("Could not create websocket server: " + this->errorString());
+            this->m_logger->error("Could not create websocket server: " + this->errorString());
         }
 
         return status;
+    } else {
+        this->m_logger->debug("Websocket's port or address not specified");
     }
 
     return false;
@@ -59,13 +63,18 @@ void SocketServer::sendMessageToAllClients(QString message)
 {
     foreach(QWebSocket *client, this->m_clients) {
         if(client->isValid()) {
+            this->m_logger->debug("Sending Websocket message to client");
             client->sendTextMessage(message);
+        } else {
+            this->m_logger->debug("Websocket client is not valid");
         }
     }
 }
 
 void SocketServer::slot_addClient()
 {
+    this->m_logger->debug("Adding new Websocket client");
+
     QWebSocket *client = this->nextPendingConnection();
 
     this->m_clients.append(client);
@@ -74,11 +83,17 @@ void SocketServer::slot_addClient()
 
     connect(client, SIGNAL(disconnected()), this, SLOT(slot_removeClient()));
     connect(client, SIGNAL(disconnected()), client, SLOT(deleteLater()));
+
+    this->m_logger->debug("Websocket client added");
 }
 
 void SocketServer::slot_removeClient()
 {
+    this->m_logger->debug("Removing Websocket client");
+
     QWebSocket *client = dynamic_cast<QWebSocket*>(this->sender());
 
     this->m_clients.removeAt(client->property("index").toInt());
+
+    this->m_logger->debug("Websocket client removed");
 }

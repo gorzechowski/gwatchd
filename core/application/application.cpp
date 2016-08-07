@@ -10,6 +10,7 @@
 #include "logger/filelogger.h"
 #include "logger/simplelogger.h"
 #include "logger/decorator/loggertimestampdecorator.h"
+#include "logger/decorator/loggerleveldecorator.h"
 #include "watcher/watcher.h"
 #include "notification/notificationmanager.h"
 #include "notification/notifier/socketnotifier.h"
@@ -54,6 +55,30 @@ QString Application::configDir()
     return this->m_parser->configDir();
 }
 
+Logger* Application::getLogger(Config *config)
+{
+    LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
+        new LoggerTimestampDecorator(
+            new FileLogger(config->value("log.dirPath", "logs").toString() + "/gwatchd.log", config)
+        )
+    );
+
+    LoggerLevelDecorator *simpleLogger = new LoggerLevelDecorator(
+        new LoggerTimestampDecorator(
+            new SimpleLogger()
+        )
+    );
+
+    LoggerComposite *logger = new LoggerComposite();
+
+    logger->add(fileLogger);
+    logger->add(simpleLogger);
+
+    logger->setDebug(this->isDebug());
+
+    return logger;
+}
+
 void Application::parseArguments()
 {
     this->m_parser->process(this->arguments());
@@ -84,18 +109,9 @@ void Application::parseArguments()
 
 void Application::initStandardMode(Config *config)
 {
-    LoggerTimestampDecorator *fileLogger = new LoggerTimestampDecorator(
-        new FileLogger(config->value("log.dirPath", "logs").toString() + "/gwatchd.log", config)
-    );
+    Logger *logger = this->getLogger(config);
 
-    LoggerTimestampDecorator *simpleLogger = new LoggerTimestampDecorator(new SimpleLogger());
-
-    LoggerComposite *logger = new LoggerComposite();
-
-    logger->add(fileLogger);
-    logger->add(simpleLogger);
-
-    JobManager *manager = new JobManager(config);
+    JobManager *manager = new JobManager(this->isDebug(), logger, config);
 
     manager->loadAvailableJobs();
 
@@ -128,7 +144,9 @@ void Application::initStandardMode(Config *config)
 
 void Application::initSingleMode(Config *config)
 {
-    JobManager *manager = new JobManager(config);
+    Logger *logger = this->getLogger(config);
+
+    JobManager *manager = new JobManager(this->isDebug(), logger, config);
 
     manager->loadAvailableJobs();
 
@@ -195,6 +213,11 @@ bool Application::isDaemon()
     return this->m_mode == Application::Daemon;
 }
 
+bool Application::isDebug()
+{
+    return this->m_parser->isSetDebug();
+}
+
 void Application::showVersion()
 {
     printf(
@@ -210,15 +233,16 @@ void Application::showHelp()
         "Usage: gwatchd [options] [command]\n\n"
 
         "Options:\n"
-        "  --pid-file <file_path>    Set PID file path\n"
-        "  --config-dir <dir_path>   Set config dir path\n"
-        "  --no-daemon               Do not detach and logs to stdout/stderr\n\n"
+        "  -p, --pid-file <file_path>    Set PID file path.\n"
+        "  -c, --config-dir <dir_path>   Set config dir path.\n"
+        "  --no-daemon                   Do not detach and logs to stdout/stderr.\n"
+        "  -d, --debug                   Run with debug/verbose mode.\n\n"
 
-        "  --help                    Print options\n"
-        "  --version                 Print version\n\n"
+        "  -h, --help                    Displays this help.\n"
+        "  -v, --version                 Displays version information.\n\n"
 
         "Commands:\n"
-        "  run <job_name> [<args>]   Execute the job once\n\n"
+        "  run <job_name> [<args>]       Run given job and quit.\n\n"
 
         "License:\n"
         "  GPLv2 or any later version.\n"

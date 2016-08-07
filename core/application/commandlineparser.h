@@ -20,6 +20,7 @@ public:
     bool isSetConfigDir();
     bool isSetHelp();
     bool isSetVersion();
+    bool isSetDebug();
 
 protected:
     QCommandLineOption m_noDaemon;
@@ -27,6 +28,7 @@ protected:
     QCommandLineOption m_configDir;
     QCommandLineOption m_help;
     QCommandLineOption m_version;
+    QCommandLineOption m_debug;
 };
 
 #endif // COMMANDLINEPARSER_H

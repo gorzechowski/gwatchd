@@ -26,9 +26,19 @@
 class Logger
 {
 public:
+    Logger(): m_isDebug(false) {}
     virtual ~Logger() {}
 
     virtual void log(QString content) = 0;
+
+    virtual void error(QString content) { log(content); }
+
+    virtual void debug(QString content) { if(m_isDebug) log(content); }
+
+    void setDebug(bool isDebug) { m_isDebug = isDebug; }
+
+protected:
+    bool m_isDebug;
 };
 
 #endif // LOGGERINTERFACE_H

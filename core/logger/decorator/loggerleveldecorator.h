@@ -18,19 +18,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef SIMPLELOGGER_H
-#define SIMPLELOGGER_H
+#ifndef LOGGERLEVELDECORATOR_H
+#define LOGGERLEVELDECORATOR_H
 
 #include <QObject>
 
 #include "logger/logger.h"
 
-class SimpleLogger: public QObject, public Logger
+class LoggerLevelDecorator : public QObject, public Logger
 {
+    Q_OBJECT
 public:
-    SimpleLogger(QObject *parent = 0);
+    LoggerLevelDecorator(Logger *logger, QObject *parent = 0);
 
     void log(QString content);
+    void debug(QString content);
+    void error(QString content);
+
+protected:
+    Logger *m_logger;
 };
 
-#endif // SIMPLELOGGER_H
+#endif // LOGGERLEVELDECORATOR_H

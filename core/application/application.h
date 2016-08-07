@@ -5,6 +5,7 @@
 
 #include "application/commandlineparser.h"
 #include "config/config.h"
+#include "logger/logger.h"
 
 class Application: public QCoreApplication
 {
@@ -24,11 +25,15 @@ public:
     QString configDir();
 
     bool isDaemon();
+    bool isDebug();
 
 protected:
     CommandLineParser *m_parser;
+    Logger *m_logger;
 
     int m_mode;
+
+    Logger* getLogger(Config *config);
 
     void parseArguments();
 

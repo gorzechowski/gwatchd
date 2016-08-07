@@ -33,12 +33,15 @@
 #include "logger/simplelogger.h"
 #include "logger/loggercomposite.h"
 #include "logger/decorator/loggertimestampdecorator.h"
+#include "logger/decorator/loggerleveldecorator.h"
 #include "notification/statenotification.h"
 #include "notification/factory/statenotificationfactory.h"
 
-JobManager::JobManager(Config *config, QObject *parent) :
+JobManager::JobManager(bool isDebug, Logger *logger, Config *config, QObject *parent) :
     QObject(parent)
 {
+    this->m_isDebug = isDebug;
+    this->m_logger = logger;
     this->m_config = config;
 }
 
@@ -53,30 +56,40 @@ bool JobManager::loadJob(JobManager::availableJob job)
 {
     QPluginLoader loader(job.value("pluginPath"));
 
+    this->m_logger->debug("Loading job: " + job.value("name"));
+
     QObject *jobInstance = loader.instance();
 
     if(jobInstance) {
         Job *loadedJob = dynamic_cast<Job*>(jobInstance);
 
         if(loadedJob) {
+            this->m_logger->debug("Initializing job");
+
             QString logDirPath = this->m_config->value("log.dirPath", "logs").toString();
 
             QJsonObject metaData = loader.metaData().value("MetaData").toObject();
             YamlConfig *config = new YamlConfig(job.value("configPath"));
 
-            LoggerTimestampDecorator *fileLogger = new LoggerTimestampDecorator(
-                new FileLogger(
-                    QString("%1/job/%2.log").arg(logDirPath).arg(job.value("name")),
-                    config
+            LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
+                new LoggerTimestampDecorator(
+                    new FileLogger(
+                        QString("%1/job/%2.log").arg(logDirPath).arg(job.value("name")),
+                        config
+                    )
                 )
             );
 
-            LoggerTimestampDecorator *simpleLogger = new LoggerTimestampDecorator(new SimpleLogger());
+            LoggerLevelDecorator *simpleLogger = new LoggerLevelDecorator(
+                new LoggerTimestampDecorator(new SimpleLogger())
+            );
 
             LoggerComposite *logger = new LoggerComposite();
 
             logger->add(fileLogger);
             logger->add(simpleLogger);
+
+            logger->setDebug(this->m_isDebug);
 
             loadedJob->setConfig(config);
             loadedJob->setLogger(logger);
@@ -92,8 +105,12 @@ bool JobManager::loadJob(JobManager::availableJob job)
                 loadedJob
             );
 
+            this->m_logger->debug("Job loaded");
+
             return true;
         }
+    } else {
+        this->m_logger->debug("Job not loaded: " + loader.errorString());
     }
 
     return false;
@@ -106,6 +123,9 @@ QList<JobManager::availableJob> JobManager::getAvailableJobs()
 
     QDir configsDir(this->m_config->fileInfo().path() + "/job");
     QDir jobsDir = qApp->applicationDirPath() + QString("/jobs");
+
+    this->m_logger->debug("Looking for jobs in: " + jobsDir.absolutePath());
+    this->m_logger->debug("Looking for job configs in: " + configsDir.absolutePath());
 
     QStringList jobs = jobsDir.entryList(QDir::Files | QDir::Readable);
 
@@ -120,6 +140,8 @@ QList<JobManager::availableJob> JobManager::getAvailableJobs()
 
         file.remove(".yml");
 
+        job.insert("name", file);
+
         file = jobs.at(jobs.indexOf(QRegExp(QString("^lib%1.*").arg(file))));
 
         QFile libFile(
@@ -128,9 +150,12 @@ QList<JobManager::availableJob> JobManager::getAvailableJobs()
 
         if(libFile.open(QIODevice::ReadOnly) && libFile.isReadable()) {
             job.insert("pluginPath", libFile.fileName());
-            job.insert("name", file);
+
+            this->m_logger->debug("Found job " + job.value("name"));
 
             availableJobs << job;
+
+            libFile.close();
         }
     }
 
@@ -144,9 +169,12 @@ QHash<QString, Job*> JobManager::getLoadedJobs()
 
 void JobManager::runJob(QString name, QStringList dirs)
 {
-    Job *job = this->getLoadedJobs().value(name.toLower());
+    name = name.toLower();
+
+    Job *job = this->getLoadedJobs().value(name);
 
     if(!job) {
+        this->m_logger->debug(QString("Job %1 not found").arg(name));
         return;
     }
 
@@ -164,6 +192,8 @@ void JobManager::runJob(QString name, QStringList dirs)
             dir.append("/");
         }
 
+        this->m_logger->debug("Running job with arg: " + dir);
+
         job->run(dir);
     }
 
@@ -173,6 +203,8 @@ void JobManager::runJob(QString name, QStringList dirs)
 void JobManager::slot_runJobs(QString data)
 {
     foreach(Job *job, this->getLoadedJobs().values()) {
+        this->m_logger->debug("Running job with arg: " + data);
+
         job->run(data);
     }
 }
@@ -186,16 +218,28 @@ QString JobManager::getJobName(QObject *job)
 
 void JobManager::slot_jobStarted()
 {
-    emit(notification(StateNotificationFactory::create(this->getJobName(this->sender()))));
+    QString name = this->getJobName(this->sender());
+
+    this->m_logger->debug("Started job " + name);
+
+    emit(notification(StateNotificationFactory::create(name)));
 }
 
 void JobManager::slot_jobRunning(Payload *payload)
 {
+    QString name = this->getJobName(this->sender());
+
+    this->m_logger->debug("Still running job " + name);
+
     emit(notification(StateNotificationFactory::create(this->getJobName(this->sender()), payload)));
 }
 
 void JobManager::slot_jobFinished(int code)
 {
+    QString name = this->getJobName(this->sender());
+
+    this->m_logger->debug("Finished job " + name + " with code " + QString::number(code));
+
     bool success = code == 0 ? true : false;
 
     emit(notification(StateNotificationFactory::create(this->getJobName(this->sender()), success)));

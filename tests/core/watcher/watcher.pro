@@ -1,20 +1,13 @@
-QT -= gui
-QT += testlib
-
-TEMPLATE = app
-
-CONFIG += console
-CONFIG -= app_bundle
+include(../../common.pri)
 
 TARGET = watcherTest
 
-SOURCES += \
-    inotifythreadtest.cpp \
-    ../../../core/watcher/inotify/inotifythread.cpp \
-    main.cpp
-
 HEADERS += \
-    inotifythreadtest.h \
-    ../../../core/watcher/inotify/inotifythread.h
+    watchertest.h
 
-INCLUDEPATH += ../../../core/
+SOURCES += \
+    main.cpp \
+    watchertest.cpp
+
+include(../../mockups/mockups.pri)
+include(../../../core/watcher/watcher.pri)

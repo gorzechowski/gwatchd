@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -23,18 +23,26 @@
 
 #include <string.h>
 
-#include "watcher/inotify/inotifywatcher.h"
+#include "watcher/watcher.h"
 #include "job/job.h"
 
-INotifyWatcher::INotifyWatcher(Logger *logger, QObject *parent) :
+#ifdef Q_OS_LINUX
+    #include "watcher/inotifythread.h"
+#elif defined(Q_OS_MAC) || defined(Q_OS_FREEBSD) || defined(Q_OS_NETBSD) || defined(Q_OS_OPENBSD)
+    #include "watcher/kqueuethread.h"
+#endif
+
+Watcher::Watcher(Logger *logger, QObject *parent) :
     QObject(parent)
 {
     this->m_logger = logger;
 }
 
-bool INotifyWatcher::init()
+bool Watcher::init()
 {
     this->m_dirs.removeDuplicates();
+
+    this->m_logger->debug("Init watcher for dirs: " + this->m_dirs.join(", "));
 
     foreach(QString dir, this->m_dirs) {
         if(!QDir(dir).exists()) {
@@ -48,40 +56,46 @@ bool INotifyWatcher::init()
         return false;
     }
 
-    this->m_watcherThread = new INotifyThread(this->m_dirs);
+#ifdef Q_OS_LINUX
+    this->m_logger->debug("Initializing inotify thread");
+    this->m_thread = new INotifyThread(this->m_dirs);
+#elif defined(Q_OS_MAC) || defined(Q_OS_FREEBSD) || defined(Q_OS_NETBSD) || defined(Q_OS_OPENBSD)
+    this->m_logger->debug("Initializing kqueue thread");
+    this->m_thread = new KQueueThread(this->m_dirs);
+#endif
 
-    connect(this->m_watcherThread, SIGNAL(fileChanged(QString)), this, SIGNAL(fileChanged(QString)));
-    connect(this->m_watcherThread, SIGNAL(watchAdded(QString)), this, SLOT(slot_watchAdded(QString)));
-    connect(this->m_watcherThread, SIGNAL(watchAddFailed(QString,int)), this, SLOT(slot_watchAddFailed(QString,int)));
-    connect(this->m_watcherThread, SIGNAL(watchesAddDone()), this, SLOT(slot_watchAddDone()));
+    connect(this->m_thread, SIGNAL(fileChanged(QString)), this, SIGNAL(fileChanged(QString)));
+    connect(this->m_thread, SIGNAL(watchAdded(QString)), this, SLOT(slot_watchAdded(QString)));
+    connect(this->m_thread, SIGNAL(watchAddFailed(QString,int)), this, SLOT(slot_watchAddFailed(QString,int)));
+    connect(this->m_thread, SIGNAL(watchesAddDone()), this, SLOT(slot_watchAddDone()));
 
-    connect(qApp, SIGNAL(aboutToQuit()), this->m_watcherThread, SLOT(slot_stop()));
+    connect(qApp, SIGNAL(aboutToQuit()), this->m_thread, SLOT(slot_stop()));
 
     this->m_logger->log("Adding watchers...");
 
-    this->m_watcherThread->start();
+    this->m_thread->start();
 
     return true;
 }
 
-void INotifyWatcher::addDirs(QStringList dirs)
+void Watcher::addDirs(QStringList dirs)
 {
     this->m_dirs.append(dirs);
 }
 
-void INotifyWatcher::slot_watchAdded(QString dir)
+void Watcher::slot_watchAdded(QString dir)
 {
     if(this->m_dirs.contains(dir)) {
         this->m_logger->log(tr("Watcher added for dir: %1 - adding watchers for subdirs...").arg(dir));
     }
 }
 
-void INotifyWatcher::slot_watchAddFailed(QString dir, int error)
+void Watcher::slot_watchAddFailed(QString dir, int error)
 {
-    this->m_logger->log(tr("Failed to add watcher for dir: %1 - %2").arg(dir).arg(strerror(error)));
+    this->m_logger->error(tr("Failed to add watcher for dir: %1 - %2").arg(dir).arg(strerror(error)));
 }
 
-void INotifyWatcher::slot_watchAddDone()
+void Watcher::slot_watchAddDone()
 {
     this->m_logger->log("Adding watchers done");
     emit(initialized());

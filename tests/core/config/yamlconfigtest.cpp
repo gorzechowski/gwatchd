@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -29,7 +29,7 @@ YamlConfigTest::YamlConfigTest(QObject *parent) :
 
 void YamlConfigTest::initTestCase()
 {
-    this->m_config = new YamlConfig(":/config.yml");
+    this->m_config = new YamlConfig(":/synchronize.yml");
 }
 
 void YamlConfigTest::cleanupTestCase()
@@ -56,8 +56,8 @@ void YamlConfigTest::testValue()
 void YamlConfigTest::testListValue()
 {
     QCOMPARE(
-        this->m_config->listValue("dirs"),
-        QStringList() << "/dir2/" << "/dir1/"
+        this->m_config->listValue("dirs").contains("/dir1/") && this->m_config->listValue("dirs").contains("/dir2/"),
+        true
     );
 
     QCOMPARE(

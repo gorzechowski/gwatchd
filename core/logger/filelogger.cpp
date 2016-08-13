@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -65,10 +65,6 @@ void FileLogger::log(QString content)
     QTextStream stream(this->m_file);
 
     stream << content << endl;
-
-    if(qApp->property("stdoutAvailable").toBool()) {
-        printf("%s\n", qPrintable(content));
-    }
 }
 
 int FileLogger::getIndex()

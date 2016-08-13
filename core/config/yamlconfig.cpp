@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -34,7 +34,6 @@ YamlConfig::YamlConfig(QString filePath, QObject *parent) :
     } else {
         this->m_config = YAML::Load("{}");
     }
-
 }
 
 QVariant YamlConfig::value(QString key, QVariant defaultValue)

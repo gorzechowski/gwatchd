@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -23,6 +23,7 @@
 
 #include "synchronizejob.h"
 #include "command/rsync/rsynccommandbuilder.h"
+#include "notification/runningpayload.h"
 
 SynchronizeJob::SynchronizeJob()
 {
@@ -59,6 +60,12 @@ void SynchronizeJob::run(QString data)
 
 void SynchronizeJob::slot_synchronize()
 {
+    if(this->m_timer->isActive()) {
+        this->m_timer->stop();
+    }
+
+    emit(started());
+
     QStringList dirs;
 
     foreach(QString dir, this->getDirs()) {
@@ -81,15 +88,25 @@ void SynchronizeJob::slot_synchronize()
 
             QProcess *process = new QProcess();
 
+            process->setProcessChannelMode(QProcess::MergedChannels);
+
             if(this->m_activeProcessList.keys().contains(hash)) {
+                this->m_logger->debug("Synchronize process already exists " + hash);
+
                 process = this->m_activeProcessList.value(hash);
 
                 if(process->state() == QProcess::Running) {
+                    this->m_logger->debug("Stopping synchronize process");
+
                     disconnect(process, SIGNAL(finished(int)), this, SLOT(slot_finished(int)));
                     process->close();
                     connect(process, SIGNAL(finished(int)), this, SLOT(slot_finished(int)));
+
+                    this->m_logger->debug("Synchronize process stopped");
                 }
             } else {
+                this->m_logger->debug("Creating new synchronize process");
+
                 connect(process, SIGNAL(started()), this, SLOT(slot_start()));
                 connect(process, SIGNAL(finished(int)), this, SLOT(slot_finished(int)));
                 connect(process, SIGNAL(readyRead()), this, SLOT(slot_read()));
@@ -98,7 +115,11 @@ void SynchronizeJob::slot_synchronize()
                 process->setProperty("hash", hash);
 
                 this->m_activeProcessList.insert(hash, process);
+
+                this->m_logger->debug("New synchronize process created");
             }
+
+            this->m_logger->debug("Starting synchronize process");
 
             process->start(command);
         }
@@ -108,8 +129,15 @@ void SynchronizeJob::slot_synchronize()
 void SynchronizeJob::slot_start()
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
+    QString dir = process->property("dir").toString();
 
-    this->m_logger->log(QString("Synchronizing %1 dir...").arg(process->property("dir").toString()));
+    this->m_logger->log(QString("Synchronizing %1 dir...").arg(dir));
+
+    RunningPayload *payload = new RunningPayload();
+
+    payload->addDirInfo(dir, RunningPayload::Started);
+
+    emit(running(payload));
 }
 
 void SynchronizeJob::slot_finished(int code)
@@ -117,15 +145,23 @@ void SynchronizeJob::slot_finished(int code)
     QProcess *process = static_cast<QProcess*>(this->sender());
 
     QString dir = process->property("dir").toString();
-    QString error = QString(process->readAllStandardError()).trimmed().remove("\n");
+    RunningPayload *payload = new RunningPayload();
+
+    payload->addDirInfo(dir, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
+
+    emit(running(payload));
+
+    this->m_activeProcessList.remove(process->property("hash").toString());
 
     if(code > 0) {
-        this->m_logger->log(QString("Synchronizing %1 dir failed: %2").arg(dir).arg(error));
+        this->m_logger->error(QString("Synchronizing %1 dir failed").arg(dir));
     } else {
         this->m_logger->log(QString("Synchronizing %1 dir done").arg(process->property("dir").toString()));
     }
 
-    this->m_activeProcessList.remove(process->property("hash").toString());
+    if(this->m_activeProcessList.isEmpty()) {
+        emit(finished(code));
+    }
 }
 
 void SynchronizeJob::slot_read()

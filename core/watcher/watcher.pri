@@ -1,8 +1,19 @@
 HEADERS += \
-    watcher/inotify/inotifythread.h \
-    watcher/inotify/inotifywatcher.h \
-    watcher/watcher.h
+    $$PWD/watcher.h
 
 SOURCES += \
-    watcher/inotify/inotifythread.cpp \
-    watcher/inotify/inotifywatcher.cpp
+    $$PWD/watcher.cpp
+
+linux {
+    HEADERS += \
+        $$PWD/inotifythread.h
+
+    SOURCES += \
+        $$PWD/inotifythread.cpp
+} else:macx|freebsd|openbsd|netbsd {
+    HEADERS += \
+        $$PWD/kqueuethread.h
+
+    SOURCES += \
+        $$PWD/kqueuethread.cpp
+}

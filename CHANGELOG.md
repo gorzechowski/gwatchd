@@ -1,5 +1,13 @@
 ## CHANGELOG
 
+#### **1.1.0** _(13-08-2016)_
+- [Bug][[#4](https://github.com/gorzechowski/gwatchd/issues/4)] I can execute gwatchd with any parameters
+- [Feature][[#6](https://github.com/gorzechowski/gwatchd/issues/6)] KQueue support
+- [Feature][[#8](https://github.com/gorzechowski/gwatchd/issues/8)] Socket notifications while job changes it's state
+- [Feature][[#9](https://github.com/gorzechowski/gwatchd/issues/9)] Possibility to manually trigger a job execution
+- [Feature][[#13](https://github.com/gorzechowski/gwatchd/issues/13)] Build as portable application
+- [Feature][[#15](https://github.com/gorzechowski/gwatchd/issues/15)] Debug/Verbose mode
+
 #### **1.0.3** _(23-07-2015)_
 - [Bug][[#5](https://github.com/gorzechowski/gwatchd/issues/5)] Fixed watching new directories
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -30,7 +30,5 @@ int main(int argc, char *argv[])
 
     YamlConfigTest yamlConfigTest;
 
-    QTest::qExec(&yamlConfigTest, argc, argv);
-
-    return 0;
+    return QTest::qExec(&yamlConfigTest, argc, argv);
 }

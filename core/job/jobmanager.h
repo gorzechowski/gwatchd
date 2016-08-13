@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -26,6 +26,9 @@
 
 #include "job/job.h"
 #include "config/config.h"
+#include "logger/logger.h"
+#include "notification/notification.h"
+#include "notification/payload.h"
 
 class JobManager : public QObject
 {
@@ -33,21 +36,33 @@ class JobManager : public QObject
 public:
     typedef QHash<QString, QString> availableJob;
 
-    JobManager(Config *config, QObject *parent = 0);
+    JobManager(bool isDebug, Logger *logger, Config *config, QObject *parent = 0);
 
     QHash<QString, Job*> getLoadedJobs();
     void loadAvailableJobs();
 
+    void runJob(QString name, QStringList dirs);
+
 protected:
     bool loadJob(JobManager::availableJob job);
     QList<JobManager::availableJob> getAvailableJobs();
+    QString getJobName(QObject*);
 
     QHash<QString, Job*> m_loaded;
 
+    bool m_isDebug;
+    Logger *m_logger;
     Config *m_config;
 
 public slots:
     void slot_runJobs(QString data);
+
+    void slot_jobStarted();
+    void slot_jobRunning(Payload*);
+    void slot_jobFinished(int);
+
+signals:
+    void notification(Notification*);
 };
 
 #endif // JOBMANAGER_H

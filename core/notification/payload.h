@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -18,39 +18,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYWATCHER_H
-#define INOTIFYWATCHER_H
+#ifndef PAYLOAD
+#define PAYLOAD
 
-#include <QObject>
+#include <QJsonObject>
 
-#include "job/jobmanager.h"
-#include "watcher/inotify/inotifythread.h"
-#include "watcher/watcher.h"
-#include "logger/logger.h"
-
-class INotifyWatcher : public QObject, public Watcher
+class Payload
 {
-    Q_OBJECT
 public:
-    INotifyWatcher(Logger *logger, QObject *parent = 0);
+    virtual ~Payload() {}
 
-    bool init();
-    void addDirs(QStringList dirs);
-
-protected:
-    INotifyThread *m_watcherThread;
-
-    QStringList m_dirs;
-    Logger *m_logger;
-
-signals:
-    void fileChanged(QString data);
-    void initialized();
-
-private slots:
-    void slot_watchAdded(QString dir);
-    void slot_watchAddFailed(QString dir, int error);
-    void slot_watchAddDone();
+    virtual QJsonObject toJsonObject() = 0;
 };
 
-#endif // INOTIFYENGINE_H
+#endif // PAYLOAD
+

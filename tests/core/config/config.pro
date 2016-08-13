@@ -1,33 +1,15 @@
-QT -= gui
-QT += testlib
-
-TEMPLATE = app
-
-CONFIG += console
-CONFIG -= app_bundle
+include(../../common.pri)
 
 TARGET = configTest
 
 SOURCES += \
     main.cpp \
-    yamlconfigtest.cpp \
-    ../../../core/config/yamlconfig.cpp
+    yamlconfigtest.cpp
 
 HEADERS += \
-    yamlconfigtest.h \
-    ../../../core/config/yamlconfig.h \
-    ../../../core/config/config.h
+    yamlconfigtest.h
 
-RESOURCES += \
-    resources.qrc
-
-INCLUDEPATH += \
-    ../../../core/ \
-    $$PWD/../../../libs/yaml-cpp/include
-
-QMAKE_RPATHDIR += /usr/lib/gwatchd/
+include(../../../core/config/config.pri)
+include(../../mockups/mockups.pri)
 
 LIBS += -L$$OUT_PWD/../../../libs/yaml-cpp -lyaml-cpp
-
-OTHER_FILES += \
-    config.yml

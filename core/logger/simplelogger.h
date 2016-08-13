@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -18,36 +18,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYTHREAD_H
-#define INOTIFYTHREAD_H
+#ifndef SIMPLELOGGER_H
+#define SIMPLELOGGER_H
 
-#include <QThread>
-#include <QStringList>
-#include <QMap>
+#include <QObject>
 
-class INotifyThread : public QThread
+#include "logger/logger.h"
+
+class SimpleLogger: public QObject, public Logger
 {
-    Q_OBJECT
 public:
-    INotifyThread(QStringList dirs, QObject *parent = 0);
+    SimpleLogger(QObject *parent = 0);
 
-    void run();
-
-protected:
-    QStringList m_dirs;
-
-    QMap<int, QString> m_watches;
-
-    int m_fd;
-
-signals:
-    void fileChanged(QString data);
-    void watchesAddDone();
-    void watchAdded(QString dir);
-    void watchAddFailed(QString dir, int error);
-
-public slots:
-    void slot_stop();
+    void log(QString content);
 };
 
-#endif // INOTIFYTHREAD_H
+#endif // SIMPLELOGGER_H

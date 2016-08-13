@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -21,16 +21,14 @@
 #include <QCoreApplication>
 #include <QTest>
 
-#include "inotifythreadtest.h"
+#include "watchertest.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
     app.setAttribute(Qt::AA_Use96Dpi, true);
 
-    INotifyThreadTest inotifyTest;
+    WatcherTest test;
 
-    QTest::qExec(&inotifyTest, argc, argv);
-
-    return 0;
+    return QTest::qExec(&test, argc, argv);
 }

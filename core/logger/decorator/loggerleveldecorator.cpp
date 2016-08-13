@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -18,35 +18,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYTHREADTEST_H
-#define INOTIFYTHREADTEST_H
+#include "loggerleveldecorator.h"
 
-#include <QObject>
-#include <QDir>
-
-#include "../../../core/watcher/inotify/inotifythread.h"
-
-class INotifyThreadTest : public QObject
+LoggerLevelDecorator::LoggerLevelDecorator(Logger *logger, QObject *parent): QObject(parent)
 {
-    Q_OBJECT
-public:
-    INotifyThreadTest(QObject *parent = 0);
+    this->m_logger = logger;
+}
 
-private:
-    QDir m_dir;
-    INotifyThread *m_thread;
+void LoggerLevelDecorator::log(QString content)
+{
+    content.prepend("<info>  ");
 
-    QMap<QString, QString> m_files;
+    this->m_logger->log(content);
+}
 
-private slots:
-    void initTestCase();
-    void cleanupTestCase();
+void LoggerLevelDecorator::debug(QString content)
+{
+    if(!this->m_isDebug) return;
 
-    void testCreateFile();
-    void testModifyFile();
-    void testCopyFile();
-    void testMoveFile();
+    content.prepend("<debug> ");
 
-};
+    this->m_logger->log(content);
+}
 
-#endif // INOTIFYTHREADTEST_H
+void LoggerLevelDecorator::error(QString content)
+{
+    content.prepend("<error> ");
+
+    this->m_logger->log(content);
+}

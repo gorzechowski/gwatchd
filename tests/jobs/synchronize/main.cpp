@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -38,11 +38,13 @@ int main(int argc, char *argv[])
     RsyncCommandPartRemoteShellTest remoteShellTest;
     RsyncCommandPartTargetTest targetTest;
 
-    QTest::qExec(&baseTest, argc, argv);
-    QTest::qExec(&excludesTest, argc, argv);
-    QTest::qExec(&includesTest, argc, argv);
-    QTest::qExec(&remoteShellTest, argc, argv);
-    QTest::qExec(&targetTest, argc, argv);
+    int res = 0;
 
-    return 0;
+    res += QTest::qExec(&baseTest, argc, argv);
+    res += QTest::qExec(&excludesTest, argc, argv);
+    res += QTest::qExec(&includesTest, argc, argv);
+    res += QTest::qExec(&remoteShellTest, argc, argv);
+    res += QTest::qExec(&targetTest, argc, argv);
+
+    return res;
 }

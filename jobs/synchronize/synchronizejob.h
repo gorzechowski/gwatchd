@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gracjan Orzechowski
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
  *
  * This file is part of GWatchD
  *
@@ -27,6 +27,7 @@
 #include <QTimer>
 
 #include "../../core/job/job.h"
+#include "../../core/notification/payload.h"
 
 class SynchronizeJob : public QObject, public Job
 {
@@ -65,6 +66,11 @@ private slots:
     void slot_read();
 
     void slot_synchronize();
+
+signals:
+    void started();
+    void running(Payload*);
+    void finished(int);
 };
 
 #endif // SYNCHRONIZEJOB_H

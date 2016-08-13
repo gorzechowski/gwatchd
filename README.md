@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/gorzechowski/gwatchd.svg?branch=master)](https://travis-ci.org/gorzechowski/gwatchd)
+
 # GWatchD - Watcher Daemon
 
 ## Description

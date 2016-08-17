@@ -27,14 +27,14 @@
 class RsyncCommandPartTarget : public CommandPart
 {
 public:
-    RsyncCommandPartTarget(QString dir, SynchronizeConfig *config);
+    RsyncCommandPartTarget(QString entry, SynchronizeConfig *config);
 
     QString build(QString host);
 
 protected:
     QString build();
 
-    QString m_dir;
+    QString m_entry;
     SynchronizeConfig *m_config;
     QString m_host;
 };

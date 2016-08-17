@@ -18,9 +18,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include <QDir>
 #include <QCoreApplication>
-
+#include <QDir>
+#include <QFileInfo>
 #include <string.h>
 
 #include "watcher/watcher.h"
@@ -40,28 +40,30 @@ Watcher::Watcher(Logger *logger, QObject *parent) :
 
 bool Watcher::init()
 {
-    this->m_dirs.removeDuplicates();
+    this->m_entries.removeDuplicates();
 
-    this->m_logger->debug("Init watcher for dirs: " + this->m_dirs.join(", "));
+    this->m_logger->debug("Init watcher for entries: " + this->m_entries.join(", "));
 
-    foreach(QString dir, this->m_dirs) {
-        if(!QDir(dir).exists()) {
-            this->m_logger->log(tr("Dir not found: %1. Skipped.").arg(dir));
-            this->m_dirs.removeOne(dir);
+    foreach(QString entry, this->m_entries) {
+        QFileInfo info(entry);
+
+        if(!info.exists()) {
+            this->m_logger->log(tr("Entry not found: %1. Skipped.").arg(entry));
+            this->m_entries.removeOne(entry);
         }
     }
 
-    if(this->m_dirs.empty()) {
-        this->m_logger->log("Dirs not specified.");
+    if(this->m_entries.empty()) {
+        this->m_logger->log("Entries not specified.");
         return false;
     }
 
 #ifdef Q_OS_LINUX
     this->m_logger->debug("Initializing inotify thread");
-    this->m_thread = new INotifyThread(this->m_dirs);
+    this->m_thread = new INotifyThread(this->m_entries);
 #elif defined(Q_OS_MAC) || defined(Q_OS_FREEBSD) || defined(Q_OS_NETBSD) || defined(Q_OS_OPENBSD)
     this->m_logger->debug("Initializing kqueue thread");
-    this->m_thread = new KQueueThread(this->m_dirs);
+    this->m_thread = new KQueueThread(this->m_entries);
 #endif
 
     connect(this->m_thread, SIGNAL(fileChanged(QString)), this, SIGNAL(fileChanged(QString)));
@@ -78,14 +80,14 @@ bool Watcher::init()
     return true;
 }
 
-void Watcher::addDirs(QStringList dirs)
+void Watcher::addEntries(QStringList entries)
 {
-    this->m_dirs.append(dirs);
+    this->m_entries.append(entries);
 }
 
 void Watcher::slot_watchAdded(QString dir)
 {
-    if(this->m_dirs.contains(dir)) {
+    if(this->m_entries.contains(dir)) {
         this->m_logger->log(tr("Watcher added for dir: %1 - adding watchers for subdirs...").arg(dir));
     }
 }

@@ -27,12 +27,12 @@
 class RsyncCommandPartRemoteShell : public CommandPart
 {
 public:
-    RsyncCommandPartRemoteShell(QString dir, SynchronizeConfig *config);
+    RsyncCommandPartRemoteShell(QString entry, SynchronizeConfig *config);
 
     QString build();
 
 protected:
-    QString m_dir;
+    QString m_entry;
     SynchronizeConfig *m_config;
 
     QStringList getArgs();

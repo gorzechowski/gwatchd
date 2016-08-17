@@ -35,12 +35,12 @@ public:
     Watcher(Logger *logger, QObject *parent = 0);
 
     bool init();
-    void addDirs(QStringList dirs);
+    void addEntries(QStringList entries);
 
 protected:
     QThread *m_thread;
 
-    QStringList m_dirs;
+    QStringList m_entries;
     Logger *m_logger;
 
 signals:

@@ -29,12 +29,12 @@ class INotifyThread : public QThread
 {
     Q_OBJECT
 public:
-    INotifyThread(QStringList dirs, QObject *parent = 0);
+    INotifyThread(QStringList entries, QObject *parent = 0);
 
     void run();
 
 protected:
-    QStringList m_dirs;
+    QStringList m_entries;
 
     QMap<int, QString> m_watches;
 
@@ -43,8 +43,8 @@ protected:
 signals:
     void fileChanged(QString data);
     void watchesAddDone();
-    void watchAdded(QString dir);
-    void watchAddFailed(QString dir, int error);
+    void watchAdded(QString entry);
+    void watchAddFailed(QString entry, int error);
 
 public slots:
     void slot_stop();

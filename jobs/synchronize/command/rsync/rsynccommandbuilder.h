@@ -28,13 +28,13 @@
 class RsyncCommandBuilder : public CommandBuilder
 {
 public:
-    RsyncCommandBuilder(QString dir, SynchronizeConfig *config);
+    RsyncCommandBuilder(QString entry, SynchronizeConfig *config);
 
     QStringList build();
 
 protected:
     QList<CommandPart*> m_parts;
-    QString m_dir;
+    QString m_entry;
     SynchronizeConfig *m_config;
 };
 

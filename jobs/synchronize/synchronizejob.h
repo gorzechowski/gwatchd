@@ -40,7 +40,7 @@ class SynchronizeJob : public QObject, public Job
 public:
     SynchronizeJob();
 
-    QStringList getDirs();
+    QStringList getEntries();
     void run(QString data);
     void setConfig(Config *config);
     void setLogger(Logger *logger);

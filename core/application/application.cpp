@@ -30,7 +30,7 @@ void Application::removePidFile()
     pidFile.remove();
 }
 
-void Application::init(Config *config)
+void Application::init(ApplicationConfig *config)
 {
     switch(this->m_mode) {
         case Application::Standard:
@@ -55,11 +55,11 @@ QString Application::configDir()
     return this->m_parser->configDir();
 }
 
-Logger* Application::getLogger(Config *config)
+Logger* Application::getLogger(ApplicationConfig *config)
 {
     LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
         new LoggerTimestampDecorator(
-            new FileLogger(config->value("log").toObject(QJsonObject{{"dirPath", "logs"}}).value("dirPath").toString() + "/gwatchd.log", config)
+            new FileLogger(config->logsDirPath() + "/gwatchd.log", config)
         )
     );
 
@@ -107,7 +107,7 @@ void Application::parseArguments()
     }
 }
 
-void Application::initStandardMode(Config *config)
+void Application::initStandardMode(ApplicationConfig *config)
 {
     Logger *logger = this->getLogger(config);
 
@@ -142,7 +142,7 @@ void Application::initStandardMode(Config *config)
     connect(manager, SIGNAL(notification(Notification*)), notificationManager, SLOT(slot_notification(Notification*)));
 }
 
-void Application::initSingleMode(Config *config)
+void Application::initSingleMode(ApplicationConfig *config)
 {
     Logger *logger = this->getLogger(config);
 
@@ -158,7 +158,7 @@ void Application::initSingleMode(Config *config)
     ::exit(0);
 }
 
-void Application::initDaemonMode(Config *config)
+void Application::initDaemonMode(ApplicationConfig *config)
 {
     QSystemSemaphore semaphore("gwatchd");
     QFile pidFile;

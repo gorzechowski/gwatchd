@@ -25,19 +25,19 @@
 #include <QFile>
 
 #include "logger/logger.h"
-#include "config/config.h"
+#include "config/applicationconfig.h"
 
 class FileLogger : public QObject, public Logger
 {
     Q_OBJECT
 public:
-    FileLogger(QString path, Config *config, QObject *parent = 0);
+    FileLogger(QString path, ApplicationConfig *config, QObject *parent = 0);
 
     void log(QString content);
 
 protected:
     QFile *m_file;
-    Config *m_config;
+    ApplicationConfig *m_config;
 
     int getIndex();
 };

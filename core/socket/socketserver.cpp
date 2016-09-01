@@ -23,7 +23,7 @@
 
 #include "socketserver.h"
 
-SocketServer::SocketServer(Config *config, Logger *logger, QString serverName) :
+SocketServer::SocketServer(ApplicationConfig *config, Logger *logger, QString serverName) :
     QWebSocketServer(serverName, QWebSocketServer::NonSecureMode)
 {
     this->m_config = config;
@@ -34,8 +34,8 @@ SocketServer::SocketServer(Config *config, Logger *logger, QString serverName) :
 
 bool SocketServer::start()
 {
-    QString addr = this->m_config->value("socket").toObject(QJsonObject{{"address", ""}}).value("address").toString();
-    int port = this->m_config->value("socket").toObject(QJsonObject{{"port", 0}}).value("port").toInt();
+    QString addr = this->m_config->socketAddress();
+    int port = this->m_config->socketPort();
 
     if(port > 0 && !addr.isEmpty()) {
         QHostAddress address;

@@ -24,6 +24,7 @@
 #include "application/application.h"
 #include "application/commandlineparser.h"
 #include "config/jsonconfig.h"
+#include "config/applicationconfig.h"
 
 Application *app;
 
@@ -49,7 +50,7 @@ int main(int argc, char *argv[])
 
     qsrand(QTime::currentTime().second());
 
-    JsonConfig *config = new JsonConfig(app->configDir() + "/config.json");
+    ApplicationConfig *config = new ApplicationConfig(new JsonConfig(app->configDir() + "/config.json"));
 
     app->init(config);
 

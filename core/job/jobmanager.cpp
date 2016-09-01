@@ -37,7 +37,7 @@
 #include "notification/statenotification.h"
 #include "notification/factory/statenotificationfactory.h"
 
-JobManager::JobManager(bool isDebug, Logger *logger, Config *config, QObject *parent) :
+JobManager::JobManager(bool isDebug, Logger *logger, ApplicationConfig *config, QObject *parent) :
     QObject(parent)
 {
     this->m_isDebug = isDebug;
@@ -66,7 +66,7 @@ bool JobManager::loadJob(JobManager::availableJob job)
         if(loadedJob) {
             this->m_logger->debug("Initializing job");
 
-            QString logDirPath = this->m_config->value("log").toObject(QJsonObject{{"dirPath", "logs"}}).value("dirPath").toString("logs");
+            QString logDirPath = this->m_config->logsDirPath();
 
             QJsonObject metaData = loader.metaData().value("MetaData").toObject();
             JsonConfig *config = new JsonConfig(job.value("configPath"));
@@ -75,7 +75,7 @@ bool JobManager::loadJob(JobManager::availableJob job)
                 new LoggerTimestampDecorator(
                     new FileLogger(
                         QString("%1/job/%2.log").arg(logDirPath).arg(job.value("name")),
-                        config
+                        this->m_config
                     )
                 )
             );

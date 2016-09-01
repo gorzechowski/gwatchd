@@ -4,7 +4,7 @@
 #include <QCoreApplication>
 
 #include "application/commandlineparser.h"
-#include "config/config.h"
+#include "config/applicationconfig.h"
 #include "logger/logger.h"
 
 class Application: public QCoreApplication
@@ -18,7 +18,7 @@ public:
         Single
     };
 
-    void init(Config *config);
+    void init(ApplicationConfig *config);
 
     void removePidFile();
 
@@ -33,15 +33,15 @@ protected:
 
     int m_mode;
 
-    Logger* getLogger(Config *config);
+    Logger* getLogger(ApplicationConfig *config);
 
     void parseArguments();
 
     void unixSignalHandler();
 
-    void initStandardMode(Config *config);
-    void initSingleMode(Config *config);
-    void initDaemonMode(Config *config);
+    void initStandardMode(ApplicationConfig *config);
+    void initSingleMode(ApplicationConfig *config);
+    void initDaemonMode(ApplicationConfig *config);
 
     void showVersion();
     void showHelp();

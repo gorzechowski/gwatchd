@@ -56,7 +56,7 @@ void FileLogger::log(QString content)
 
     qint64 size = this->m_file->size() + content.length() + 1;
 
-    if(size >= (this->m_config->value("log.maxFileSize", 5 * 1024).toInt() * 1024)) {
+    if(size >= (this->m_config->value("log").toObject(QJsonObject{{"maxFileSize", 5}}).value("maxFileSize").toInt() * 1024)) {
         this->m_file->copy(this->m_file->fileName() + QString::number(this->getIndex()));
         this->m_file->resize(0);
         this->m_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);

@@ -24,6 +24,7 @@
 #include "synchronizejob.h"
 #include "command/rsync/rsynccommandbuilder.h"
 #include "notification/runningpayload.h"
+#include "config/synchronizeconfig.h"
 
 SynchronizeJob::SynchronizeJob()
 {
@@ -34,7 +35,7 @@ SynchronizeJob::SynchronizeJob()
 
 void SynchronizeJob::setConfig(Config *config)
 {
-    this->m_config = config;
+    this->m_config = new SynchronizeConfig(config);
 }
 
 void SynchronizeJob::setLogger(Logger *logger)
@@ -44,7 +45,7 @@ void SynchronizeJob::setLogger(Logger *logger)
 
 QStringList SynchronizeJob::getDirs()
 {
-    return this->m_config->listValue("dirs");
+    return this->m_config->entries();
 }
 
 void SynchronizeJob::run(QString data)
@@ -55,7 +56,7 @@ void SynchronizeJob::run(QString data)
         this->m_timer->stop();
     }
 
-    this->m_timer->start(this->m_config->value("delay", 100).toInt());
+    this->m_timer->start(this->m_config->value("delay").toInt(100));
 }
 
 void SynchronizeJob::slot_synchronize()

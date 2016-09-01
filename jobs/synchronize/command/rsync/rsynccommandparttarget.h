@@ -22,12 +22,12 @@
 #define RSYNCCOMMANDPARTTARGET_H
 
 #include "command/commandpart.h"
-#include "config/config.h"
+#include "config/synchronizeconfig.h"
 
 class RsyncCommandPartTarget : public CommandPart
 {
 public:
-    RsyncCommandPartTarget(QString dir, Config *config);
+    RsyncCommandPartTarget(QString dir, SynchronizeConfig *config);
 
     QString build(QString host);
 
@@ -35,7 +35,7 @@ protected:
     QString build();
 
     QString m_dir;
-    Config *m_config;
+    SynchronizeConfig *m_config;
     QString m_host;
 };
 

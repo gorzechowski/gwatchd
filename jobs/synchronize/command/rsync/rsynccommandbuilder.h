@@ -23,19 +23,19 @@
 
 #include "command/commandbuilder.h"
 #include "command/commandpart.h"
-#include "config/config.h"
+#include "config/synchronizeconfig.h"
 
 class RsyncCommandBuilder : public CommandBuilder
 {
 public:
-    RsyncCommandBuilder(QString dir, Config *config);
+    RsyncCommandBuilder(QString dir, SynchronizeConfig *config);
 
     QStringList build();
 
 protected:
     QList<CommandPart*> m_parts;
     QString m_dir;
-    Config *m_config;
+    SynchronizeConfig *m_config;
 };
 
 #endif // RSYNCCOMMANDBUILDER_H

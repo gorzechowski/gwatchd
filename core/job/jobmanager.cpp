@@ -28,7 +28,7 @@
 
 #include "job/jobmanager.h"
 #include "job/job.h"
-#include "config/yamlconfig.h"
+#include "config/jsonconfig.h"
 #include "logger/filelogger.h"
 #include "logger/simplelogger.h"
 #include "logger/loggercomposite.h"
@@ -66,10 +66,10 @@ bool JobManager::loadJob(JobManager::availableJob job)
         if(loadedJob) {
             this->m_logger->debug("Initializing job");
 
-            QString logDirPath = this->m_config->value("log.dirPath", "logs").toString();
+            QString logDirPath = this->m_config->value("log").toObject(QJsonObject{{"dirPath", "logs"}}).value("dirPath").toString("logs");
 
             QJsonObject metaData = loader.metaData().value("MetaData").toObject();
-            YamlConfig *config = new YamlConfig(job.value("configPath"));
+            JsonConfig *config = new JsonConfig(job.value("configPath"));
 
             LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
                 new LoggerTimestampDecorator(
@@ -130,7 +130,7 @@ QList<JobManager::availableJob> JobManager::getAvailableJobs()
     QStringList jobs = jobsDir.entryList(QDir::Files | QDir::Readable);
 
     foreach(QString file, configsDir.entryList(QDir::Files | QDir::Readable)) {
-        if(!file.contains(QRegExp("^\\w+\\.yml$"))) {
+        if(!file.contains(QRegExp("^\\w+\\.json$"))) {
             continue;
         }
 
@@ -138,7 +138,7 @@ QList<JobManager::availableJob> JobManager::getAvailableJobs()
 
         job.insert("configPath", configsDir.absolutePath() + "/" + file);
 
-        file.remove(".yml");
+        file.remove(".json");
 
         job.insert("name", file);
 

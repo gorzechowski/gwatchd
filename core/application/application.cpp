@@ -59,7 +59,7 @@ Logger* Application::getLogger(Config *config)
 {
     LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
         new LoggerTimestampDecorator(
-            new FileLogger(config->value("log.dirPath", "logs").toString() + "/gwatchd.log", config)
+            new FileLogger(config->value("log").toObject(QJsonObject{{"dirPath", "logs"}}).value("dirPath").toString() + "/gwatchd.log", config)
         )
     );
 

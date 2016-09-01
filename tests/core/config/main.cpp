@@ -22,6 +22,7 @@
 #include <QTest>
 
 #include "yamlconfigtest.h"
+#include "jsonconfigtest.h"
 
 int main(int argc, char *argv[])
 {
@@ -29,6 +30,12 @@ int main(int argc, char *argv[])
     app.setAttribute(Qt::AA_Use96Dpi, true);
 
     YamlConfigTest yamlConfigTest;
+    JsonConfigTest jsonConfigTest;
 
-    return QTest::qExec(&yamlConfigTest, argc, argv);
+    int res = 0;
+
+    res += QTest::qExec(&yamlConfigTest, argc, argv);
+    res += QTest::qExec(&jsonConfigTest, argc, argv);
+
+    return res;
 }

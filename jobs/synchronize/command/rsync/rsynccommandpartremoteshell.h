@@ -22,18 +22,18 @@
 #define RSYNCCOMMANDPARTREMOTESHELL_H
 
 #include "command/commandpart.h"
-#include "config/config.h"
+#include "config/synchronizeconfig.h"
 
 class RsyncCommandPartRemoteShell : public CommandPart
 {
 public:
-    RsyncCommandPartRemoteShell(QString dir, Config *config);
+    RsyncCommandPartRemoteShell(QString dir, SynchronizeConfig *config);
 
     QString build();
 
 protected:
     QString m_dir;
-    Config *m_config;
+    SynchronizeConfig *m_config;
 
     QStringList getArgs();
 };

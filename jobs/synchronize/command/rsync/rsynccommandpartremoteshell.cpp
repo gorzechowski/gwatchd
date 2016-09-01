@@ -20,7 +20,7 @@
 
 #include "command/rsync/rsynccommandpartremoteshell.h"
 
-RsyncCommandPartRemoteShell::RsyncCommandPartRemoteShell(QString dir, Config *config)
+RsyncCommandPartRemoteShell::RsyncCommandPartRemoteShell(QString dir, SynchronizeConfig *config)
 {
     this->m_dir = dir;
     this->m_config = config;
@@ -42,37 +42,25 @@ QStringList RsyncCommandPartRemoteShell::getArgs()
 {
     QStringList args;
 
-    QString keyFile = this->m_config->value(
-        QString("dirs.%1.ssh.identityFile").arg(this->m_dir),
-        this->m_config->value("ssh.identityFile", "").toString()
-    ).toString();
+    QString keyFile = this->m_config->sshIdentityFile(this->m_dir);
 
     if(!keyFile.isEmpty()) {
         args << "-i " + keyFile;
     }
 
-    QString configFile = this->m_config->value(
-        QString("dirs.%1.ssh.configFile").arg(this->m_dir),
-        this->m_config->value("ssh.configFile", "").toString()
-    ).toString();
+    QString configFile = this->m_config->sshConfigFile(this->m_dir);
 
     if(!configFile.isEmpty()) {
         args << "-F " + configFile;
     }
 
-    int port = this->m_config->value(
-        QString("dirs.%1.ssh.port").arg(this->m_dir),
-        this->m_config->value("ssh.port", 0).toInt()
-    ).toInt();
+    int port = this->m_config->sshPort(this->m_dir);
 
     if(port > 0) {
         args << "-p " + QString::number(port);
     }
 
-    QStringList options = this->m_config->listValue(
-        QString("dirs.%1.ssh.options").arg(this->m_dir),
-        this->m_config->listValue("ssh.options", QStringList())
-    );
+    QStringList options = this->m_config->sshOptions(this->m_dir);
 
     if(!options.empty()) {
         foreach(QString option, options) {

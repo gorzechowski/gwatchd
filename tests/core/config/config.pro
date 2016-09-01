@@ -4,10 +4,12 @@ TARGET = configTest
 
 SOURCES += \
     main.cpp \
-    yamlconfigtest.cpp
+    yamlconfigtest.cpp \
+    jsonconfigtest.cpp
 
 HEADERS += \
-    yamlconfigtest.h
+    yamlconfigtest.h \
+    jsonconfigtest.h
 
 include(../../../core/config/config.pri)
 include(../../mockups/mockups.pri)

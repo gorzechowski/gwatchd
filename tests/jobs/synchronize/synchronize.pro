@@ -26,7 +26,3 @@ include(../../mockups/mockups.pri)
 
 INCLUDEPATH += \
     ../../../jobs/synchronize/
-
-#QMAKE_RPATHDIR += $$OUT_PWD/../../../libs/yaml-cpp
-
-#LIBS += -L$$OUT_PWD/../../../libs/yaml-cpp -lyaml-cpp

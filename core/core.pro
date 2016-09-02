@@ -9,7 +9,6 @@ CONFIG   += console
 CONFIG   -= app_bundle
 
 INCLUDEPATH += \
-#    $$PWD/../libs/yaml-cpp/include \
     /usr/local/include
 
 unix:!macx {
@@ -19,8 +18,6 @@ unix:!macx {
     QMAKE_LFLAGS += -Wl,-z,origin \'-Wl,-rpath,$${RPATH}\'
     QMAKE_RPATHDIR =
 }
-
-#LIBS += -L$$OUT_PWD/../libs/yaml-cpp -lyaml-cpp
 
 SOURCES += main.cpp
 

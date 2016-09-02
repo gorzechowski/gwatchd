@@ -15,7 +15,4 @@ unix:!macx {
 
 INCLUDEPATH += \
     $$PWD/../core/ \
-#    $$PWD/../libs/yaml-cpp/include \
     /usr/local/include
-
-#LIBS += -L$$OUT_PWD/../../libs/yaml-cpp -lyaml-cpp

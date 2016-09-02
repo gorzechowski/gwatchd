@@ -22,6 +22,7 @@
 #define CONFIG_H
 
 #include <QObject>
+#include <QStringList>
 #include <QJsonValue>
 #include <QJsonObject>
 #include <QJsonArray>

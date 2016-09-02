@@ -27,7 +27,7 @@
 #include "command/rsync/rsynccommandpartremoteshell.h"
 #include "command/rsync/rsynccommandparttarget.h"
 
-RsyncCommandBuilder::RsyncCommandBuilder(QString dir, Config *config)
+RsyncCommandBuilder::RsyncCommandBuilder(QString dir, SynchronizeConfig *config)
 {
     this->m_dir = dir;
     this->m_config = config;
@@ -35,12 +35,7 @@ RsyncCommandBuilder::RsyncCommandBuilder(QString dir, Config *config)
 
 QStringList RsyncCommandBuilder::build()
 {
-    QStringList parts, commands, hosts;
-
-    hosts = this->m_config->listValue(
-        QString("dirs.%1.target.hosts").arg(this->m_dir),
-        this->m_config->listValue("target.hosts")
-    );
+    QStringList parts, commands;
 
     QString dir = this->m_dir;
 
@@ -48,7 +43,7 @@ QStringList RsyncCommandBuilder::build()
         dir.append("/");
     }
 
-    foreach(QString host, hosts) {
+    foreach(QString host, this->m_config->targetHosts(this->m_dir)) {
         parts.append(RsyncCommandPartBase().build());
         parts.append(RsyncCommandPartIncludes(this->m_dir, this->m_config).build());
         parts.append(RsyncCommandPartExcludes(this->m_dir, this->m_config).build());

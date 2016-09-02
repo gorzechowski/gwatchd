@@ -25,7 +25,7 @@
 #include <QHash>
 
 #include "job/job.h"
-#include "config/config.h"
+#include "config/applicationconfig.h"
 #include "logger/logger.h"
 #include "notification/notification.h"
 #include "notification/payload.h"
@@ -36,7 +36,7 @@ class JobManager : public QObject
 public:
     typedef QHash<QString, QString> availableJob;
 
-    JobManager(bool isDebug, Logger *logger, Config *config, QObject *parent = 0);
+    JobManager(bool isDebug, Logger *logger, ApplicationConfig *config, QObject *parent = 0);
 
     QHash<QString, Job*> getLoadedJobs();
     void loadAvailableJobs();
@@ -52,7 +52,7 @@ protected:
 
     bool m_isDebug;
     Logger *m_logger;
-    Config *m_config;
+    ApplicationConfig *m_config;
 
 public slots:
     void slot_runJobs(QString data);

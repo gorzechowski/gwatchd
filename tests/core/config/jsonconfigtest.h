@@ -18,36 +18,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include "command/rsync/rsynccommandparttarget.h"
+#ifndef JSONCONFIGTEST_H
+#define JSONCONFIGTEST_H
 
-RsyncCommandPartTarget::RsyncCommandPartTarget(QString dir, SynchronizeConfig *config)
+#include <QObject>
+
+#include "../../../core/config/jsonconfig.h"
+
+class JsonConfigTest: public QObject
 {
-    this->m_dir = dir;
-    this->m_config = config;
-}
+    Q_OBJECT
+public:
+    JsonConfigTest(QObject *parent = 0);
 
-QString RsyncCommandPartTarget::build(QString host)
-{
-    this->m_host = host;
+protected:
+    JsonConfig *m_config;
 
-    return this->build();
-}
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
 
-QString RsyncCommandPartTarget::build()
-{
-    QString target = "%1@%2:%3";
+    void testValue();
+    void testListValue();
+    void testDefaultValue();
+    void testMissingFile();
+};
 
-    QString user = this->m_config->targetUser(this->m_dir);
-
-    if(user.isEmpty()) {
-        target.remove("@");
-    }
-
-    QString dir = this->m_config->targetPath(this->m_dir);
-
-    if(!dir.endsWith("/")) {
-        dir.append("/");
-    }
-
-    return target.arg(user, this->m_host, dir);
-}
+#endif // JSONCONFIGTEST_H

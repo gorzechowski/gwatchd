@@ -23,7 +23,8 @@
 
 #include "application/application.h"
 #include "application/commandlineparser.h"
-#include "config/yamlconfig.h"
+#include "config/jsonconfig.h"
+#include "config/applicationconfig.h"
 
 Application *app;
 
@@ -49,7 +50,7 @@ int main(int argc, char *argv[])
 
     qsrand(QTime::currentTime().second());
 
-    YamlConfig *config = new YamlConfig(app->configDir() + "/config.yml");
+    ApplicationConfig *config = new ApplicationConfig(new JsonConfig(app->configDir() + "/config.json"));
 
     app->init(config);
 

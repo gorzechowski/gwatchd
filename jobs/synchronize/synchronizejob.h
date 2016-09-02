@@ -28,6 +28,7 @@
 
 #include "../../core/job/job.h"
 #include "../../core/notification/payload.h"
+#include "config/synchronizeconfig.h"
 
 class SynchronizeJob : public QObject, public Job
 {
@@ -48,6 +49,7 @@ public:
     QString generateCommand(QString dir);
 
 protected:
+    SynchronizeConfig *m_config;
     QHash<QString, QProcess*> m_activeProcessList;
 
     QTimer *m_timer;

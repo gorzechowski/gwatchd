@@ -24,7 +24,8 @@
 #include <QObject>
 
 #include "../../../jobs/synchronize/command/rsync/rsynccommandpartremoteshell.h"
-#include "config/yamlconfig.h"
+#include "config/synchronizeconfig.h"
+#include "config/jsonconfig.h"
 
 class RsyncCommandPartRemoteShellTest : public QObject
 {
@@ -33,7 +34,7 @@ public:
     RsyncCommandPartRemoteShellTest(QObject *parent = 0);
 
 private:
-    Config *m_config;
+    SynchronizeConfig *m_config;
     RsyncCommandPartRemoteShell *m_commandPart;
 
 private slots:

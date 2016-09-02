@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
+ *
+ * This file is part of GWatchD
+ *
+ * GWatchD is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GWatchD; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ */
+
 #include <QDebug>
 #include <QSystemSemaphore>
 #include <stdio.h>
@@ -30,7 +50,7 @@ void Application::removePidFile()
     pidFile.remove();
 }
 
-void Application::init(Config *config)
+void Application::init(ApplicationConfig *config)
 {
     switch(this->m_mode) {
         case Application::Standard:
@@ -55,11 +75,11 @@ QString Application::configDir()
     return this->m_parser->configDir();
 }
 
-Logger* Application::getLogger(Config *config)
+Logger* Application::getLogger(ApplicationConfig *config)
 {
     LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
         new LoggerTimestampDecorator(
-            new FileLogger(config->value("log.dirPath", "logs").toString() + "/gwatchd.log", config)
+            new FileLogger(config->logsDirPath() + "/gwatchd.log", config)
         )
     );
 
@@ -107,7 +127,7 @@ void Application::parseArguments()
     }
 }
 
-void Application::initStandardMode(Config *config)
+void Application::initStandardMode(ApplicationConfig *config)
 {
     Logger *logger = this->getLogger(config);
 
@@ -142,7 +162,7 @@ void Application::initStandardMode(Config *config)
     connect(manager, SIGNAL(notification(Notification*)), notificationManager, SLOT(slot_notification(Notification*)));
 }
 
-void Application::initSingleMode(Config *config)
+void Application::initSingleMode(ApplicationConfig *config)
 {
     Logger *logger = this->getLogger(config);
 
@@ -158,7 +178,7 @@ void Application::initSingleMode(Config *config)
     ::exit(0);
 }
 
-void Application::initDaemonMode(Config *config)
+void Application::initDaemonMode(ApplicationConfig *config)
 {
     QSystemSemaphore semaphore("gwatchd");
     QFile pidFile;

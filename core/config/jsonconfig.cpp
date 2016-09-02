@@ -18,36 +18,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include "command/rsync/rsynccommandparttarget.h"
+#include <QFile>
+#include <QDebug>
 
-RsyncCommandPartTarget::RsyncCommandPartTarget(QString dir, SynchronizeConfig *config)
+#include "jsonconfig.h"
+
+JsonConfig::JsonConfig(QString filePath, QObject *parent) : Config(filePath, parent)
 {
-    this->m_dir = dir;
-    this->m_config = config;
+    QFile file(filePath);
+
+    if(file.exists()) {
+        file.open(QIODevice::ReadOnly);
+
+        this->m_main = QJsonDocument::fromJson(file.readAll()).object();
+    } else {
+        this->m_main = QJsonObject();
+    }
 }
 
-QString RsyncCommandPartTarget::build(QString host)
+QJsonValue JsonConfig::value(QString key)
 {
-    this->m_host = host;
+    QJsonValue value = this->m_main.value(key);
 
-    return this->build();
-}
-
-QString RsyncCommandPartTarget::build()
-{
-    QString target = "%1@%2:%3";
-
-    QString user = this->m_config->targetUser(this->m_dir);
-
-    if(user.isEmpty()) {
-        target.remove("@");
-    }
-
-    QString dir = this->m_config->targetPath(this->m_dir);
-
-    if(!dir.endsWith("/")) {
-        dir.append("/");
-    }
-
-    return target.arg(user, this->m_host, dir);
+    return value;
 }

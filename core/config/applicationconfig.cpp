@@ -18,36 +18,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include "command/rsync/rsynccommandparttarget.h"
+#include "applicationconfig.h"
 
-RsyncCommandPartTarget::RsyncCommandPartTarget(QString dir, SynchronizeConfig *config)
+ApplicationConfig::ApplicationConfig(Config *config, QObject *parent) : QObject(parent)
 {
-    this->m_dir = dir;
     this->m_config = config;
 }
 
-QString RsyncCommandPartTarget::build(QString host)
+QFileInfo ApplicationConfig::fileInfo()
 {
-    this->m_host = host;
-
-    return this->build();
+    return this->m_config->fileInfo();
 }
 
-QString RsyncCommandPartTarget::build()
+QString ApplicationConfig::logsDirPath()
 {
-    QString target = "%1@%2:%3";
+    return this->m_config->value("log").toObject().value("dirPath").toString("logs");
+}
 
-    QString user = this->m_config->targetUser(this->m_dir);
+int ApplicationConfig::logsMaxFileSize()
+{
+    return this->m_config->value("log").toObject().value("maxFileSize").toInt(5);
+}
 
-    if(user.isEmpty()) {
-        target.remove("@");
-    }
+QString ApplicationConfig::socketAddress()
+{
+    return this->m_config->value("socket").toObject().value("address").toString("");
+}
 
-    QString dir = this->m_config->targetPath(this->m_dir);
-
-    if(!dir.endsWith("/")) {
-        dir.append("/");
-    }
-
-    return target.arg(user, this->m_host, dir);
+int ApplicationConfig::socketPort()
+{
+    return this->m_config->value("socket").toObject().value("port").toInt(0);
 }

@@ -8,7 +8,4 @@ CONFIG -= app_bundle
 
 INCLUDEPATH += \
     $$PWD/../core/ \
-    $$PWD/../libs/yaml-cpp/include \
     /usr/local/include
-
-QMAKE_RPATHDIR += $$OUT_PWD/../../../libs/yaml-cpp

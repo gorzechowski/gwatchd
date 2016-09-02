@@ -33,7 +33,7 @@ defineTest(minQtVersion) {
 
 CONFIG += ordered
 TEMPLATE = subdirs
-SUBDIRS += libs core jobs tests
+SUBDIRS += core jobs tests
 
 OTHER_FILES += \
     CHANGELOG.md \
@@ -50,9 +50,6 @@ unix {
     jobs.path = $$OUT_PWD/bin/jobs
     jobs.files = $$OUT_PWD/jobs/synchronize/lib*
 
-    libs.path = $$OUT_PWD/bin/libs
-    libs.files = $$OUT_PWD/libs/yaml-cpp/lib*
-
     tests.path = $$OUT_PWD/bin/tests
     tests.files = \
         $$OUT_PWD/tests/core/config/*Test \
@@ -60,20 +57,5 @@ unix {
         $$OUT_PWD/tests/core/watcher/*Test \
         $$OUT_PWD/tests/jobs/synchronize/*Test
 
-    INSTALLS += core jobs libs tests
-}
-
-macx {
-    install_name_tool.target = install_name_tool
-    install_name_tool.commands = \
-        install_name_tool -change libyaml-cpp.dylib @executable_path/libs/libyaml-cpp.dylib $$OUT_PWD/core/gwatchd && \
-        install_name_tool -change libyaml-cpp.dylib @executable_path/libs/libyaml-cpp.dylib $$OUT_PWD/jobs/synchronize/lib* && \
-        install_name_tool -change libyaml-cpp.dylib @executable_path/../libs/libyaml-cpp.dylib $$OUT_PWD/tests/core/config/*Test && \
-        install_name_tool -change libyaml-cpp.dylib @executable_path/../libs/libyaml-cpp.dylib $$OUT_PWD/tests/core/notification/*Test && \
-        install_name_tool -change libyaml-cpp.dylib @executable_path/../libs/libyaml-cpp.dylib $$OUT_PWD/tests/core/watcher/*Test && \
-        install_name_tool -change libyaml-cpp.dylib @executable_path/../libs/libyaml-cpp.dylib $$OUT_PWD/tests/jobs/*/*Test
-
-    QMAKE_EXTRA_TARGETS += install_name_tool
-
-    POST_TARGETDEPS += install_name_tool
+    INSTALLS += core jobs tests
 }

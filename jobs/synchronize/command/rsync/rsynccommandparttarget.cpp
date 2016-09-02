@@ -49,5 +49,5 @@ QString RsyncCommandPartTarget::build()
         targetPath.append("/");
     }
 
-    return target.arg(user, this->m_host, dir);
+    return target.arg(user, this->m_host, targetPath);
 }

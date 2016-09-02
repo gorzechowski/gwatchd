@@ -36,12 +36,7 @@ RsyncCommandBuilder::RsyncCommandBuilder(QString entry, SynchronizeConfig *confi
 
 QStringList RsyncCommandBuilder::build()
 {
-    QStringList parts, commands, hosts;
-
-    hosts = this->m_config->listValue(
-        QString("dirs.%1.target.hosts").arg(this->m_entry),
-        this->m_config->listValue("target.hosts")
-    );
+    QStringList parts, commands;
 
     QString entry = this->m_entry;
 
@@ -51,7 +46,7 @@ QStringList RsyncCommandBuilder::build()
         entry.append("/");
     }
 
-    foreach(QString host, this->m_config->targetHosts(this->m_dir)) {
+    foreach(QString host, this->m_config->targetHosts(this->m_entry)) {
         parts.append(RsyncCommandPartBase().build());
         parts.append(RsyncCommandPartIncludes(this->m_entry, this->m_config).build());
         parts.append(RsyncCommandPartExcludes(this->m_entry, this->m_config).build());

@@ -45,9 +45,5 @@ QString RsyncCommandPartTarget::build()
 
     QString targetPath = this->m_config->targetPath(this->m_entry);
 
-    if(!targetPath.endsWith("/")) {
-        targetPath.append("/");
-    }
-
     return target.arg(user, this->m_host, targetPath);
 }

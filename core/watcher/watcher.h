@@ -46,11 +46,6 @@ protected:
 signals:
     void fileChanged(QString data);
     void initialized();
-
-private slots:
-    void slot_watchAdded(QString dir);
-    void slot_watchAddFailed(QString dir, int error);
-    void slot_watchAddDone();
 };
 
 #endif // KQUEUEWATCHER_H

@@ -23,6 +23,7 @@
 #include <QFileInfo>
 #include <QCoreApplication>
 #include <QDebug>
+#include <string.h>
 
 #include <sys/inotify.h>
 #include <unistd.h>
@@ -36,10 +37,11 @@
 #define BUF_LEN    (MAX_EVENTS * (EVENT_SIZE + LEN_NAME))
 #define WATCH_FLAGS (IN_MODIFY | IN_DELETE | IN_CREATE | IN_MOVE)
 
-INotifyThread::INotifyThread(QStringList entries, QObject *parent) :
+INotifyThread::INotifyThread(QStringList entries, Logger *logger, QObject *parent) :
     QThread(parent)
 {
     this->m_entries = entries;
+    this->m_logger = logger;
 }
 
 void INotifyThread::run()
@@ -66,14 +68,16 @@ void INotifyThread::run()
 
         if(watchDescriptor >= 0) {
             this->m_watches.insert(watchDescriptor, entry);
-            emit(watchAdded(entry));
+            this->watchAdded(entry);
         } else {
-            emit(watchAddFailed(entry, errno));
+            this->watchAddFailed(entry, errno);
         }
 
         if(info.isFile()) {
             continue;
         }
+
+        this->m_logger->log("Adding watchers for subdirs...");
 
         QDirIterator it(entry, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
 
@@ -86,15 +90,14 @@ void INotifyThread::run()
 
             if(watchDescriptor >= 0) {
                 this->m_watches.insert(watchDescriptor, subDir);
-                emit(watchAdded(subDir));
             } else {
-                emit(watchAddFailed(subDir, errno));
+                this->watchAddFailed(subDir, errno);
             }
-
         }
     }
 
     emit(watchesAddDone());
+    this->m_logger->log("Adding watchers done");
 
     int length;
     int i;
@@ -179,4 +182,14 @@ void INotifyThread::slot_stop()
 
     this->terminate();
     this->wait();
+}
+
+void INotifyThread::watchAdded(QString entry)
+{
+    this->m_logger->log(tr("Watcher added for entry: %1").arg(entry));
+}
+
+void INotifyThread::watchAddFailed(QString entry, int error)
+{
+    this->m_logger->error(tr("Failed to add watcher for entry: %1 - %2").arg(entry).arg(strerror(error)));
 }

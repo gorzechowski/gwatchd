@@ -29,7 +29,7 @@ RsyncCommandPartExcludesTest::RsyncCommandPartExcludesTest(QObject *parent) :
 
 void RsyncCommandPartExcludesTest::initTestCase()
 {
-    this->m_config = new YamlConfig(":/synchronize.yml");
+    this->m_config = new SynchronizeConfig(new JsonConfig(":/synchronize.json"));
 
     this->m_commandPart = new RsyncCommandPartExcludes("/dir1/", this->m_config);
 }

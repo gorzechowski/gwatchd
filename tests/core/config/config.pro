@@ -4,14 +4,14 @@ TARGET = configTest
 
 SOURCES += \
     main.cpp \
-    yamlconfigtest.cpp \
+#    yamlconfigtest.cpp \
     jsonconfigtest.cpp
 
 HEADERS += \
-    yamlconfigtest.h \
+#    yamlconfigtest.h \
     jsonconfigtest.h
 
 include(../../../core/config/config.pri)
 include(../../mockups/mockups.pri)
 
-LIBS += -L$$OUT_PWD/../../../libs/yaml-cpp -lyaml-cpp
+#LIBS += -L$$OUT_PWD/../../../libs/yaml-cpp -lyaml-cpp

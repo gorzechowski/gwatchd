@@ -11,5 +11,6 @@ SOURCES += \
     main.cpp \
     statenotificationtest.cpp
 
+include(../../../core/config/config.pri)
 include(../../../core/notification/notification.pri)
 include(../../../core/socket/socket.pri)

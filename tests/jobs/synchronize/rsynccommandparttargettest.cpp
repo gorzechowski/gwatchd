@@ -29,14 +29,14 @@ RsyncCommandPartTargetTest::RsyncCommandPartTargetTest(QObject *parent) :
 
 void RsyncCommandPartTargetTest::initTestCase()
 {
-    this->m_config = new YamlConfig(":/synchronize.yml");
+    this->m_config = new SynchronizeConfig(new JsonConfig(":/synchronize.json"));
 
     this->m_commandPart = new RsyncCommandPartTarget("/dir2/", this->m_config);
 }
 
 void RsyncCommandPartTargetTest::testBuild()
 {
-    QStringList hosts = this->m_config->listValue("target.hosts");
+    QStringList hosts = this->m_config->targetHosts();
 
     QCOMPARE(hosts.count(), 1);
 

@@ -33,7 +33,7 @@ defineTest(minQtVersion) {
 
 CONFIG += ordered
 TEMPLATE = subdirs
-SUBDIRS += core jobs# tests
+SUBDIRS += core jobs tests
 
 OTHER_FILES += \
     CHANGELOG.md \
@@ -60,7 +60,7 @@ unix {
         $$OUT_PWD/tests/core/watcher/*Test \
         $$OUT_PWD/tests/jobs/synchronize/*Test
 
-    INSTALLS += core jobs
+    INSTALLS += core jobs tests
 }
 
 macx {

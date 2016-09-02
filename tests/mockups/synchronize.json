@@ -19,6 +19,9 @@
 			"target": {
 				"path": "/backup/dir1/"
 			},
+            "ssh": {
+                "configFile": "/home/user/sshConfig"
+            },
 			"excludes": [
 				"*.git",
 				"*.local"
@@ -40,6 +43,10 @@
         "/dir3/file.txt": {
             "target": {
                 "path": "/backup/dir3/file.txt"
+            },
+            "ssh": {
+                "identityFile": "/home/user/.ssh/service",
+                "configFile": "/home/user/.ssh/custom"
             }
         }
 	}

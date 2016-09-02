@@ -58,12 +58,6 @@ void INotifyThread::run()
             continue;
         }
 
-        QFileInfo info(entry);
-
-        if(info.isDir() && !entry.endsWith("/")) {
-            entry.append("/");
-        }
-
         watchDescriptor = inotify_add_watch(this->m_fd, entry.toUtf8(), WATCH_FLAGS);
 
         if(watchDescriptor >= 0) {
@@ -72,6 +66,8 @@ void INotifyThread::run()
         } else {
             this->watchAddFailed(entry, errno);
         }
+
+        QFileInfo info(entry);
 
         if(info.isFile()) {
             continue;
@@ -117,7 +113,7 @@ void INotifyThread::run()
                 case IN_MODIFY:
                 case IN_DELETE:
                 case IN_CREATE:
-                    emit(fileChanged(this->m_watches.value(event->wd) + QString(event->name)));
+                    emit(fileChanged(QDir::cleanPath(this->m_watches.value(event->wd) + "/" + QString(event->name))));
                     break;
 
                 case IN_MOVED_FROM:
@@ -126,14 +122,14 @@ void INotifyThread::run()
 
                 case IN_MOVED_TO:
                     emit(fileChanged(
-                        fileMoving.value(event->cookie) + ">" + this->m_watches.value(event->wd) + QString(event->name)
+                        fileMoving.value(event->cookie) + ">" + QDir::cleanPath(this->m_watches.value(event->wd) + "/" + QString(event->name))
                     ));
 
                     fileMoving.remove(event->cookie);
                     break;
 
                 case IN_CREATE | IN_ISDIR:
-                    path = this->m_watches.value(event->wd) + event->name;
+                    path = QDir::cleanPath(this->m_watches.value(event->wd) + "/" + event->name);
 
                     if(!path.endsWith("/")) {
                         path.append("/");
@@ -149,7 +145,7 @@ void INotifyThread::run()
                     break;
 
                 case IN_DELETE | IN_ISDIR:
-                    path = this->m_watches.value(event->wd) + event->name;
+                    path = QDir::cleanPath(this->m_watches.value(event->wd) + "/" + event->name);
 
                     watchDescriptor = this->m_watches.key(path);
 

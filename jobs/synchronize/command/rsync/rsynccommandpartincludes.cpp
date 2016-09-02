@@ -20,7 +20,7 @@
 
 #include "command/rsync/rsynccommandpartincludes.h"
 
-RsyncCommandPartIncludes::RsyncCommandPartIncludes(QString entry, SynchronizeConfig *config)
+RsyncCommandPartIncludes::RsyncCommandPartIncludes(QFileInfo entry, SynchronizeConfig *config)
 {
     this->m_config = config;
     this->m_entry = entry;
@@ -28,7 +28,7 @@ RsyncCommandPartIncludes::RsyncCommandPartIncludes(QString entry, SynchronizeCon
 
 QString RsyncCommandPartIncludes::build()
 {
-    QStringList list = this->m_config->includes(this->m_entry);
+    QStringList list = this->m_config->includes(this->m_entry.absoluteFilePath());
     QStringList includes;
 
     foreach(QString file, list) {

@@ -19,7 +19,6 @@
  */
 
 #include <QStringList>
-#include <QFileInfo>
 
 #include "command/rsync/rsynccommandbuilder.h"
 #include "command/rsync/rsynccommandpartbase.h"
@@ -28,7 +27,7 @@
 #include "command/rsync/rsynccommandpartremoteshell.h"
 #include "command/rsync/rsynccommandparttarget.h"
 
-RsyncCommandBuilder::RsyncCommandBuilder(QString entry, SynchronizeConfig *config)
+RsyncCommandBuilder::RsyncCommandBuilder(QFileInfo entry, SynchronizeConfig *config)
 {
     this->m_entry = entry;
     this->m_config = config;
@@ -38,15 +37,13 @@ QStringList RsyncCommandBuilder::build()
 {
     QStringList parts, commands;
 
-    QString entry = this->m_entry;
+    QString entry = this->m_entry.absoluteFilePath();
 
-    QFileInfo info(entry);
-
-    if(info.isDir() && !entry.endsWith("/")) {
+    if(this->m_entry.isDir() && !entry.endsWith("/")) {
         entry.append("/");
     }
 
-    foreach(QString host, this->m_config->targetHosts(this->m_entry)) {
+    foreach(QString host, this->m_config->targetHosts(this->m_entry.absoluteFilePath())) {
         parts.append(RsyncCommandPartBase().build());
         parts.append(RsyncCommandPartIncludes(this->m_entry, this->m_config).build());
         parts.append(RsyncCommandPartExcludes(this->m_entry, this->m_config).build());

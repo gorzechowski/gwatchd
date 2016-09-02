@@ -19,6 +19,7 @@
  */
 
 #include <QTest>
+#include <QFileInfo>
 
 #include "rsynccommandpartremoteshelltest.h"
 
@@ -31,7 +32,7 @@ void RsyncCommandPartRemoteShellTest::initTestCase()
 {
     this->m_config = new SynchronizeConfig(new JsonConfig(":/synchronize.json"));
 
-    this->m_commandPart = new RsyncCommandPartRemoteShell("/dir2/", this->m_config);
+    this->m_commandPart = new RsyncCommandPartRemoteShell(QFileInfo("/dir2/"), this->m_config);
 }
 
 void RsyncCommandPartRemoteShellTest::testBuild()

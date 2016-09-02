@@ -21,20 +21,22 @@
 #ifndef RSYNCCOMMANDPARTTARGET_H
 #define RSYNCCOMMANDPARTTARGET_H
 
+#include <QFileInfo>
+
 #include "command/commandpart.h"
 #include "config/synchronizeconfig.h"
 
 class RsyncCommandPartTarget : public CommandPart
 {
 public:
-    RsyncCommandPartTarget(QString entry, SynchronizeConfig *config);
+    RsyncCommandPartTarget(QFileInfo entry, SynchronizeConfig *config);
 
     QString build(QString host);
 
 protected:
     QString build();
 
-    QString m_entry;
+    QFileInfo m_entry;
     SynchronizeConfig *m_config;
     QString m_host;
 };

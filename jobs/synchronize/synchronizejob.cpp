@@ -20,6 +20,7 @@
 
 #include <QDebug>
 #include <QCryptographicHash>
+#include <QFileInfo>
 
 #include "synchronizejob.h"
 #include "command/rsync/rsynccommandbuilder.h"
@@ -81,7 +82,9 @@ void SynchronizeJob::slot_synchronize()
     this->m_files.clear();
 
     foreach(QString entry, entries) {
-        RsyncCommandBuilder builder(entry, this->m_config);
+        QFileInfo info(entry);
+
+        RsyncCommandBuilder builder(info, this->m_config);
         QStringList commands = builder.build();
 
         foreach(QString command, commands) {

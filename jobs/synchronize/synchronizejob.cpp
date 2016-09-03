@@ -88,7 +88,6 @@ void SynchronizeJob::slot_synchronize()
         QStringList commands = builder.build();
 
         foreach(QString command, commands) {
-            qDebug() << command;
             QString hash = QCryptographicHash::hash(command.toUtf8(), QCryptographicHash::Md5).toHex();
 
             QProcess *process = new QProcess();
@@ -134,13 +133,13 @@ void SynchronizeJob::slot_synchronize()
 void SynchronizeJob::slot_start()
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
-    QString dir = process->property("entry").toString();
+    QString entry = process->property("entry").toString();
 
-    this->m_logger->log(QString("Synchronizing %1 dir...").arg(dir));
+    this->m_logger->log(QString("Synchronizing %1...").arg(entry));
 
     RunningPayload *payload = new RunningPayload();
 
-    payload->addDirInfo(dir, RunningPayload::Started);
+    payload->addEntryInfo(entry, RunningPayload::Started);
 
     emit(running(payload));
 }
@@ -149,19 +148,19 @@ void SynchronizeJob::slot_finished(int code)
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
 
-    QString dir = process->property("entry").toString();
+    QString entry = process->property("entry").toString();
     RunningPayload *payload = new RunningPayload();
 
-    payload->addDirInfo(dir, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
+    payload->addEntryInfo(entry, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
 
     emit(running(payload));
 
     this->m_activeProcessList.remove(process->property("hash").toString());
 
     if(code > 0) {
-        this->m_logger->error(QString("Synchronizing %1 dir failed").arg(dir));
+        this->m_logger->error(QString("Synchronizing %1 failed").arg(entry));
     } else {
-        this->m_logger->log(QString("Synchronizing %1 dir done").arg(process->property("entry").toString()));
+        this->m_logger->log(QString("Synchronizing %1 done").arg(process->property("entry").toString()));
     }
 
     if(this->m_activeProcessList.isEmpty()) {

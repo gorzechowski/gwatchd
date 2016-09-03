@@ -41,7 +41,7 @@ FileLogger::FileLogger(QString path, ApplicationConfig *config, QObject *parent)
         );
     }
 
-    if(!this->m_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+    if(!this->m_file->isOpen() && !this->m_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
         printf(
             "Could not open log file %s: %s\n",
             qPrintable(path),

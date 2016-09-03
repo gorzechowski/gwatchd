@@ -21,6 +21,8 @@
 #ifndef RSYNCCOMMANDBUILDER_H
 #define RSYNCCOMMANDBUILDER_H
 
+#include <QFileInfo>
+
 #include "command/commandbuilder.h"
 #include "command/commandpart.h"
 #include "config/synchronizeconfig.h"
@@ -28,13 +30,13 @@
 class RsyncCommandBuilder : public CommandBuilder
 {
 public:
-    RsyncCommandBuilder(QString dir, SynchronizeConfig *config);
+    RsyncCommandBuilder(QFileInfo entry, SynchronizeConfig *config);
 
     QStringList build();
 
 protected:
     QList<CommandPart*> m_parts;
-    QString m_dir;
+    QFileInfo m_entry;
     SynchronizeConfig *m_config;
 };
 

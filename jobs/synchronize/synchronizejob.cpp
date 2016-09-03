@@ -20,6 +20,7 @@
 
 #include <QDebug>
 #include <QCryptographicHash>
+#include <QFileInfo>
 
 #include "synchronizejob.h"
 #include "command/rsync/rsynccommandbuilder.h"
@@ -43,7 +44,7 @@ void SynchronizeJob::setLogger(Logger *logger)
     this->m_logger = logger;
 }
 
-QStringList SynchronizeJob::getDirs()
+QStringList SynchronizeJob::getEntries()
 {
     return this->m_config->entries();
 }
@@ -67,12 +68,12 @@ void SynchronizeJob::slot_synchronize()
 
     emit(started());
 
-    QStringList dirs;
+    QStringList entries;
 
-    foreach(QString dir, this->getDirs()) {
+    foreach(QString entry, this->getEntries()) {
         foreach(QString file, this->m_files) {
-            if(file.startsWith(dir)) {
-                dirs << dir;
+            if(file.startsWith(entry)) {
+                entries << entry;
                 break;
             }
         }
@@ -80,8 +81,10 @@ void SynchronizeJob::slot_synchronize()
 
     this->m_files.clear();
 
-    foreach(QString dir, dirs) {
-        RsyncCommandBuilder builder(dir, this->m_config);
+    foreach(QString entry, entries) {
+        QFileInfo info(entry);
+
+        RsyncCommandBuilder builder(info, this->m_config);
         QStringList commands = builder.build();
 
         foreach(QString command, commands) {
@@ -112,7 +115,7 @@ void SynchronizeJob::slot_synchronize()
                 connect(process, SIGNAL(finished(int)), this, SLOT(slot_finished(int)));
                 connect(process, SIGNAL(readyRead()), this, SLOT(slot_read()));
 
-                process->setProperty("dir", dir);
+                process->setProperty("entry", entry);
                 process->setProperty("hash", hash);
 
                 this->m_activeProcessList.insert(hash, process);
@@ -130,13 +133,13 @@ void SynchronizeJob::slot_synchronize()
 void SynchronizeJob::slot_start()
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
-    QString dir = process->property("dir").toString();
+    QString entry = process->property("entry").toString();
 
-    this->m_logger->log(QString("Synchronizing %1 dir...").arg(dir));
+    this->m_logger->log(QString("Synchronizing %1...").arg(entry));
 
     RunningPayload *payload = new RunningPayload();
 
-    payload->addDirInfo(dir, RunningPayload::Started);
+    payload->addEntryInfo(entry, RunningPayload::Started);
 
     emit(running(payload));
 }
@@ -145,19 +148,19 @@ void SynchronizeJob::slot_finished(int code)
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
 
-    QString dir = process->property("dir").toString();
+    QString entry = process->property("entry").toString();
     RunningPayload *payload = new RunningPayload();
 
-    payload->addDirInfo(dir, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
+    payload->addEntryInfo(entry, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
 
     emit(running(payload));
 
     this->m_activeProcessList.remove(process->property("hash").toString());
 
     if(code > 0) {
-        this->m_logger->error(QString("Synchronizing %1 dir failed").arg(dir));
+        this->m_logger->error(QString("Synchronizing %1 failed").arg(entry));
     } else {
-        this->m_logger->log(QString("Synchronizing %1 dir done").arg(process->property("dir").toString()));
+        this->m_logger->log(QString("Synchronizing %1 done").arg(process->property("entry").toString()));
     }
 
     if(this->m_activeProcessList.isEmpty()) {

@@ -33,7 +33,7 @@ class RunningPayload: public Payload
 public:
     RunningPayload();
 
-    void addDirInfo(QString dir, int state);
+    void addEntryInfo(QString entry, int state);
 
     enum State {
         Started = 0,

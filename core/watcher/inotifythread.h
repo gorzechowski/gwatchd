@@ -25,26 +25,30 @@
 #include <QStringList>
 #include <QMap>
 
+#include "logger/logger.h"
+
 class INotifyThread : public QThread
 {
     Q_OBJECT
 public:
-    INotifyThread(QStringList dirs, QObject *parent = 0);
+    INotifyThread(QStringList entries, Logger *logger, QObject *parent = 0);
 
     void run();
 
 protected:
-    QStringList m_dirs;
+    QStringList m_entries;
+    Logger *m_logger;
 
     QMap<int, QString> m_watches;
 
     int m_fd;
 
+    void watchAdded(QString entry);
+    void watchAddFailed(QString entry, int error);
+
 signals:
     void fileChanged(QString data);
     void watchesAddDone();
-    void watchAdded(QString dir);
-    void watchAddFailed(QString dir, int error);
 
 public slots:
     void slot_stop();

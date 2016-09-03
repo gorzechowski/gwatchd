@@ -41,7 +41,7 @@ public:
     QHash<QString, Job*> getLoadedJobs();
     void loadAvailableJobs();
 
-    void runJob(QString name, QStringList dirs);
+    void runJob(QString name, QStringList entries);
 
 protected:
     bool loadJob(JobManager::availableJob job);

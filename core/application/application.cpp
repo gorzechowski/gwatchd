@@ -138,7 +138,7 @@ void Application::initStandardMode(ApplicationConfig *config)
     Watcher *watcher = new Watcher(logger);
 
     foreach(Job *job, manager->getLoadedJobs().values()) {
-        watcher->addDirs(job->getDirs());
+        watcher->addEntries(job->getEntries());
     }
 
     connect(watcher, SIGNAL(fileChanged(QString)), manager, SLOT(slot_runJobs(QString)));

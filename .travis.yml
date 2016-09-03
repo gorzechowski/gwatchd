@@ -62,5 +62,4 @@ before_script:
 
 script:
   - make
-  - make install
-  - for test in `find bin/tests/ -type f`; do ./$test; done
+  - make check

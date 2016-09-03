@@ -63,7 +63,7 @@ void SocketServer::sendMessageToAllClients(QString message)
 {
     foreach(QWebSocket *client, this->m_clients) {
         if(client->isValid()) {
-            this->m_logger->debug("Sending Websocket message to client");
+            this->m_logger->debug("Sending Websocket message to client: " + message);
             client->sendTextMessage(message);
         } else {
             this->m_logger->debug("Websocket client is not valid");

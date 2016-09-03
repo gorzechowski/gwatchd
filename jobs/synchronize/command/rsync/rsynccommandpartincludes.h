@@ -21,18 +21,20 @@
 #ifndef RSYNCCOMMANDPARTINCLUDES_H
 #define RSYNCCOMMANDPARTINCLUDES_H
 
+#include <QFileInfo>
+
 #include "command/commandpart.h"
 #include "config/synchronizeconfig.h"
 
 class RsyncCommandPartIncludes : public CommandPart
 {
 public:
-    RsyncCommandPartIncludes(QString dir, SynchronizeConfig *config);
+    RsyncCommandPartIncludes(QFileInfo entry, SynchronizeConfig *config);
 
     QString build();
 
 protected:
-    QString m_dir;
+    QFileInfo m_entry;
     SynchronizeConfig *m_config;
 };
 

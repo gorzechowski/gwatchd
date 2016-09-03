@@ -20,9 +20,9 @@
 
 #include "command/rsync/rsynccommandparttarget.h"
 
-RsyncCommandPartTarget::RsyncCommandPartTarget(QString dir, SynchronizeConfig *config)
+RsyncCommandPartTarget::RsyncCommandPartTarget(QFileInfo entry, SynchronizeConfig *config)
 {
-    this->m_dir = dir;
+    this->m_entry = entry;
     this->m_config = config;
 }
 
@@ -36,18 +36,21 @@ QString RsyncCommandPartTarget::build(QString host)
 QString RsyncCommandPartTarget::build()
 {
     QString target = "%1@%2:%3";
+    QString entry = this->m_entry.absoluteFilePath();
 
-    QString user = this->m_config->targetUser(this->m_dir);
+    QString user = this->m_config->targetUser(entry);
 
     if(user.isEmpty()) {
         target.remove("@");
     }
 
-    QString dir = this->m_config->targetPath(this->m_dir);
+    QString targetPath = this->m_config->targetPath(entry);
 
-    if(!dir.endsWith("/")) {
-        dir.append("/");
+    if(this->m_entry.isDir() && !targetPath.endsWith("/")) {
+        targetPath.append("/");
+    } else if(this->m_entry.isFile() && targetPath.endsWith("/")) {
+        targetPath = targetPath.left(targetPath.length() - 1);
     }
 
-    return target.arg(user, this->m_host, dir);
+    return target.arg(user, this->m_host, targetPath);
 }

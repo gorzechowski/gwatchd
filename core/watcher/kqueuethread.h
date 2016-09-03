@@ -25,16 +25,19 @@
 #include <QStringList>
 #include <QMap>
 
+#include "logger/logger.h"
+
 class KQueueThread : public QThread
 {
     Q_OBJECT
 public:
-    KQueueThread(QStringList dirs, QObject *parent = 0);
+    KQueueThread(QStringList entries, Logger *logger, QObject *parent = 0);
 
     void run();
 
 protected:
-    QStringList m_dirs;
+    QStringList m_entries;
+    Logger *m_logger;
 
     QMap<int, QString> m_watches;
 
@@ -43,13 +46,14 @@ protected:
     QStringList findNewEntries(QString);
     QStringList getEntriesForDir(QString, QMap<int, QString>);
     QStringList getEntriesForDir(QString);
-    bool addWatcher(QString, bool emitSignal = true);
+    bool addWatcher(QString);
+
+    void watchAdded(QString entry);
+    void watchAddFailed(QString entry, int error);
 
 signals:
     void fileChanged(QString data);
     void watchesAddDone();
-    void watchAdded(QString dir);
-    void watchAddFailed(QString dir, int error);
 
 public slots:
     void slot_stop();

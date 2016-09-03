@@ -20,9 +20,9 @@
 
 #include "command/rsync/rsynccommandpartremoteshell.h"
 
-RsyncCommandPartRemoteShell::RsyncCommandPartRemoteShell(QString dir, SynchronizeConfig *config)
+RsyncCommandPartRemoteShell::RsyncCommandPartRemoteShell(QFileInfo entry, SynchronizeConfig *config)
 {
-    this->m_dir = dir;
+    this->m_entry = entry;
     this->m_config = config;
 }
 
@@ -41,26 +41,27 @@ QString RsyncCommandPartRemoteShell::build()
 QStringList RsyncCommandPartRemoteShell::getArgs()
 {
     QStringList args;
+    QString entry = this->m_entry.absoluteFilePath();
 
-    QString keyFile = this->m_config->sshIdentityFile(this->m_dir);
+    QString keyFile = this->m_config->sshIdentityFile(entry);
 
     if(!keyFile.isEmpty()) {
         args << "-i " + keyFile;
     }
 
-    QString configFile = this->m_config->sshConfigFile(this->m_dir);
+    QString configFile = this->m_config->sshConfigFile(entry);
 
     if(!configFile.isEmpty()) {
         args << "-F " + configFile;
     }
 
-    int port = this->m_config->sshPort(this->m_dir);
+    int port = this->m_config->sshPort(entry);
 
     if(port > 0) {
         args << "-p " + QString::number(port);
     }
 
-    QStringList options = this->m_config->sshOptions(this->m_dir);
+    QStringList options = this->m_config->sshOptions(entry);
 
     if(!options.empty()) {
         foreach(QString option, options) {

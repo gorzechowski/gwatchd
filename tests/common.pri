@@ -3,7 +3,7 @@ QT += testlib
 
 TEMPLATE = app
 
-CONFIG += console
+CONFIG += console testcase
 CONFIG -= app_bundle
 
 INCLUDEPATH += \

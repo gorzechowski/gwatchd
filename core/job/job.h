@@ -32,7 +32,7 @@ class Job
 public:
     virtual ~Job() {}
 
-    virtual QStringList getDirs() = 0;
+    virtual QStringList getEntries() = 0;
     virtual void run(QString data) = 0;
     virtual void setConfig(Config *config) { m_config = config; }
     virtual void setLogger(Logger *logger) = 0;

@@ -54,7 +54,7 @@ void WatcherTest::initTestCase()
 
     this->m_watcher = new Watcher(logger);
 
-    this->m_watcher->addDirs(QStringList() << this->m_dir.absolutePath());
+    this->m_watcher->addEntries(QStringList() << this->m_dir.absolutePath());
 
     QEventLoop loop;
 

@@ -19,6 +19,7 @@
  */
 
 #include <QtTest>
+#include <QFileInfo>
 
 #include "rsynccommandpartexcludestest.h"
 
@@ -31,7 +32,7 @@ void RsyncCommandPartExcludesTest::initTestCase()
 {
     this->m_config = new SynchronizeConfig(new JsonConfig(":/synchronize.json"));
 
-    this->m_commandPart = new RsyncCommandPartExcludes("/dir1/", this->m_config);
+    this->m_commandPart = new RsyncCommandPartExcludes(QFileInfo("/dir1/"), this->m_config);
 }
 
 void RsyncCommandPartExcludesTest::testBuild()

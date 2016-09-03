@@ -167,7 +167,7 @@ QHash<QString, Job*> JobManager::getLoadedJobs()
     return this->m_loaded;
 }
 
-void JobManager::runJob(QString name, QStringList dirs)
+void JobManager::runJob(QString name, QStringList entries)
 {
     name = name.toLower();
 
@@ -183,18 +183,20 @@ void JobManager::runJob(QString name, QStringList dirs)
 
     connect(jobObject, SIGNAL(finished(int)), &loop, SLOT(quit()));
 
-    if(dirs.isEmpty()) {
-        dirs = job->getDirs();
+    if(entries.isEmpty()) {
+        entries = job->getEntries();
     }
 
-    foreach(QString dir, dirs) {
-        if(!dir.endsWith("/")) {
-            dir.append("/");
+    foreach(QString entry, entries) {
+        QFileInfo info(entry);
+
+        if(info.isDir() && !entry.endsWith("/")) {
+            entry.append("/");
         }
 
-        this->m_logger->debug("Running job with arg: " + dir);
+        this->m_logger->debug("Running job with arg: " + entry);
 
-        job->run(dir);
+        job->run(entry);
     }
 
     loop.exec();

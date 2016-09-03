@@ -36,6 +36,8 @@
 #include "notification/notifier/socketnotifier.h"
 #include "socket/socketserver.h"
 
+QSystemSemaphore semaphore("gwatchd");
+
 Application::Application(CommandLineParser *parser, int &argc, char **argv) : QCoreApplication(argc, argv)
 {
     this->m_parser = parser;
@@ -160,6 +162,12 @@ void Application::initStandardMode(ApplicationConfig *config)
     notificationManager->addNotifier(new SocketNotifier(socketServer));
 
     connect(manager, SIGNAL(notification(Notification*)), notificationManager, SLOT(slot_notification(Notification*)));
+
+    semaphore.release();
+
+    ::close(STDIN_FILENO);
+    ::close(STDOUT_FILENO);
+    ::close(STDERR_FILENO);
 }
 
 void Application::initSingleMode(ApplicationConfig *config)
@@ -180,7 +188,6 @@ void Application::initSingleMode(ApplicationConfig *config)
 
 void Application::initDaemonMode(ApplicationConfig *config)
 {
-    QSystemSemaphore semaphore("gwatchd");
     QFile pidFile;
 
     pid_t pid, sid;
@@ -210,6 +217,25 @@ void Application::initDaemonMode(ApplicationConfig *config)
     }
 
     // we are in child process...
+
+    #ifdef Q_OS_MAC
+        char *debug = NULL;
+
+        if(this->m_parser->isSetDebug()) {
+            debug = QByteArray("-d").data();
+        }
+
+        char* const argv[] = {
+            this->applicationFilePath().toUtf8().data(),
+            QByteArray("--no-daemon").data(),
+            debug,
+            NULL
+        };
+
+        ::execv(this->applicationFilePath().toUtf8().data(), argv);
+
+        ::exit(0);
+    #endif
 
     umask(0);
 

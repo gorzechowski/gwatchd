@@ -20,8 +20,9 @@
 
 #include "applicationconfig.h"
 
-ApplicationConfig::ApplicationConfig(Config *config, QObject *parent) : QObject(parent)
+ApplicationConfig::ApplicationConfig(QString appRootDir, Config *config, QObject *parent) : QObject(parent)
 {
+    this->m_appRootDir = appRootDir;
     this->m_config = config;
 }
 
@@ -32,7 +33,7 @@ QFileInfo ApplicationConfig::fileInfo()
 
 QString ApplicationConfig::logsDirPath()
 {
-    return this->m_config->value("log").toObject().value("dirPath").toString("logs");
+    return this->m_config->value("log").toObject().value("dirPath").toString(this->m_appRootDir + "/logs");
 }
 
 int ApplicationConfig::logsMaxFileSize()

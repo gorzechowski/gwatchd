@@ -30,7 +30,7 @@ class ApplicationConfig : public QObject
 {
     Q_OBJECT
 public:
-    ApplicationConfig(Config *config, QObject *parent = 0);
+    ApplicationConfig(QString appRootDir, Config *config, QObject *parent = 0);
 
     QFileInfo fileInfo();
 
@@ -41,6 +41,7 @@ public:
     int socketPort();
 
 protected:
+    QString m_appRootDir;
     Config *m_config;
 };
 

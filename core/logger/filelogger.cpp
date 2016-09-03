@@ -52,7 +52,9 @@ FileLogger::FileLogger(QString path, ApplicationConfig *config, QObject *parent)
 
 void FileLogger::log(QString content)
 {
-    if(!this->m_file->isOpen() || !this->m_file->isWritable()) return;
+    if(!this->m_file->isOpen() || !this->m_file->isWritable()) {
+        return;
+    }
 
     qint64 size = this->m_file->size() + content.length() + 1;
 

@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
     qsrand(QTime::currentTime().second());
 
-    ApplicationConfig *config = new ApplicationConfig(new JsonConfig(app->configDir() + "/config.json"));
+    ApplicationConfig *config = new ApplicationConfig(app->applicationDirPath(), new JsonConfig(app->configDir() + "/config.json"));
 
     app->init(config);
 

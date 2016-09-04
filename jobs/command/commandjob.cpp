@@ -23,6 +23,7 @@
 #include <QFileInfo>
 
 #include "commandjob.h"
+#include "command/ssh/sshcommandbuilder.h"
 //#include "notification/runningpayload.h"
 #include "config/commandconfig.h"
 
@@ -81,13 +82,14 @@ void CommandJob::slot_execute()
     this->m_files.clear();
 
     foreach(QString entry, entries) {
-//        QFileInfo info(entry);
+        QFileInfo info(entry);
 
         QStringList commands;
 
         if(this->m_config->remote(entry)) {
-//            SshCommandBuilder builder(info, this->m_config);
-//            commands = builder.build();
+            SshCommandBuilder builder(info, this->m_config);
+            commands = builder.build();
+            continue;
         } else {
             commands << this->m_config->exec(entry);
         }

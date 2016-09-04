@@ -49,6 +49,7 @@ unix {
 
     jobs.path = $$OUT_PWD/bin/jobs
     jobs.files = $$OUT_PWD/jobs/synchronize/lib*
+    jobs.files += $$OUT_PWD/jobs/command/lib*
 
     tests.path = $$OUT_PWD/bin/tests
     tests.files = \

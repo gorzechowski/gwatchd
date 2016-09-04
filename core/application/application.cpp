@@ -163,11 +163,21 @@ void Application::initStandardMode(ApplicationConfig *config)
 
     connect(manager, SIGNAL(notification(Notification*)), notificationManager, SLOT(slot_notification(Notification*)));
 
-    semaphore.release();
+    #ifdef Q_OS_MAC
+        QFile file(this->m_parser->pidFile());
 
-    ::close(STDIN_FILENO);
-    ::close(STDOUT_FILENO);
-    ::close(STDERR_FILENO);
+        if(file.open(QIODevice::ReadOnly)) {
+            if(file.readAll().toInt() == ::getpid()) {
+                semaphore.release();
+
+                ::close(STDIN_FILENO);
+                ::close(STDOUT_FILENO);
+                ::close(STDERR_FILENO);
+            }
+
+            file.close();
+        }
+    #endif
 }
 
 void Application::initSingleMode(ApplicationConfig *config)

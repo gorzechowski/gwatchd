@@ -44,9 +44,6 @@ public:
     void run(QString data);
     void setConfig(Config *config);
     void setLogger(Logger *logger);
-    void init();
-
-    QString generateCommand(QString dir);
 
 protected:
     SynchronizeConfig *m_config;
@@ -54,13 +51,6 @@ protected:
 
     QTimer *m_timer;
     QStringList m_files;
-
-    QString getExcludes(int dirIndex);
-    QString getIncludes(int dirIndex);
-
-    QMap<QString, QString> getSshParams(int dirIndex);
-
-    void executeHook(QString type);
 
 private slots:
     void slot_start();

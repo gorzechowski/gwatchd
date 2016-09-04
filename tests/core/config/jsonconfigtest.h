@@ -39,9 +39,6 @@ private slots:
     void cleanupTestCase();
 
     void testValue();
-    void testListValue();
-    void testDefaultValue();
-    void testMissingFile();
 };
 
 #endif // JSONCONFIGTEST_H

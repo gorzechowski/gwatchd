@@ -25,7 +25,7 @@
 
 #include "commandjob.h"
 #include "command/ssh/sshcommandbuilder.h"
-//#include "notification/runningpayload.h"
+#include "notification/runningpayload.h"
 #include "config/commandconfig.h"
 
 CommandJob::CommandJob()
@@ -161,37 +161,44 @@ QStringList CommandJob::retrieveEntries(QStringList files)
     return entries;
 }
 
+QString CommandJob::getCommand(QProcess *process)
+{
+    return QString("%1 %2").arg(process->program(), process->arguments().join(" "));
+}
+
 void CommandJob::slot_start()
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
-//    QString entry = process->property("entry").toString();
+    QString entry = process->property("entry").toString();
+    QString command = this->getCommand(process);
 
-    this->m_logger->log(QString("Running command: %1").arg(process->program()));
+    this->m_logger->log(QString("Running command: %1").arg(command));
 
-//    RunningPayload *payload = new RunningPayload();
+    RunningPayload *payload = new RunningPayload();
 
-//    payload->addEntryInfo(entry, RunningPayload::Started);
+    payload->addEntryInfo(entry, RunningPayload::Started);
 
-//    emit(running(payload));
+    emit(running(payload));
 }
 
 void CommandJob::slot_finished(int code)
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
 
-//    QString entry = process->property("entry").toString();
-//    RunningPayload *payload = new RunningPayload();
+    QString entry = process->property("entry").toString();
+    QString command = this->getCommand(process);
+    RunningPayload *payload = new RunningPayload();
 
-//    payload->addEntryInfo(entry, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
+    payload->addEntryInfo(entry, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
 
-//    emit(running(payload));
+    emit(running(payload));
 
     this->m_activeProcessList.remove(process->property("hash").toString());
 
     if(code > 0) {
-        this->m_logger->error(QString("Command %1 failed").arg(process->program()));
+        this->m_logger->error(QString("Command %1 failed").arg(command));
     } else {
-        this->m_logger->log(QString("Command %1 done").arg(process->program()));
+        this->m_logger->log(QString("Command %1 done").arg(command));
     }
 
     if(this->m_activeProcessList.isEmpty()) {

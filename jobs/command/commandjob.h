@@ -52,6 +52,7 @@ protected:
     QStringList m_files;
 
     QStringList retrieveEntries(QStringList files);
+    QString getCommand(QProcess *process);
 
 private slots:
     void slot_start();

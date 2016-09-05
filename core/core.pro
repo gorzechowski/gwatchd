@@ -21,6 +21,7 @@ unix:!macx {
 
 SOURCES += main.cpp
 
+include(../app.pri)
 include(application/application.pri)
 include(config/config.pri)
 include(job/job.pri)

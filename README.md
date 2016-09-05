@@ -10,7 +10,8 @@ Each job is a plugin which has own config file located in `config/job` dir with 
 Logs can be found in `logs` and `logs/job` dirs. Daemon and plugins have separate log files (just like config files).
 
 ## Available jobs
-- [**Synchronize**](https://github.com/gorzechowski/gwatchd/wiki/Synchronize-Job)
+- [**Command**](https://github.com/gorzechowski/gwatchd/blob/master/docs/command-job.md)
+- [**Synchronize**](https://github.com/gorzechowski/gwatchd/blob/master/docs/synchronize-job.md)
 
 ## Daemon configuration
 
@@ -24,14 +25,17 @@ Optional properties:
 | socket.port `<integer>`                   | Websocket server listen port. If empty, server will not be initialized. |
 
 Example config:
-```yaml
-log:
-  maxFileSize: 10000
-  dirPath: /home/user/logs/gwatchd
-
-socket:
-  address: "127.0.0.1"
-  port: 8080
+```json
+{
+    "log": {
+        "maxFileSize": 10000,
+        "dirPath": "/home/user/logs/gwatchd"
+    },
+    "socket": {
+        "address": "127.0.0.1",
+        "port": 8080
+    }
+}
 ```
 
 ## License

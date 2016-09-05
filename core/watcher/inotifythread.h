@@ -24,6 +24,8 @@
 #include <QThread>
 #include <QStringList>
 #include <QMap>
+#include <QHash>
+#include <QTime>
 
 #include "logger/logger.h"
 
@@ -41,10 +43,14 @@ protected:
 
     QMap<int, QString> m_watches;
 
+    QHash<QString, QTime> m_debounce;
+
     int m_fd;
 
     void watchAdded(QString entry);
     void watchAddFailed(QString entry, int error);
+
+    void debounce(QString data);
 
 signals:
     void fileChanged(QString data);

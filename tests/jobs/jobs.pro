@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS += synchronize
+SUBDIRS += synchronize command

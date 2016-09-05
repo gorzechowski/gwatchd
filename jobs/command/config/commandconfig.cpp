@@ -45,6 +45,11 @@ QString CommandConfig::exec(QString entry)
     return this->m_config->value("dirs").toObject().value(entry).toObject().value("exec").toString();
 }
 
+QString CommandConfig::fileMask(QString entry)
+{
+    return this->m_config->value("dirs").toObject().value(entry).toObject().value("fileMask").toString();
+}
+
 QStringList CommandConfig::sshHosts()
 {
     return this->m_config->toStringList(this->m_config->value("ssh").toObject().value("hosts").toArray());

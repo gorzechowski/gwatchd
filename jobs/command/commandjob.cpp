@@ -21,6 +21,7 @@
 #include <QDebug>
 #include <QCryptographicHash>
 #include <QFileInfo>
+#include <QRegularExpression>
 
 #include "commandjob.h"
 #include "command/ssh/sshcommandbuilder.h"
@@ -68,18 +69,14 @@ void CommandJob::slot_execute()
 
     emit(started());
 
-    QStringList entries;
-
-    foreach(QString entry, this->getEntries()) {
-        foreach(QString file, this->m_files) {
-            if(file.startsWith(entry)) {
-                entries << entry;
-                break;
-            }
-        }
-    }
+    QStringList entries = this->retrieveEntries(this->m_files);
 
     this->m_files.clear();
+
+    if(entries.isEmpty()) {
+        this->m_logger->debug("Command job has nothing to do");
+        emit(finished(0));
+    }
 
     foreach(QString entry, entries) {
         QFileInfo info(entry);
@@ -89,7 +86,6 @@ void CommandJob::slot_execute()
         if(this->m_config->remote(entry)) {
             SshCommandBuilder builder(info, this->m_config);
             commands = builder.build();
-            continue;
         } else {
             commands << this->m_config->exec(entry);
         }
@@ -135,6 +131,34 @@ void CommandJob::slot_execute()
             process->start(command);
         }
     }
+}
+
+QStringList CommandJob::retrieveEntries(QStringList files)
+{
+    QStringList entries;
+
+    foreach(QString entry, this->getEntries()) {
+        foreach(QString file, files) {
+            if(file.startsWith(entry)) {
+                QString fileMask = this->m_config->fileMask(entry);
+
+                if(!fileMask.isEmpty()) {
+                    QString fileName = file.split("/").last();
+                    QRegularExpression regex(fileMask);
+                    QRegularExpressionMatch match = regex.match(fileName);
+
+                    if(!match.hasMatch()) {
+                        continue;
+                    }
+                }
+
+                entries << entry;
+                break;
+            }
+        }
+    }
+
+    return entries;
 }
 
 void CommandJob::slot_start()

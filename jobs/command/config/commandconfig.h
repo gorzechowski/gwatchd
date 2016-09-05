@@ -36,6 +36,7 @@ public:
     QStringList entries();
     bool remote(QString entry);
     QString exec(QString entry);
+    QString fileMask(QString entry);
     QStringList sshHosts();
     QStringList sshHosts(QString entry);
     QString sshUser();

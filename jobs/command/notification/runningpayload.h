@@ -18,46 +18,35 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYTHREAD_H
-#define INOTIFYTHREAD_H
+#ifndef RUNNINGPAYLOAD_H
+#define RUNNINGPAYLOAD_H
 
-#include <QThread>
-#include <QStringList>
-#include <QMap>
-#include <QHash>
-#include <QTime>
+#include <QtPlugin>
 
-#include "logger/logger.h"
+#include "../../core/notification/payload.h"
 
-class INotifyThread : public QThread
+class RunningPayload: public Payload
 {
-    Q_OBJECT
-public:
-    INotifyThread(QStringList entries, Logger *logger, QObject *parent = 0);
 
-    void run();
+    Q_INTERFACES(Payload)
+
+public:
+    RunningPayload();
+
+    void addEntryInfo(QString entry, int state);
+
+    enum State {
+        Started = 0,
+        Finished,
+        Failed
+    };
+
+    QJsonObject toJsonObject();
 
 protected:
-    QStringList m_entries;
-    Logger *m_logger;
+    QHash<QString, QHash<QString, QString> > m_payload;
 
-    QMap<int, QString> m_watches;
-
-    QHash<QString, QTime> m_debounce;
-
-    int m_fd;
-
-    void watchAdded(QString entry);
-    void watchAddFailed(QString entry, int error);
-
-    void debounce(QString data);
-
-signals:
-    void fileChanged(QString data);
-    void watchesAddDone();
-
-public slots:
-    void slot_stop();
+    QString stateToString(int state);
 };
 
-#endif // INOTIFYTHREAD_H
+#endif // RUNNINGPAYLOAD_H

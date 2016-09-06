@@ -18,46 +18,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYTHREAD_H
-#define INOTIFYTHREAD_H
+#ifndef SSHCOMMANDPARTTARGETTEST_H
+#define SSHCOMMANDPARTTARGETTEST_H
 
-#include <QThread>
-#include <QStringList>
-#include <QMap>
-#include <QHash>
-#include <QTime>
+#include <QObject>
 
-#include "logger/logger.h"
+#include "../../../jobs/command/command/ssh/sshcommandparttarget.h"
 
-class INotifyThread : public QThread
+class SshCommandPartTargetTest : public QObject
 {
     Q_OBJECT
 public:
-    INotifyThread(QStringList entries, Logger *logger, QObject *parent = 0);
+    SshCommandPartTargetTest(QObject *parent = 0);
 
-    void run();
+private slots:
+    void testBuildNoUser();
+    void testBuild();
 
-protected:
-    QStringList m_entries;
-    Logger *m_logger;
-
-    QMap<int, QString> m_watches;
-
-    QHash<QString, QTime> m_debounce;
-
-    int m_fd;
-
-    void watchAdded(QString entry);
-    void watchAddFailed(QString entry, int error);
-
-    void debounce(QString data);
-
-signals:
-    void fileChanged(QString data);
-    void watchesAddDone();
-
-public slots:
-    void slot_stop();
 };
 
-#endif // INOTIFYTHREAD_H
+#endif // SSHCOMMANDPARTTARGETTEST_H

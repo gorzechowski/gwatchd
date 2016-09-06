@@ -18,46 +18,31 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYTHREAD_H
-#define INOTIFYTHREAD_H
+#include "command/ssh/sshcommandparttarget.h"
 
-#include <QThread>
-#include <QStringList>
-#include <QMap>
-#include <QHash>
-#include <QTime>
-
-#include "logger/logger.h"
-
-class INotifyThread : public QThread
+SshCommandPartTarget::SshCommandPartTarget(QFileInfo entry, CommandConfig *config)
 {
-    Q_OBJECT
-public:
-    INotifyThread(QStringList entries, Logger *logger, QObject *parent = 0);
+    this->m_entry = entry;
+    this->m_config = config;
+}
 
-    void run();
+QString SshCommandPartTarget::build(QString host)
+{
+    this->m_host = host;
 
-protected:
-    QStringList m_entries;
-    Logger *m_logger;
+    return this->build();
+}
 
-    QMap<int, QString> m_watches;
+QString SshCommandPartTarget::build()
+{
+    QString target = "%1@%2";
+    QString entry = this->m_entry.absoluteFilePath();
 
-    QHash<QString, QTime> m_debounce;
+    QString user = this->m_config->sshUser(entry);
 
-    int m_fd;
+    if(user.isEmpty()) {
+        target.remove("@");
+    }
 
-    void watchAdded(QString entry);
-    void watchAddFailed(QString entry, int error);
-
-    void debounce(QString data);
-
-signals:
-    void fileChanged(QString data);
-    void watchesAddDone();
-
-public slots:
-    void slot_stop();
-};
-
-#endif // INOTIFYTHREAD_H
+    return target.arg(user, this->m_host);
+}

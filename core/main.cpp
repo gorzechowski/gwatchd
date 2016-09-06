@@ -41,9 +41,6 @@ int main(int argc, char *argv[])
 {
     app = new Application(new CommandLineParser(), argc, argv);
 
-    app->setApplicationName("GWatchD");
-    app->setApplicationVersion("1.1.0");
-
     signal(SIGINT, unixSignalHandler);
     signal(SIGTERM, unixSignalHandler);
     signal(SIGTSTP, unixSignalHandler);

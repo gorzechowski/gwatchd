@@ -18,46 +18,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYTHREAD_H
-#define INOTIFYTHREAD_H
+#ifndef COMMANDCONFIGTEST_H
+#define COMMANDCONFIGTEST_H
 
-#include <QThread>
-#include <QStringList>
-#include <QMap>
-#include <QHash>
-#include <QTime>
+#include <QObject>
 
-#include "logger/logger.h"
+#include "../../../jobs/command/config/commandconfig.h"
+#include "config/jsonconfig.h"
 
-class INotifyThread : public QThread
+class CommandConfigTest : public QObject
 {
     Q_OBJECT
 public:
-    INotifyThread(QStringList entries, Logger *logger, QObject *parent = 0);
-
-    void run();
+    CommandConfigTest(QObject *parent = 0);
 
 protected:
-    QStringList m_entries;
-    Logger *m_logger;
+    CommandConfig *m_config;
 
-    QMap<int, QString> m_watches;
+private slots:
+    void initTestCase();
 
-    QHash<QString, QTime> m_debounce;
-
-    int m_fd;
-
-    void watchAdded(QString entry);
-    void watchAddFailed(QString entry, int error);
-
-    void debounce(QString data);
-
-signals:
-    void fileChanged(QString data);
-    void watchesAddDone();
-
-public slots:
-    void slot_stop();
+    void testValue();
+    void testListValue();
+    void testMissingFile();
 };
 
-#endif // INOTIFYTHREAD_H
+#endif // COMMANDCONFIGTEST_H

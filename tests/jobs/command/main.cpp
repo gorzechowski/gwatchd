@@ -18,46 +18,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYTHREAD_H
-#define INOTIFYTHREAD_H
+#include <QCoreApplication>
+#include <QTest>
 
-#include <QThread>
-#include <QStringList>
-#include <QMap>
-#include <QHash>
-#include <QTime>
+#include "sshcommandpartbasetest.h"
+#include "sshcommandparttargettest.h"
+#include "commandconfigtest.h"
 
-#include "logger/logger.h"
-
-class INotifyThread : public QThread
+int main(int argc, char *argv[])
 {
-    Q_OBJECT
-public:
-    INotifyThread(QStringList entries, Logger *logger, QObject *parent = 0);
+    QCoreApplication app(argc, argv);
+    app.setAttribute(Qt::AA_Use96Dpi, true);
 
-    void run();
+    SshCommandPartBaseTest baseTest;
+    SshCommandPartTargetTest targetTest;
 
-protected:
-    QStringList m_entries;
-    Logger *m_logger;
+    CommandConfigTest configTest;
 
-    QMap<int, QString> m_watches;
+    int res = 0;
 
-    QHash<QString, QTime> m_debounce;
+    res += QTest::qExec(&baseTest, argc, argv);
+    res += QTest::qExec(&targetTest, argc, argv);
+    res += QTest::qExec(&configTest, argc, argv);
 
-    int m_fd;
-
-    void watchAdded(QString entry);
-    void watchAddFailed(QString entry, int error);
-
-    void debounce(QString data);
-
-signals:
-    void fileChanged(QString data);
-    void watchesAddDone();
-
-public slots:
-    void slot_stop();
-};
-
-#endif // INOTIFYTHREAD_H
+    return res;
+}

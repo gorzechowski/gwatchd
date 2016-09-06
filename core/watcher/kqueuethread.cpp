@@ -111,15 +111,15 @@ void KQueueThread::run()
                         this->watchAddFailed(entry, errno);
                     }
 
-                    emit(fileChanged(entry));
+                    this->debounce(entry);
                 }
             } else {
-                emit(fileChanged(path));
+                this->debounce(path);
             }
         }
 
         if(event.fflags & NOTE_DELETE || event.fflags & NOTE_RENAME) {
-            emit(fileChanged(path));
+            this->debounce(path);
             this->m_watches.remove(ident);
             close(ident);
         }
@@ -154,6 +154,22 @@ bool KQueueThread::addWatcher(QString path)
     }
 
     return false;
+}
+
+void KQueueThread::debounce(QString data)
+{
+    QTime lastEvent = this->m_debounce.value(data);
+    QTime currentTime = QTime::currentTime();
+
+    this->m_debounce.insert(data, currentTime);
+
+    if(lastEvent.isValid()) {
+        if(lastEvent.msecsTo(currentTime) <= 25) {
+            return;
+        }
+    }
+
+    emit(fileChanged(data));
 }
 
 QStringList KQueueThread::findNewEntries(QString dir)

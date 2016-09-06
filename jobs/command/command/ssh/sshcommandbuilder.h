@@ -18,46 +18,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYTHREAD_H
-#define INOTIFYTHREAD_H
+#ifndef SSHCOMMANDBUILDER_H
+#define SSHCOMMANDBUILDER_H
 
-#include <QThread>
-#include <QStringList>
-#include <QMap>
-#include <QHash>
-#include <QTime>
+#include <QFileInfo>
 
-#include "logger/logger.h"
+#include "command/commandbuilder.h"
+#include "command/commandpart.h"
+#include "config/commandconfig.h"
 
-class INotifyThread : public QThread
+class SshCommandBuilder : public CommandBuilder
 {
-    Q_OBJECT
 public:
-    INotifyThread(QStringList entries, Logger *logger, QObject *parent = 0);
+    SshCommandBuilder(QFileInfo entry, CommandConfig *config);
 
-    void run();
+    QStringList build();
 
 protected:
-    QStringList m_entries;
-    Logger *m_logger;
-
-    QMap<int, QString> m_watches;
-
-    QHash<QString, QTime> m_debounce;
-
-    int m_fd;
-
-    void watchAdded(QString entry);
-    void watchAddFailed(QString entry, int error);
-
-    void debounce(QString data);
-
-signals:
-    void fileChanged(QString data);
-    void watchesAddDone();
-
-public slots:
-    void slot_stop();
+    QList<CommandPart*> m_parts;
+    QFileInfo m_entry;
+    CommandConfig *m_config;
 };
 
-#endif // INOTIFYTHREAD_H
+#endif // SSHCOMMANDBUILDER_H

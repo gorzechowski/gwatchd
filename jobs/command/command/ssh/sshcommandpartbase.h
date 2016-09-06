@@ -18,46 +18,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYTHREAD_H
-#define INOTIFYTHREAD_H
+#ifndef SSHCOMMANDPARTBASE_H
+#define SSHCOMMANDPARTBASE_H
 
-#include <QThread>
-#include <QStringList>
-#include <QMap>
-#include <QHash>
-#include <QTime>
+#include <QFileInfo>
 
-#include "logger/logger.h"
+#include "command/commandpart.h"
+#include "config/commandconfig.h"
 
-class INotifyThread : public QThread
+class SshCommandPartBase : public CommandPart
 {
-    Q_OBJECT
 public:
-    INotifyThread(QStringList entries, Logger *logger, QObject *parent = 0);
+    SshCommandPartBase(QFileInfo entry, CommandConfig *config);
 
-    void run();
+    QString build();
 
 protected:
-    QStringList m_entries;
-    Logger *m_logger;
+    QFileInfo m_entry;
+    CommandConfig *m_config;
+    QString m_host;
 
-    QMap<int, QString> m_watches;
-
-    QHash<QString, QTime> m_debounce;
-
-    int m_fd;
-
-    void watchAdded(QString entry);
-    void watchAddFailed(QString entry, int error);
-
-    void debounce(QString data);
-
-signals:
-    void fileChanged(QString data);
-    void watchesAddDone();
-
-public slots:
-    void slot_stop();
+    QStringList getArgs();
 };
 
-#endif // INOTIFYTHREAD_H
+#endif // SSHCOMMANDPARTBASE_H

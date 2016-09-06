@@ -18,46 +18,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYTHREAD_H
-#define INOTIFYTHREAD_H
+#ifndef COMMANDPART_H
+#define COMMANDPART_H
 
-#include <QThread>
-#include <QStringList>
-#include <QMap>
-#include <QHash>
-#include <QTime>
+#include <QString>
 
-#include "logger/logger.h"
-
-class INotifyThread : public QThread
+class CommandPart
 {
-    Q_OBJECT
 public:
-    INotifyThread(QStringList entries, Logger *logger, QObject *parent = 0);
+    virtual ~CommandPart() {}
 
-    void run();
-
-protected:
-    QStringList m_entries;
-    Logger *m_logger;
-
-    QMap<int, QString> m_watches;
-
-    QHash<QString, QTime> m_debounce;
-
-    int m_fd;
-
-    void watchAdded(QString entry);
-    void watchAddFailed(QString entry, int error);
-
-    void debounce(QString data);
-
-signals:
-    void fileChanged(QString data);
-    void watchesAddDone();
-
-public slots:
-    void slot_stop();
+    virtual QString build() = 0;
 };
 
-#endif // INOTIFYTHREAD_H
+#endif // COMMANDPART_H

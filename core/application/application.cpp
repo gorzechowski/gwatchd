@@ -42,6 +42,9 @@ Application::Application(CommandLineParser *parser, int &argc, char **argv) : QC
 {
     this->m_parser = parser;
 
+    this->setApplicationName("GWatchD");
+    this->setApplicationVersion(VERSION);
+
     this->parseArguments();
 }
 

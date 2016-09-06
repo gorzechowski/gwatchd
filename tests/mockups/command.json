@@ -1,0 +1,35 @@
+{
+	"delay": 100,
+	"ssh": {
+		"identityFile": "/home/user/.ssh/id_rsa",
+		"configFile": "/etc/sshConfig",
+		"port": 22,
+		"options": [
+			"StrictHostKeyChecking=no"
+        ],
+        "hosts": [
+            "example.com"
+        ]
+	},
+	"dirs": {
+		"/dir1/": {
+            "exec": "mkdir -p /tmp/test",
+            "ssh": {
+                "configFile": "/home/user/sshConfig",
+                "user": "user"
+            }
+		},
+        "/dir2/file.txt": {
+            "exec": "mkdir -p /tmp/test",
+			"ssh": {
+                "identityFile": "/home/user/.ssh/key",
+                "port": 2222
+			}
+        },
+        "/dir3/": {
+            "remote": true,
+            "exec": "./script",
+            "fileMask": "local.*"
+        }
+	}
+}

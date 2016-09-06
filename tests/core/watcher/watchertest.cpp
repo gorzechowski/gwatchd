@@ -21,6 +21,8 @@
 #include <QTest>
 #include <QSignalSpy>
 #include <QEventLoop>
+#include <QThread>
+#include <QDebug>
 
 #include "watchertest.h"
 #include "../../mockups/loggermock.h"
@@ -73,6 +75,8 @@ void WatcherTest::cleanupTestCase()
 
 void WatcherTest::testCreateFile()
 {
+    QThread::msleep(100);
+
     QSignalSpy spy(this->m_watcher, SIGNAL(fileChanged(QString)));
 
     QFile file;
@@ -92,6 +96,8 @@ void WatcherTest::testCreateFile()
 
 void WatcherTest::testModifyFile()
 {
+    QThread::msleep(100);
+
     QSignalSpy spy(this->m_watcher, SIGNAL(fileChanged(QString)));
 
     QFile file;
@@ -114,6 +120,8 @@ void WatcherTest::testModifyFile()
 
 void WatcherTest::testCopyFile()
 {
+    QThread::msleep(100);
+
     QSignalSpy spy(this->m_watcher, SIGNAL(fileChanged(QString)));
 
     QFile file;
@@ -129,6 +137,8 @@ void WatcherTest::testCopyFile()
         QCOMPARE(spy.count() > 0, true);
 
         spy.clear();
+
+        QThread::msleep(100);
 
         file.setFileName(dest);
 
@@ -147,6 +157,8 @@ void WatcherTest::testCopyFile()
 
 void WatcherTest::testMoveFile()
 {
+    QThread::msleep(100);
+
     QSignalSpy spy(this->m_watcher, SIGNAL(fileChanged(QString)));
 
     QFile file;
@@ -164,6 +176,8 @@ void WatcherTest::testMoveFile()
         QCOMPARE(spy.count() > 0, true);
 
         spy.clear();
+
+        QThread::msleep(100);
 
         file.open(QIODevice::ReadWrite);
         file.write("test");

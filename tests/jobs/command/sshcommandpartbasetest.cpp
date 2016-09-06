@@ -18,46 +18,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYTHREAD_H
-#define INOTIFYTHREAD_H
+#include <QTest>
 
-#include <QThread>
-#include <QStringList>
-#include <QMap>
-#include <QHash>
-#include <QTime>
+#include "config/commandconfig.h"
+#include "config/jsonconfig.h"
 
-#include "logger/logger.h"
+#include "sshcommandpartbasetest.h"
 
-class INotifyThread : public QThread
+SshCommandPartBaseTest::SshCommandPartBaseTest(QObject *parent) :
+    QObject(parent)
 {
-    Q_OBJECT
-public:
-    INotifyThread(QStringList entries, Logger *logger, QObject *parent = 0);
 
-    void run();
+}
 
-protected:
-    QStringList m_entries;
-    Logger *m_logger;
+void SshCommandPartBaseTest::testBuild()
+{
+    CommandConfig *config = new CommandConfig(new JsonConfig(":/command.json"));
 
-    QMap<int, QString> m_watches;
+    SshCommandPartBase *part = new SshCommandPartBase(QFileInfo("/dir1/"), config);
 
-    QHash<QString, QTime> m_debounce;
-
-    int m_fd;
-
-    void watchAdded(QString entry);
-    void watchAddFailed(QString entry, int error);
-
-    void debounce(QString data);
-
-signals:
-    void fileChanged(QString data);
-    void watchesAddDone();
-
-public slots:
-    void slot_stop();
-};
-
-#endif // INOTIFYTHREAD_H
+    QCOMPARE(part->build(), QString("ssh -i /home/user/.ssh/id_rsa -F /home/user/sshConfig -p 22 -o StrictHostKeyChecking=no"));
+}

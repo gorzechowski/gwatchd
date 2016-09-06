@@ -18,46 +18,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef INOTIFYTHREAD_H
-#define INOTIFYTHREAD_H
+#include <QString>
 
-#include <QThread>
-#include <QStringList>
-#include <QMap>
-#include <QHash>
-#include <QTime>
+#include "sshcommandbuilder.h"
 
-#include "logger/logger.h"
+#include "command/ssh/sshcommandpartbase.h"
+#include "command/ssh/sshcommandparttarget.h"
 
-class INotifyThread : public QThread
+SshCommandBuilder::SshCommandBuilder(QFileInfo entry, CommandConfig *config)
 {
-    Q_OBJECT
-public:
-    INotifyThread(QStringList entries, Logger *logger, QObject *parent = 0);
+    this->m_entry = entry;
+    this->m_config = config;
+}
 
-    void run();
+QStringList SshCommandBuilder::build()
+{
+    QStringList parts, commands;
+    QString entry = this->m_entry.absoluteFilePath();
 
-protected:
-    QStringList m_entries;
-    Logger *m_logger;
+    foreach(QString host, this->m_config->sshHosts(entry)) {
+        parts.append(SshCommandPartBase(this->m_entry, this->m_config).build());
+        parts.append(SshCommandPartTarget(this->m_entry, this->m_config).build(host));
+        parts.append(QString("\"%1\"").arg(this->m_config->exec(entry)));
 
-    QMap<int, QString> m_watches;
+        commands.append(parts.join(" "));
+        parts.clear();
+    }
 
-    QHash<QString, QTime> m_debounce;
-
-    int m_fd;
-
-    void watchAdded(QString entry);
-    void watchAddFailed(QString entry, int error);
-
-    void debounce(QString data);
-
-signals:
-    void fileChanged(QString data);
-    void watchesAddDone();
-
-public slots:
-    void slot_stop();
-};
-
-#endif // INOTIFYTHREAD_H
+    return commands;
+}

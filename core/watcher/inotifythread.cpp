@@ -113,7 +113,7 @@ void INotifyThread::run()
                 case IN_MODIFY:
                 case IN_DELETE:
                 case IN_CREATE:
-                    emit(fileChanged(QDir::cleanPath(this->m_watches.value(event->wd) + "/" + QString(event->name))));
+                    this->debounce(QDir::cleanPath(this->m_watches.value(event->wd) + "/" + QString(event->name)));
                     break;
 
                 case IN_MOVED_FROM:
@@ -121,9 +121,9 @@ void INotifyThread::run()
                     break;
 
                 case IN_MOVED_TO:
-                    emit(fileChanged(
+                    this->debounce(
                         fileMoving.value(event->cookie) + ">" + QDir::cleanPath(this->m_watches.value(event->wd) + "/" + QString(event->name))
-                    ));
+                    );
 
                     fileMoving.remove(event->cookie);
                     break;
@@ -141,7 +141,7 @@ void INotifyThread::run()
                         this->m_watches.insert(watchDescriptor, path);
                     }
 
-                    emit(fileChanged(path));
+                    this->debounce(path);
                     break;
 
                 case IN_DELETE | IN_ISDIR:
@@ -152,7 +152,7 @@ void INotifyThread::run()
                     inotify_rm_watch(this->m_fd, watchDescriptor);
                     this->m_watches.remove(watchDescriptor);
 
-                    emit(fileChanged(path));
+                    this->debounce(path);
                     break;
 
                 default:
@@ -162,6 +162,22 @@ void INotifyThread::run()
             i += (event->len + EVENT_SIZE);
         }
     }
+}
+
+void INotifyThread::debounce(QString data)
+{
+    QTime lastEvent = this->m_debounce.value(data);
+    QTime currentTime = QTime::currentTime();
+
+    this->m_debounce.insert(data, currentTime);
+
+    if(lastEvent.isValid()) {
+        if(lastEvent.msecsTo(currentTime) <= 25) {
+            return;
+        }
+    }
+
+    emit(fileChanged(data));
 }
 
 void INotifyThread::slot_stop()

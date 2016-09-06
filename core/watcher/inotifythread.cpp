@@ -172,7 +172,7 @@ void INotifyThread::debounce(QString data)
     this->m_debounce.insert(data, currentTime);
 
     if(lastEvent.isValid()) {
-        if(lastEvent.msecsTo(currentTime) <= 50) {
+        if(lastEvent.msecsTo(currentTime) <= 25) {
             return;
         }
     }

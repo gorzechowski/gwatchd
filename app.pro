@@ -46,23 +46,32 @@ OTHER_FILES += \
     scripts/* \
     docs/*
 
+TARGET_DIR = $$OUT_PWD/gwatchd-$${GWATCHD_VERSION}
+
 unix {
-    core.path = $$OUT_PWD/gwatchd-$${GWATCHD_VERSION}
+    core.path = $$TARGET_DIR
     core.files = $$OUT_PWD/core/gwatchd
 
-    jobs.path = $$OUT_PWD/gwatchd-$${GWATCHD_VERSION}/jobs
+    jobs.path = $$TARGET_DIR/jobs
     jobs.files = $$OUT_PWD/jobs/synchronize/lib*
     jobs.files += $$OUT_PWD/jobs/command/lib*
 
-    libs.path = $$OUT_PWD/gwatchd-$${GWATCHD_VERSION}/libs
-    libs.files += $$[QT_INSTALL_LIBS]/libQt5Core.so*
-    libs.files += $$[QT_INSTALL_LIBS]/libQt5Network.so*
-    libs.files += $$[QT_INSTALL_LIBS]/libQt5WebSockets.so*
-    libs.files += $$[QT_INSTALL_LIBS]/libicui18n.so*
-    libs.files += $$[QT_INSTALL_LIBS]/libicuuc.so*
-    libs.files += $$[QT_INSTALL_LIBS]/libicudata.so*
+    libs.path = $$TARGET_DIR/libs
 
-    tests.path = $$OUT_PWD/gwatchd-$${GWATCHD_VERSION}/tests
+    !macx {
+        libs.files += $$[QT_INSTALL_LIBS]/libQt5Core.so*
+        libs.files += $$[QT_INSTALL_LIBS]/libQt5Network.so*
+        libs.files += $$[QT_INSTALL_LIBS]/libQt5WebSockets.so*
+        libs.files += $$[QT_INSTALL_LIBS]/libicui18n.so*
+        libs.files += $$[QT_INSTALL_LIBS]/libicuuc.so*
+        libs.files += $$[QT_INSTALL_LIBS]/libicudata.so*
+    } else {
+        libs.files += $$[QT_INSTALL_LIBS]/QtCore.framework
+        libs.files += $$[QT_INSTALL_LIBS]/QtNetwork.framework
+        libs.files += $$[QT_INSTALL_LIBS]/QtWebSockets.framework
+    }
+
+    tests.path = $$TARGET_DIR/tests
     tests.files = \
         $$OUT_PWD/tests/core/config/*Test \
         $$OUT_PWD/tests/core/notification/*Test \
@@ -71,4 +80,18 @@ unix {
         $$OUT_PWD/tests/jobs/command/*Test
 
     INSTALLS += core jobs libs tests
+}
+
+macx {
+    install_name_tool.target = install_name_tool
+    install_name_tool.commands = \
+        install_name_tool -change @rpath/QtWebSockets.framework/Versions/5/QtWebSockets @executable_path/libs/QtWebSockets.framework/Versions/5/QtWebSockets $$TARGET_DIR/gwatchd && \
+        install_name_tool -change @rpath/QtNetwork.framework/Versions/5/QtNetwork @executable_path/libs/QtNetwork.framework/Versions/5/QtNetwork $$TARGET_DIR/gwatchd && \
+        install_name_tool -change @rpath/QtCore.framework/Versions/5/QtCore @executable_path/libs/QtCore.framework/Versions/5/QtCore $$TARGET_DIR/gwatchd && \
+        install_name_tool -change @rpath/QtCore.framework/Versions/5/QtCore @executable_path/libs/QtCore.framework/Versions/5/QtCore $$TARGET_DIR/jobs/libcommandjob.dylib && \
+        install_name_tool -change @rpath/QtCore.framework/Versions/5/QtCore @executable_path/libs/QtCore.framework/Versions/5/QtCore $$TARGET_DIR/jobs/libsynchronizejob.dylib
+
+    QMAKE_EXTRA_TARGETS += install_name_tool
+
+    POST_TARGETDEPS += install_name_tool
 }

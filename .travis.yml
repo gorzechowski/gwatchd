@@ -1,65 +1,20 @@
-language: cpp
+sudo: false
 
-os: linux
-
-compiler:
-  - gcc
-  - clang
+services:
+  - docker
 
 env:
-  global:
-    - ppa_5_3="ppa:beineri/opt-qt532"
-    - ppa_5_4="ppa:beineri/opt-qt542"
-    - ppa_5_5="ppa:beineri/opt-qt551"
-    - ppa_5_6="ppa:beineri/opt-qt561"
-
-    - pkg_5_3="qt53base qt53websockets; source /opt/qt53/bin/qt53-env.sh"
-    - pkg_5_4="qt54base qt54websockets; source /opt/qt54/bin/qt54-env.sh"
-    - pkg_5_5="qt55base qt55websockets; source /opt/qt55/bin/qt55-env.sh"
-    - pkg_5_6="qt56base qt56websockets; source /opt/qt56/bin/qt56-env.sh"
   matrix:
-    - QT_VERSION="5_3"
-    - QT_VERSION="5_4"
-    - QT_VERSION="5_5"
-    - QT_VERSION="5_6"
-
-sudo: required
+    - QT_VERSION="5.6_gcc"
+    - QT_VERSION="5.6_clang"
+    - QT_VERSION="5.7_gcc"
+    - QT_VERSION="5.7_clang"
 
 before_install:
-  - if [ "$CXX" = "g++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y; fi
-  - if [ "$CXX" = "clang++" ]; then sudo add-apt-repository ppa:h-rayflood/llvm -y; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-      ppa="ppa_"$QT_VERSION;
-      cmd="sudo add-apt-repository ${!ppa} -y";
-      eval $cmd && sudo apt-get update -qq;
-    fi
+  - ./docker/generateDockerfile.sh -t docker/Dockerfile.template -e qt=$QT_VERSION >> Dockerfile
 
 install:
-  - if [ "$CXX" = "g++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -qq g++ gcc; export CXX="g++" CC="gcc"; $CXX --version; fi
-  - if [ "$CXX" = "clang++" ]; then
-      sudo apt-get install --allow-unauthenticated -qq clang-3.4;
-      export CXXFLAGS="-std=c++0x -stdlib=libc++";
-
-      svn co --quiet http://llvm.org/svn/llvm-project/libcxx/trunk libcxx;
-      cd libcxx/lib && bash buildit;
-      sudo cp ./libc++.so.1.0 /usr/lib/;
-      sudo mkdir /usr/include/c++/v1;
-      cd .. && sudo cp -r include/* /usr/include/c++/v1/;
-      cd /usr/lib && sudo ln -sf libc++.so.1.0 libc++.so && sudo ln -sf libc++.so.1.0 libc++.so.1;
-      cd $TRAVIS_BUILD_DIR;
-
-      export CXX="clang++-3.4";
-    fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libboost-all-dev; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-      pkg="pkg_"$QT_VERSION;
-      cmd="sudo apt-get install -qq ${!pkg}"
-      eval $cmd;
-    fi
-
-before_script: 
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then qmake -recursive; fi
+  - docker build -t gorzechowski/gwatchd .
 
 script:
-  - make
-  - make check
+  - docker run --rm gorzechowski/gwatchd bash --login /opt/gwatchd/scripts/check.sh

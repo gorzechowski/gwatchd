@@ -1,17 +1,21 @@
 sudo: false
 
+language: cpp
+
 services:
   - docker
 
 env:
   matrix:
-    - QT_VERSION="5.6_gcc"
-    - QT_VERSION="5.6_clang"
-    - QT_VERSION="5.7_gcc"
-    - QT_VERSION="5.7_clang"
+    - QT="5.5_gcc"
+    - QT="5.5_clang"
+    - QT="5.6_gcc"
+    - QT="5.6_clang"
+    - QT="5.7_gcc"
+    - QT="5.7_clang"
 
 before_install:
-  - ./docker/generateDockerfile.sh -t docker/Dockerfile.template -e qt=$QT_VERSION >> Dockerfile
+  - ./docker/generateDockerfile.sh -t docker/Dockerfile.template -e qt=$QT >> Dockerfile
 
 install:
   - docker build -t gorzechowski/gwatchd .

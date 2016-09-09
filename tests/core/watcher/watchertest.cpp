@@ -23,6 +23,7 @@
 #include <QEventLoop>
 #include <QThread>
 #include <QDebug>
+#include <QProcess>
 
 #include "watchertest.h"
 #include "../../mockups/loggermock.h"
@@ -69,8 +70,9 @@ void WatcherTest::initTestCase()
 
 void WatcherTest::cleanupTestCase()
 {
-//    this->m_watcher->slot_stop();
-    this->m_dir.removeRecursively();
+    QProcess *process = new QProcess();
+
+    process->start("rm", QStringList() << "-r" << this->m_dir.absolutePath());
 }
 
 void WatcherTest::testCreateFile()

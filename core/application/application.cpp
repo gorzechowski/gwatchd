@@ -26,6 +26,7 @@
 
 #include "application.h"
 #include "job/jobmanager.h"
+#include "job/jobsloader.h"
 #include "job/jobscollector.h"
 #include "logger/loggercomposite.h"
 #include "logger/filelogger.h"
@@ -139,14 +140,15 @@ void Application::initStandardMode(ApplicationConfig *config)
 
     JobManager *manager = new JobManager(this->isDebug(), logger, config);
     JobsCollector *collector = new JobsCollector(config, logger);
+    JobsLoader *loader = new JobsLoader(config, logger);
 
     foreach(JobDescriptor descriptor, collector->collectedJobs()) {
-        manager->loadJob(descriptor);
+        loader->loadJob(descriptor);
     }
 
     Watcher *watcher = new Watcher(logger);
 
-    foreach(Job *job, manager->getLoadedJobs().values()) {
+    foreach(Job *job, loader->getLoadedJobs().values()) {
         watcher->addEntries(job->getEntries());
     }
 
@@ -194,9 +196,10 @@ void Application::initSingleMode(ApplicationConfig *config)
     JobManager *manager = new JobManager(this->isDebug(), logger, config);
 
     JobsCollector *collector = new JobsCollector(config, logger);
+    JobsLoader *loader = new JobsLoader(config, logger);
 
     foreach(JobDescriptor descriptor, collector->collectedJobs()) {
-        manager->loadJob(descriptor);
+        loader->loadJob(descriptor);
     }
 
     QString runJobName = this->m_parser->runJobName();

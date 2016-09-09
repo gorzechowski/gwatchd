@@ -18,47 +18,31 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef JOBMANAGER_H
-#define JOBMANAGER_H
+#ifndef JOBSLOADER_H
+#define JOBSLOADER_H
 
 #include <QObject>
-#include <QHash>
 
-#include "job/job.h"
-//#include "job/jobdescriptor.h"
 #include "config/applicationconfig.h"
+#include "job/job.h"
+#include "job/jobdescriptor.h"
 #include "logger/logger.h"
-#include "notification/notification.h"
-#include "notification/payload.h"
 
-class JobManager : public QObject
+class JobsLoader : public QObject
 {
     Q_OBJECT
 public:
-    JobManager(bool isDebug, Logger *logger, ApplicationConfig *config, QObject *parent = 0);
+    JobsLoader(ApplicationConfig *config, Logger *logger, QObject *parent = 0);
 
-//    QHash<QString, Job*> getLoadedJobs();
+    QHash<QString, Job*> getLoadedJobs();
 
-    void runJob(QString name, QStringList entries);
+    bool loadJob(JobDescriptor jobDescriptor);
 
 protected:
-    QString getJobName(QObject*);
-
-//    QHash<QString, Job*> m_loaded;
-
-    bool m_isDebug;
-    Logger *m_logger;
     ApplicationConfig *m_config;
+    Logger *m_logger;
 
-public slots:
-    void slot_runJobs(QString data);
-
-    void slot_jobStarted();
-    void slot_jobRunning(Payload*);
-    void slot_jobFinished(int);
-
-signals:
-    void notification(Notification*);
+    QHash<QString, Job*> m_loaded;
 };
 
-#endif // JOBMANAGER_H
+#endif // JOBSLOADER_H

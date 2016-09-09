@@ -18,49 +18,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef JOBMANAGER_H
-#define JOBMANAGER_H
+#ifndef JOBSCOLLECTOR_H
+#define JOBSCOLLECTOR_H
 
 #include <QObject>
-#include <QHash>
 
-#include "job/job.h"
 #include "job/jobdescriptor.h"
-#include "config/applicationconfig.h"
 #include "logger/logger.h"
-#include "notification/notification.h"
-#include "notification/payload.h"
+#include "config/applicationconfig.h"
 
-class JobManager : public QObject
+class JobsCollector : public QObject
 {
     Q_OBJECT
 public:
-    JobManager(bool isDebug, Logger *logger, ApplicationConfig *config, QObject *parent = 0);
+    JobsCollector(ApplicationConfig *config, Logger *logger, QObject *parent = 0);
 
-    QHash<QString, Job*> getLoadedJobs();
-
-    void runJob(QString name, QStringList entries);
-
-    bool loadJob(JobDescriptor jobDescriptor);
+    QList<JobDescriptor> collectedJobs();
 
 protected:
-    QString getJobName(QObject*);
-
-    QHash<QString, Job*> m_loaded;
-
-    bool m_isDebug;
-    Logger *m_logger;
     ApplicationConfig *m_config;
+    Logger *m_logger;
+    QList<JobDescriptor> m_collected;
 
-public slots:
-    void slot_runJobs(QString data);
-
-    void slot_jobStarted();
-    void slot_jobRunning(Payload*);
-    void slot_jobFinished(int);
-
-signals:
-    void notification(Notification*);
+    void collectJobs();
 };
 
-#endif // JOBMANAGER_H
+#endif // JOBSCOLLECTOR_H

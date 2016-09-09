@@ -45,18 +45,11 @@ JobManager::JobManager(bool isDebug, Logger *logger, ApplicationConfig *config, 
     this->m_config = config;
 }
 
-void JobManager::loadAvailableJobs()
+bool JobManager::loadJob(JobDescriptor jobDescriptor)
 {
-    foreach(JobManager::availableJob job, this->getAvailableJobs()) {
-        this->loadJob(job);
-    }
-}
+    QPluginLoader loader(jobDescriptor.pluginPath());
 
-bool JobManager::loadJob(JobManager::availableJob job)
-{
-    QPluginLoader loader(job.value("pluginPath"));
-
-    this->m_logger->debug("Loading job: " + job.value("name"));
+    this->m_logger->debug("Loading job: " + jobDescriptor.name());
 
     QObject *jobInstance = loader.instance();
 
@@ -69,12 +62,12 @@ bool JobManager::loadJob(JobManager::availableJob job)
             QString logDirPath = this->m_config->logsDirPath();
 
             QJsonObject metaData = loader.metaData().value("MetaData").toObject();
-            JsonConfig *config = new JsonConfig(job.value("configPath"));
+            JsonConfig *config = new JsonConfig(jobDescriptor.configPath());
 
             LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
                 new LoggerTimestampDecorator(
                     new FileLogger(
-                        QString("%1/job/%2.log").arg(logDirPath).arg(job.value("name")),
+                        QString("%1/job/%2.log").arg(logDirPath).arg(jobDescriptor.name()),
                         this->m_config
                     )
                 )
@@ -114,52 +107,6 @@ bool JobManager::loadJob(JobManager::availableJob job)
     }
 
     return false;
-}
-
-QList<JobManager::availableJob> JobManager::getAvailableJobs()
-{
-    QList<JobManager::availableJob> availableJobs;
-    JobManager::availableJob job;
-
-    QDir configsDir(this->m_config->fileInfo().path() + "/job");
-    QDir jobsDir = qApp->applicationDirPath() + QString("/jobs");
-
-    this->m_logger->debug("Looking for jobs in: " + jobsDir.absolutePath());
-    this->m_logger->debug("Looking for job configs in: " + configsDir.absolutePath());
-
-    QStringList jobs = jobsDir.entryList(QDir::Files | QDir::Readable);
-
-    foreach(QString file, configsDir.entryList(QDir::Files | QDir::Readable)) {
-        if(!file.contains(QRegExp("^\\w+\\.json$"))) {
-            continue;
-        }
-
-        job.clear();
-
-        job.insert("configPath", configsDir.absolutePath() + "/" + file);
-
-        file.remove(".json");
-
-        job.insert("name", file);
-
-        file = jobs.at(jobs.indexOf(QRegExp(QString("^lib%1.*").arg(file))));
-
-        QFile libFile(
-            jobsDir.absolutePath() + QString("/%1").arg(file)
-        );
-
-        if(libFile.open(QIODevice::ReadOnly) && libFile.isReadable()) {
-            job.insert("pluginPath", libFile.fileName());
-
-            this->m_logger->debug("Found job " + job.value("name"));
-
-            availableJobs << job;
-
-            libFile.close();
-        }
-    }
-
-    return availableJobs;
 }
 
 QHash<QString, Job*> JobManager::getLoadedJobs()

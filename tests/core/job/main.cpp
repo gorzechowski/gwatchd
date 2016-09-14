@@ -18,29 +18,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef JOBSCOLLECTOR_H
-#define JOBSCOLLECTOR_H
+#include <QCoreApplication>
+#include <QTest>
 
-#include <QObject>
+#include "jobdescriptortest.h"
+#include "jobscollectortest.h"
 
-#include "job/jobdescriptor.h"
-#include "logger/logger.h"
-#include "config/applicationconfig.h"
-
-class JobsCollector : public QObject
+int main(int argc, char *argv[])
 {
-    Q_OBJECT
-public:
-    JobsCollector(QString configsDirPath, QString jobsDirPath, Logger *logger, QObject *parent = 0);
+    QCoreApplication app(argc, argv);
+    app.setAttribute(Qt::AA_Use96Dpi, true);
 
-    QList<JobDescriptor> collectedJobs();
+    JobDescriptorTest jobDescriptorTest;
+    JobsCollectorTest jobsCollectorTest;
 
-protected:
-    ApplicationConfig *m_config;
-    Logger *m_logger;
-    QList<JobDescriptor> m_collected;
+    int res = 0;
 
-    void collectJobs(QString configsDirPath, QString jobsDirPath);
-};
+    res += QTest::qExec(&jobDescriptorTest, argc, argv);
+    res += QTest::qExec(&jobsCollectorTest, argc, argv);
 
-#endif // JOBSCOLLECTOR_H
+    return res;
+}

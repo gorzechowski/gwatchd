@@ -24,18 +24,17 @@
 
 #include "jobscollector.h"
 
-JobsCollector::JobsCollector(ApplicationConfig *config, Logger *logger, QObject *parent) : QObject(parent)
+JobsCollector::JobsCollector(QString configsDirPath, QString jobsDirPath, Logger *logger, QObject *parent) : QObject(parent)
 {
-    this->m_config = config;
     this->m_logger = logger;
 
-    this->collectJobs();
+    this->collectJobs(configsDirPath, jobsDirPath);
 }
 
-void JobsCollector::collectJobs()
+void JobsCollector::collectJobs(QString configsDirPath, QString jobsDirPath)
 {
-    QDir configsDir(this->m_config->fileInfo().path() + "/job");
-    QDir jobsDir = qApp->applicationDirPath() + QString("/jobs");
+    QDir configsDir(configsDirPath);
+    QDir jobsDir(jobsDirPath);
 
     this->m_logger->debug("Looking for jobs in: " + jobsDir.absolutePath());
     this->m_logger->debug("Looking for job configs in: " + configsDir.absolutePath());
@@ -51,7 +50,14 @@ void JobsCollector::collectJobs()
 
         name = file;
 
-        file = jobs.at(jobs.indexOf(QRegExp(QString("^lib%1.*").arg(file))));
+        int index = jobs.indexOf(QRegExp(QString("^lib%1.*").arg(file)));
+
+        if(index < 0) {
+            this->m_logger->debug("Missing lib file for job " + name);
+            continue;
+        }
+
+        file = jobs.at(index);
 
         QFile libFile(
             jobsDir.absolutePath() + QString("/%1").arg(file)

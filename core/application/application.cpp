@@ -139,7 +139,11 @@ void Application::initStandardMode(ApplicationConfig *config)
 {
     Logger *logger = this->getLogger(config);
 
-    JobsCollector *collector = new JobsCollector(config, logger);
+    JobsCollector *collector = new JobsCollector(
+        config->fileInfo().path() + "/job",
+        this->applicationDirPath() + "/jobs",
+        logger
+    );
     JobsLoader *loader = new JobsLoader(config, logger);
     JobsRunner *runner = new JobsRunner(loader, logger);
     JobsNotificationManager *manager = new JobsNotificationManager(logger);
@@ -201,7 +205,11 @@ void Application::initSingleMode(ApplicationConfig *config)
 {
     Logger *logger = this->getLogger(config);
 
-    JobsCollector *collector = new JobsCollector(config, logger);
+    JobsCollector *collector = new JobsCollector(
+        config->fileInfo().path() + "/job",
+        this->applicationDirPath() + "/jobs",
+        logger
+    );
     JobsLoader *loader = new JobsLoader(config, logger);
     JobsRunner *runner = new JobsRunner(loader, logger);
 

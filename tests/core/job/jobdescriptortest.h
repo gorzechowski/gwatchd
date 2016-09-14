@@ -18,29 +18,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef JOBSCOLLECTOR_H
-#define JOBSCOLLECTOR_H
+#ifndef JOBDESCRIPTORTEST_H
+#define JOBDESCRIPTORTEST_H
 
 #include <QObject>
 
-#include "job/jobdescriptor.h"
-#include "logger/logger.h"
-#include "config/applicationconfig.h"
-
-class JobsCollector : public QObject
+class JobDescriptorTest : public QObject
 {
     Q_OBJECT
 public:
-    JobsCollector(QString configsDirPath, QString jobsDirPath, Logger *logger, QObject *parent = 0);
+    JobDescriptorTest();
 
-    QList<JobDescriptor> collectedJobs();
-
-protected:
-    ApplicationConfig *m_config;
-    Logger *m_logger;
-    QList<JobDescriptor> m_collected;
-
-    void collectJobs(QString configsDirPath, QString jobsDirPath);
+private slots:
+    void testCreateInstance_data();
+    void testCreateInstance();
 };
 
-#endif // JOBSCOLLECTOR_H
+#endif // JOBDESCRIPTORTEST_H

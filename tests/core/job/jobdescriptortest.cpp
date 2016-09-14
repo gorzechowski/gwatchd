@@ -18,29 +18,40 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef JOBSCOLLECTOR_H
-#define JOBSCOLLECTOR_H
-
-#include <QObject>
+#include <QTest>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QString>
 
 #include "job/jobdescriptor.h"
-#include "logger/logger.h"
-#include "config/applicationconfig.h"
 
-class JobsCollector : public QObject
+#include "jobdescriptortest.h"
+
+JobDescriptorTest::JobDescriptorTest()
 {
-    Q_OBJECT
-public:
-    JobsCollector(QString configsDirPath, QString jobsDirPath, Logger *logger, QObject *parent = 0);
 
-    QList<JobDescriptor> collectedJobs();
+}
 
-protected:
-    ApplicationConfig *m_config;
-    Logger *m_logger;
-    QList<JobDescriptor> m_collected;
+void JobDescriptorTest::testCreateInstance_data()
+{
+    QTest::addColumn<QString>("name");
+    QTest::addColumn<QString>("configPath");
+    QTest::addColumn<QString>("pluginPath");
 
-    void collectJobs(QString configsDirPath, QString jobsDirPath);
-};
+    QTest::newRow("row1") << "jobName" << "config/path" << "plugin/path";
+}
 
-#endif // JOBSCOLLECTOR_H
+void JobDescriptorTest::testCreateInstance()
+{
+    QFETCH(QString, name);
+    QFETCH(QString, configPath);
+    QFETCH(QString, pluginPath);
+
+    JobDescriptor descriptor(name, configPath, pluginPath);
+
+    QCOMPARE(descriptor.name(), name);
+    QCOMPARE(descriptor.configPath(), configPath);
+    QCOMPARE(descriptor.pluginPath(), pluginPath);
+}
+
+#include "moc_jobdescriptortest.cpp"

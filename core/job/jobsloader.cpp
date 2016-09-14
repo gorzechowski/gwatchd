@@ -85,10 +85,6 @@ bool JobsLoader::loadJob(JobDescriptor jobDescriptor)
 
             jobInstance->setProperty("metaData", metaData);
 
-            connect(jobInstance, SIGNAL(started()), this, SLOT(slot_jobStarted()));
-            connect(jobInstance, SIGNAL(running(Payload*)), this, SLOT(slot_jobRunning(Payload*)));
-            connect(jobInstance, SIGNAL(finished(int)), this, SLOT(slot_jobFinished(int)));
-
             this->m_loaded.insert(
                 metaData.value("name").toString(),
                 loadedJob

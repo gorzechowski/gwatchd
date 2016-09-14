@@ -28,6 +28,7 @@
 #include "job/jobmanager.h"
 #include "job/jobsloader.h"
 #include "job/jobscollector.h"
+#include "job/jobsrunner.h"
 #include "logger/loggercomposite.h"
 #include "logger/filelogger.h"
 #include "logger/simplelogger.h"
@@ -141,6 +142,7 @@ void Application::initStandardMode(ApplicationConfig *config)
     JobManager *manager = new JobManager(this->isDebug(), logger, config);
     JobsCollector *collector = new JobsCollector(config, logger);
     JobsLoader *loader = new JobsLoader(config, logger);
+    JobsRunner *runner = new JobsRunner(loader, logger);
 
     foreach(JobDescriptor descriptor, collector->collectedJobs()) {
         loader->loadJob(descriptor);
@@ -150,9 +152,15 @@ void Application::initStandardMode(ApplicationConfig *config)
 
     foreach(Job *job, loader->getLoadedJobs().values()) {
         watcher->addEntries(job->getEntries());
+
+        QObject *jobInstance = dynamic_cast<QObject*>(job);
+
+        connect(jobInstance, SIGNAL(started()), manager, SLOT(slot_jobStarted()));
+        connect(jobInstance, SIGNAL(running(Payload*)), manager, SLOT(slot_jobRunning(Payload*)));
+        connect(jobInstance, SIGNAL(finished(int)), manager, SLOT(slot_jobFinished(int)));
     }
 
-    connect(watcher, SIGNAL(fileChanged(QString)), manager, SLOT(slot_runJobs(QString)));
+    connect(watcher, SIGNAL(fileChanged(QString)), runner, SLOT(runAll(QString)));
 
     QEventLoop loop;
 
@@ -193,10 +201,9 @@ void Application::initSingleMode(ApplicationConfig *config)
 {
     Logger *logger = this->getLogger(config);
 
-    JobManager *manager = new JobManager(this->isDebug(), logger, config);
-
     JobsCollector *collector = new JobsCollector(config, logger);
     JobsLoader *loader = new JobsLoader(config, logger);
+    JobsRunner *runner = new JobsRunner(loader, logger);
 
     foreach(JobDescriptor descriptor, collector->collectedJobs()) {
         loader->loadJob(descriptor);
@@ -205,7 +212,7 @@ void Application::initSingleMode(ApplicationConfig *config)
     QString runJobName = this->m_parser->runJobName();
     QStringList runJobArgs = this->m_parser->runJobArgs();
 
-    manager->runJob(runJobName, runJobArgs);
+    runner->run(runJobName, runJobArgs);
 
     ::exit(0);
 }

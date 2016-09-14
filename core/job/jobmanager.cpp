@@ -45,50 +45,6 @@ JobManager::JobManager(bool isDebug, Logger *logger, ApplicationConfig *config, 
     this->m_config = config;
 }
 
-void JobManager::runJob(QString name, QStringList entries)
-{
-    name = name.toLower();
-
-//    Job *job = this->getLoadedJobs().value(name);
-
-//    if(!job) {
-//        this->m_logger->debug(QString("Job %1 not found").arg(name));
-//        return;
-//    }
-
-//    QObject *jobObject = dynamic_cast<QObject*>(job);
-//    QEventLoop loop;
-
-//    connect(jobObject, SIGNAL(finished(int)), &loop, SLOT(quit()));
-
-//    if(entries.isEmpty()) {
-//        entries = job->getEntries();
-//    }
-
-//    foreach(QString entry, entries) {
-//        QFileInfo info(entry);
-
-//        if(info.isDir() && !entry.endsWith("/")) {
-//            entry.append("/");
-//        }
-
-//        this->m_logger->debug("Running job with arg: " + entry);
-
-//        job->run(entry);
-//    }
-
-//    loop.exec();
-}
-
-void JobManager::slot_runJobs(QString data)
-{
-//    foreach(Job *job, this->getLoadedJobs().values()) {
-//        this->m_logger->debug("Running job with arg: " + data);
-
-//        job->run(data);
-//    }
-}
-
 QString JobManager::getJobName(QObject *job)
 {
     QJsonObject data = job->property("metaData").toJsonObject();

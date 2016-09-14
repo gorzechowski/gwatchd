@@ -18,31 +18,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef JOBMANAGER_H
-#define JOBMANAGER_H
+#ifndef JOBSNOTIFICATIONMANAGER_H
+#define JOBSNOTIFICATIONMANAGER_H
 
 #include <QObject>
-#include <QHash>
 
-#include "job/job.h"
-//#include "job/jobdescriptor.h"
-#include "config/applicationconfig.h"
 #include "logger/logger.h"
 #include "notification/notification.h"
 #include "notification/payload.h"
 
-class JobManager : public QObject
+class JobsNotificationManager : public QObject
 {
     Q_OBJECT
 public:
-    JobManager(bool isDebug, Logger *logger, ApplicationConfig *config, QObject *parent = 0);
+    JobsNotificationManager(Logger *logger, QObject *parent = 0);
 
 protected:
-    QString getJobName(QObject*);
-
-    bool m_isDebug;
     Logger *m_logger;
-    ApplicationConfig *m_config;
+
+    QString getJobName(QObject*);
 
 public slots:
     void slot_jobStarted();
@@ -53,4 +47,4 @@ signals:
     void notification(Notification*);
 };
 
-#endif // JOBMANAGER_H
+#endif // JOBSNOTIFICATIONMANAGER_H

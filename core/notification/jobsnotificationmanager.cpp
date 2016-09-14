@@ -18,41 +18,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-//#include <QPluginLoader>
-#include <QDir>
-#include <QFile>
-#include <QMap>
-#include <QDebug>
-#include <QEventLoop>
-//#include <QCoreApplication>
+#include <QJsonObject>
+#include <QVariant>
 
-#include "job/jobmanager.h"
-#include "job/job.h"
-#include "config/jsonconfig.h"
-#include "logger/filelogger.h"
-#include "logger/simplelogger.h"
-#include "logger/loggercomposite.h"
-#include "logger/decorator/loggertimestampdecorator.h"
-#include "logger/decorator/loggerleveldecorator.h"
-#include "notification/statenotification.h"
+#include "jobsnotificationmanager.h"
+
 #include "notification/factory/statenotificationfactory.h"
 
-JobManager::JobManager(bool isDebug, Logger *logger, ApplicationConfig *config, QObject *parent) :
-    QObject(parent)
+JobsNotificationManager::JobsNotificationManager(Logger *logger, QObject *parent) : QObject(parent)
 {
-    this->m_isDebug = isDebug;
     this->m_logger = logger;
-    this->m_config = config;
 }
 
-QString JobManager::getJobName(QObject *job)
+QString JobsNotificationManager::getJobName(QObject *job)
 {
     QJsonObject data = job->property("metaData").toJsonObject();
 
     return data.value("name").toString();
 }
 
-void JobManager::slot_jobStarted()
+void JobsNotificationManager::slot_jobStarted()
 {
     QString name = this->getJobName(this->sender());
 
@@ -61,7 +46,7 @@ void JobManager::slot_jobStarted()
     emit(notification(StateNotificationFactory::create(name)));
 }
 
-void JobManager::slot_jobRunning(Payload *payload)
+void JobsNotificationManager::slot_jobRunning(Payload *payload)
 {
     QString name = this->getJobName(this->sender());
 
@@ -70,7 +55,7 @@ void JobManager::slot_jobRunning(Payload *payload)
     emit(notification(StateNotificationFactory::create(this->getJobName(this->sender()), payload)));
 }
 
-void JobManager::slot_jobFinished(int code)
+void JobsNotificationManager::slot_jobFinished(int code)
 {
     QString name = this->getJobName(this->sender());
 

@@ -25,7 +25,6 @@
 #include <unistd.h>
 
 #include "application.h"
-#include "job/jobmanager.h"
 #include "job/jobsloader.h"
 #include "job/jobscollector.h"
 #include "job/jobsrunner.h"
@@ -37,6 +36,7 @@
 #include "watcher/watcher.h"
 #include "notification/notificationmanager.h"
 #include "notification/notifier/socketnotifier.h"
+#include "notification/jobsnotificationmanager.h"
 #include "socket/socketserver.h"
 
 QSystemSemaphore semaphore("gwatchd");
@@ -139,10 +139,10 @@ void Application::initStandardMode(ApplicationConfig *config)
 {
     Logger *logger = this->getLogger(config);
 
-    JobManager *manager = new JobManager(this->isDebug(), logger, config);
     JobsCollector *collector = new JobsCollector(config, logger);
     JobsLoader *loader = new JobsLoader(config, logger);
     JobsRunner *runner = new JobsRunner(loader, logger);
+    JobsNotificationManager *manager = new JobsNotificationManager(logger);
 
     foreach(JobDescriptor descriptor, collector->collectedJobs()) {
         loader->loadJob(descriptor);

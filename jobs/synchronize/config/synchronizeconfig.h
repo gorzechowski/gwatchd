@@ -34,6 +34,7 @@ public:
     QJsonValue value(QString key);
 
     QStringList entries();
+    QString fileMask(QString entry);
     QStringList excludes(QString entry);
     QStringList includes(QString entry);
     QStringList targetHosts();

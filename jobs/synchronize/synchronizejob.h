@@ -52,6 +52,8 @@ protected:
     QTimer *m_timer;
     QStringList m_files;
 
+    QStringList retrieveEntries(QStringList files);
+
 private slots:
     void slot_start();
     void slot_finished(int code);

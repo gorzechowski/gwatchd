@@ -67,16 +67,17 @@ void CommandJob::slot_execute()
         this->m_timer->stop();
     }
 
-    emit(started());
-
     QStringList entries = this->retrieveEntries(this->m_files);
 
     this->m_files.clear();
 
     if(entries.isEmpty()) {
         this->m_logger->debug("Command job has nothing to do");
-        emit(finished(0));
+
+        return;
     }
+
+    emit(started());
 
     foreach(QString entry, entries) {
         QFileInfo info(entry);

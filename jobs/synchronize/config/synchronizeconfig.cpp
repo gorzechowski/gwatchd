@@ -35,6 +35,11 @@ QStringList SynchronizeConfig::entries()
     return this->m_config->value("dirs").toObject().keys();
 }
 
+QString SynchronizeConfig::fileMask(QString entry)
+{
+    return this->m_config->value("dirs").toObject().value(entry).toObject().value("fileMask").toString();
+}
+
 QStringList SynchronizeConfig::excludes(QString entry)
 {
     return this->m_config->toStringList(this->m_config->value("dirs").toObject().value(entry).toObject().value("excludes").toArray());

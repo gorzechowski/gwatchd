@@ -212,12 +212,14 @@ void SynchronizeJob::slot_finished(int code)
     if(this->m_activeProcessList.isEmpty()) {
         emit(finished(code));
 
+        typedef QPair<QString, QString> Hook;
+
         if(code > 0) {
-            foreach(auto hook, this->m_config->failedHooks(entry)) {
+            foreach(Hook hook, this->m_config->failedHooks(entry)) {
                 this->runHook(hook.first, Predefine(hook.second));
             }
         } else {
-            foreach(auto hook, this->m_config->finishedHooks(entry)) {
+            foreach(Hook hook, this->m_config->finishedHooks(entry)) {
                 this->runHook(hook.first, Predefine(hook.second));
             }
         }

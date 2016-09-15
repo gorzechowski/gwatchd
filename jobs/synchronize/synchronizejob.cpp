@@ -22,6 +22,7 @@
 #include <QCryptographicHash>
 #include <QFileInfo>
 #include <QRegularExpression>
+#include <QSystemSemaphore>
 
 #include "synchronizejob.h"
 #include "command/rsync/rsynccommandbuilder.h"
@@ -50,15 +51,22 @@ QStringList SynchronizeJob::getEntries()
     return this->m_config->entries();
 }
 
-void SynchronizeJob::run(QString data)
+void SynchronizeJob::run(Entry entry)
 {
-    this->m_files << data;
+    if(this->m_files.indexOf(entry) < 0) {
+        this->m_files << entry;
+    }
 
     if(this->m_timer->isActive()) {
         this->m_timer->stop();
     }
 
     this->m_timer->start(this->m_config->value("delay").toInt(100));
+}
+
+void SynchronizeJob::run(Predefine predefine)
+{
+
 }
 
 void SynchronizeJob::slot_synchronize()
@@ -73,6 +81,8 @@ void SynchronizeJob::slot_synchronize()
 
     if(entries.isEmpty()) {
         this->m_logger->debug("Synchronize job has nothing to do");
+
+        emit(finished(0));
 
         return;
     }
@@ -156,6 +166,15 @@ QStringList SynchronizeJob::retrieveEntries(QStringList files)
     return entries;
 }
 
+void SynchronizeJob::runHook(QString name, Predefine predefine)
+{
+    QSystemSemaphore semaphore("gwatchd:" + name + ":" + predefine);
+
+    emit(runRequested(name, predefine));
+
+    semaphore.acquire();
+}
+
 void SynchronizeJob::slot_start()
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
@@ -186,7 +205,11 @@ void SynchronizeJob::slot_finished(int code)
     if(code > 0) {
         this->m_logger->error(QString("Synchronizing %1 failed").arg(entry));
     } else {
-        this->m_logger->log(QString("Synchronizing %1 done").arg(process->property("entry").toString()));
+        this->m_logger->log(QString("Synchronizing %1 done").arg(entry));
+    }
+
+    foreach(auto hook, this->m_config->finishedHooks(entry)) {
+        this->runHook(hook.first, Predefine(hook.second));
     }
 
     if(this->m_activeProcessList.isEmpty()) {

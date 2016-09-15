@@ -33,7 +33,7 @@ defineTest(minQtVersion) {
 
 CONFIG += ordered
 TEMPLATE = subdirs
-SUBDIRS += core jobs tests
+SUBDIRS += core jobs# tests
 
 include(app.pri)
 
@@ -79,7 +79,7 @@ unix {
         $$OUT_PWD/tests/jobs/synchronize/*Test \
         $$OUT_PWD/tests/jobs/command/*Test
 
-    INSTALLS += core jobs libs tests
+    INSTALLS += core jobs libs# tests
 }
 
 macx {

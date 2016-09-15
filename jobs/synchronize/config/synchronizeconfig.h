@@ -22,6 +22,7 @@
 #define SYNCHRONIZECONFIG_H
 
 #include <QObject>
+#include <QPair>
 
 #include "../../../core/config/config.h"
 
@@ -34,6 +35,8 @@ public:
     QJsonValue value(QString key);
 
     QStringList entries();
+    QStringList predefines();
+    QList<QPair<QString, QString> > finishedHooks(QString entry);
     QString fileMask(QString entry);
     QStringList excludes(QString entry);
     QStringList includes(QString entry);

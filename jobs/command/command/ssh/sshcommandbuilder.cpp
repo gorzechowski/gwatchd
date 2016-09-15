@@ -25,7 +25,7 @@
 #include "command/ssh/sshcommandpartbase.h"
 #include "command/ssh/sshcommandparttarget.h"
 
-SshCommandBuilder::SshCommandBuilder(QFileInfo entry, CommandConfig *config)
+SshCommandBuilder::SshCommandBuilder(QString entry, CommandConfig *config)
 {
     this->m_entry = entry;
     this->m_config = config;
@@ -34,12 +34,11 @@ SshCommandBuilder::SshCommandBuilder(QFileInfo entry, CommandConfig *config)
 QStringList SshCommandBuilder::build()
 {
     QStringList parts, commands;
-    QString entry = this->m_entry.absoluteFilePath();
 
-    foreach(QString host, this->m_config->sshHosts(entry)) {
+    foreach(QString host, this->m_config->sshHosts(this->m_entry)) {
         parts.append(SshCommandPartBase(this->m_entry, this->m_config).build());
         parts.append(SshCommandPartTarget(this->m_entry, this->m_config).build(host));
-        parts.append(QString("\"%1\"").arg(this->m_config->exec(entry)));
+        parts.append(QString("\"%1\"").arg(this->m_config->exec(this->m_entry)));
 
         commands.append(parts.join(" "));
         parts.clear();

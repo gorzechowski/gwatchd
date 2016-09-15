@@ -19,6 +19,8 @@
  */
 
 #include <QEventLoop>
+#include <QSystemSemaphore>
+#include <QDebug>
 
 #include "jobsrunner.h"
 
@@ -48,7 +50,7 @@ void JobsRunner::run(QString name, QStringList entries)
         entries = job->getEntries();
     }
 
-    foreach(QString entry, entries) {
+    foreach(Entry entry, entries) {
         QFileInfo info(entry);
 
         if(info.isDir() && !entry.endsWith("/")) {
@@ -63,11 +65,43 @@ void JobsRunner::run(QString name, QStringList entries)
     loop.exec();
 }
 
+void JobsRunner::run(QString name, Entry entry)
+{
+    this->run(name, QStringList() << entry);
+}
+
+void JobsRunner::run(QString name, Predefine predefine)
+{
+    name = name.toLower();
+
+    Job *job = this->m_loader->getLoadedJobs().value(name);
+
+    if(!job) {
+        this->m_logger->debug(QString("Job %1 not found").arg(name));
+        return;
+    }
+
+    QObject *jobObject = dynamic_cast<QObject*>(job);
+    QEventLoop loop;
+
+    connect(jobObject, SIGNAL(finished(int)), &loop, SLOT(quit()));
+
+    this->m_logger->debug("Running job with arg: " + predefine);
+
+    job->run(predefine);
+
+    QSystemSemaphore semaphore("gwatchd:" + name + ":" + predefine);
+
+    loop.exec();
+
+    semaphore.release();
+}
+
 void JobsRunner::runAll(QString data)
 {
     foreach(Job *job, this->m_loader->getLoadedJobs().values()) {
         this->m_logger->debug("Running job with arg: " + data);
 
-        job->run(data);
+        job->run(Entry(data));
     }
 }

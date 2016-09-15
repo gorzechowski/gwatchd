@@ -23,6 +23,7 @@
 CommandConfig::CommandConfig(Config *config, QObject *parent) : QObject(parent)
 {
     this->m_config = config;
+    this->m_group = "dirs";
 }
 
 QJsonValue CommandConfig::value(QString key)
@@ -30,24 +31,29 @@ QJsonValue CommandConfig::value(QString key)
     return this->m_config->value(key);
 }
 
+void CommandConfig::setGroup(QString group)
+{
+    this->m_group = group;
+}
+
 QStringList CommandConfig::entries()
 {
-    return this->m_config->value("dirs").toObject().keys();
+    return this->m_config->value(this->m_group).toObject().keys();
 }
 
 bool CommandConfig::remote(QString entry)
 {
-    return this->m_config->value("dirs").toObject().value(entry).toObject().value("remote").toBool(false);
+    return this->m_config->value(this->m_group).toObject().value(entry).toObject().value("remote").toBool(false);
 }
 
 QString CommandConfig::exec(QString entry)
 {
-    return this->m_config->value("dirs").toObject().value(entry).toObject().value("exec").toString();
+    return this->m_config->value(this->m_group).toObject().value(entry).toObject().value("exec").toString();
 }
 
 QString CommandConfig::fileMask(QString entry)
 {
-    return this->m_config->value("dirs").toObject().value(entry).toObject().value("fileMask").toString();
+    return this->m_config->value(this->m_group).toObject().value(entry).toObject().value("fileMask").toString();
 }
 
 QStringList CommandConfig::sshHosts()
@@ -57,7 +63,7 @@ QStringList CommandConfig::sshHosts()
 
 QStringList CommandConfig::sshHosts(QString entry)
 {
-    QJsonValue value = this->m_config->value("dirs").toObject().value(entry).toObject().value("ssh").toObject().value("hosts");
+    QJsonValue value = this->m_config->value(this->m_group).toObject().value(entry).toObject().value("ssh").toObject().value("hosts");
 
     if(!value.isArray()) {
         return this->sshHosts();
@@ -73,7 +79,7 @@ QString CommandConfig::sshUser()
 
 QString CommandConfig::sshUser(QString entry)
 {
-    QString value = this->m_config->value("dirs").toObject().value(entry).toObject().value("ssh").toObject().value("user").toString();
+    QString value = this->m_config->value(this->m_group).toObject().value(entry).toObject().value("ssh").toObject().value("user").toString();
 
     if(value.isEmpty()) {
         return this->sshUser();
@@ -89,7 +95,7 @@ QString CommandConfig::sshIdentityFile()
 
 QString CommandConfig::sshIdentityFile(QString entry)
 {
-    QString value = this->m_config->value("dirs").toObject().value(entry).toObject().value("ssh").toObject().value("identityFile").toString();
+    QString value = this->m_config->value(this->m_group).toObject().value(entry).toObject().value("ssh").toObject().value("identityFile").toString();
 
     if(value.isEmpty()) {
         return this->sshIdentityFile();
@@ -105,7 +111,7 @@ QString CommandConfig::sshConfigFile()
 
 QString CommandConfig::sshConfigFile(QString entry)
 {
-    QString value = this->m_config->value("dirs").toObject().value(entry).toObject().value("ssh").toObject().value("configFile").toString();
+    QString value = this->m_config->value(this->m_group).toObject().value(entry).toObject().value("ssh").toObject().value("configFile").toString();
 
     if(value.isEmpty()) {
         return this->sshConfigFile();
@@ -121,7 +127,7 @@ int CommandConfig::sshPort()
 
 int CommandConfig::sshPort(QString entry)
 {
-    int value = this->m_config->value("dirs").toObject().value(entry).toObject().value("ssh").toObject().value("port").toInt(-1);
+    int value = this->m_config->value(this->m_group).toObject().value(entry).toObject().value("ssh").toObject().value("port").toInt(-1);
 
     if(value == -1) {
         return this->sshPort();
@@ -137,7 +143,7 @@ QStringList CommandConfig::sshOptions()
 
 QStringList CommandConfig::sshOptions(QString entry)
 {
-    QJsonValue value = this->m_config->value("dirs").toObject().value(entry).toObject().value("ssh").toObject().value("options");
+    QJsonValue value = this->m_config->value(this->m_group).toObject().value(entry).toObject().value("ssh").toObject().value("options");
 
     if(!value.isArray()) {
         return this->sshOptions();

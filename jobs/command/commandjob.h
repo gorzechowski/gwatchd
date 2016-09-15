@@ -40,7 +40,8 @@ public:
     CommandJob();
 
     QStringList getEntries();
-    void run(QString data);
+    void run(Entry entry);
+    void run(Predefine predefine);
     void setConfig(Config *config);
     void setLogger(Logger *logger);
 
@@ -48,11 +49,16 @@ protected:
     CommandConfig *m_config;
     QHash<QString, QProcess*> m_activeProcessList;
 
-    QTimer *m_timer;
-    QStringList m_files;
+    QTimer *m_entryTimer;
+    QTimer *m_predefineTimer;
+    QList<Entry> m_entries;
+    QList<Predefine> m_predefines;
 
-    QStringList retrieveEntries(QStringList files);
+    QList<Entry> retrieveEntries(QList<Entry> entries);
     QString getCommand(QProcess *process);
+
+    void execute(QList<Entry> entries);
+    void execute(QList<Predefine> predefines);
 
 private slots:
     void slot_start();
@@ -60,11 +66,14 @@ private slots:
     void slot_read();
 
     void slot_execute();
+    void execute();
 
 signals:
     void started();
     void running(Payload*);
     void finished(int);
+    void runRequested(QString, Entry);
+    void runRequested(QString, Predefine);
 };
 
 #endif // COMMANDJOB_H

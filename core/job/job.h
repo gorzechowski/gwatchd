@@ -27,13 +27,26 @@
 #include "logger/logger.h"
 #include "notification/payload.h"
 
+class Entry: public QString
+{
+public:
+    Entry(QString string): QString(string) {}
+};
+
+class Predefine: public QString
+{
+public:
+    Predefine(QString string): QString(string) {}
+};
+
 class Job
 {
 public:
     virtual ~Job() {}
 
     virtual QStringList getEntries() = 0;
-    virtual void run(QString data) = 0;
+    virtual void run(Entry entry) = 0;
+    virtual void run(Predefine predefine) = 0;
     virtual void setConfig(Config *config) { m_config = config; }
     virtual void setLogger(Logger *logger) = 0;
 
@@ -45,6 +58,8 @@ signals:
     void started();
     void running(Payload*);
     void finished(int);
+    void runRequested(QString, Entry);
+    void runRequested(QString, Predefine);
 };
 
 Q_DECLARE_INTERFACE(Job, "job/1.0")

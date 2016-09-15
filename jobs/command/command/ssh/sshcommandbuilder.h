@@ -26,17 +26,18 @@
 #include "command/commandbuilder.h"
 #include "command/commandpart.h"
 #include "config/commandconfig.h"
+#include "../../core/job/job.h"
 
 class SshCommandBuilder : public CommandBuilder
 {
 public:
-    SshCommandBuilder(QFileInfo entry, CommandConfig *config);
+    SshCommandBuilder(QString entry, CommandConfig *config);
 
     QStringList build();
 
 protected:
     QList<CommandPart*> m_parts;
-    QFileInfo m_entry;
+    QString m_entry;
     CommandConfig *m_config;
 };
 

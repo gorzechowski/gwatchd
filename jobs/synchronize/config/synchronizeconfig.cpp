@@ -35,6 +35,44 @@ QStringList SynchronizeConfig::entries()
     return this->m_config->value("dirs").toObject().keys();
 }
 
+QStringList SynchronizeConfig::predefines()
+{
+    return this->m_config->value("predefines").toObject().keys();
+}
+
+QList<QPair<QString, QString> > SynchronizeConfig::finishedHooks(QString entry)
+{
+    QList<QPair<QString, QString> > hooks;
+
+    QJsonValue value = this->m_config->value("dirs").toObject().value(entry).toObject().value("hooks");
+
+    if(!value.isObject()) {
+        return hooks;
+    }
+
+    value = value.toObject().value("finished");
+
+    if(!value.isArray()) {
+        return hooks;
+    }
+
+    QJsonArray array = value.toArray();
+
+    foreach(QJsonValue hook, array) {
+        if(!hook.isObject()) {
+            continue;
+        }
+
+        QJsonObject object = hook.toObject();
+        QString key = object.keys().first();
+        QString value = object.value(key).toString();
+
+        hooks << QPair<QString, QString>(key, value);
+    }
+
+    return hooks;
+}
+
 QString SynchronizeConfig::fileMask(QString entry)
 {
     return this->m_config->value("dirs").toObject().value(entry).toObject().value("fileMask").toString();

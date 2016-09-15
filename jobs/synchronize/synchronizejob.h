@@ -41,7 +41,8 @@ public:
     SynchronizeJob();
 
     QStringList getEntries();
-    void run(QString data);
+    void run(Entry entry);
+    void run(Predefine predefine);
     void setConfig(Config *config);
     void setLogger(Logger *logger);
 
@@ -54,6 +55,8 @@ protected:
 
     QStringList retrieveEntries(QStringList files);
 
+    void runHook(QString name, Predefine predefine);
+
 private slots:
     void slot_start();
     void slot_finished(int code);
@@ -65,6 +68,8 @@ signals:
     void started();
     void running(Payload*);
     void finished(int);
+    void runRequested(QString, Entry);
+    void runRequested(QString, Predefine);
 };
 
 #endif // SYNCHRONIZEJOB_H

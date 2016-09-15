@@ -29,12 +29,12 @@
 class SshCommandPartBase : public CommandPart
 {
 public:
-    SshCommandPartBase(QFileInfo entry, CommandConfig *config);
+    SshCommandPartBase(QString entry, CommandConfig *config);
 
     QString build();
 
 protected:
-    QFileInfo m_entry;
+    QString m_entry;
     CommandConfig *m_config;
     QString m_host;
 

@@ -20,7 +20,7 @@
 
 #include "command/ssh/sshcommandparttarget.h"
 
-SshCommandPartTarget::SshCommandPartTarget(QFileInfo entry, CommandConfig *config)
+SshCommandPartTarget::SshCommandPartTarget(QString entry, CommandConfig *config)
 {
     this->m_entry = entry;
     this->m_config = config;
@@ -36,7 +36,7 @@ QString SshCommandPartTarget::build(QString host)
 QString SshCommandPartTarget::build()
 {
     QString target = "%1@%2";
-    QString entry = this->m_entry.absoluteFilePath();
+    QString entry = this->m_entry;
 
     QString user = this->m_config->sshUser(entry);
 

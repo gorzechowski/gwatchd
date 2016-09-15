@@ -36,6 +36,8 @@ public:
 
 public slots:
     void runAll(QString data);
+    void run(QString name, Entry entry);
+    void run(QString name, Predefine predefine);
 
 protected:
     JobsLoader *m_loader;

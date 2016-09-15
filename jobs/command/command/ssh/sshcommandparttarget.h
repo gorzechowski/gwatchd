@@ -29,14 +29,14 @@
 class SshCommandPartTarget : public CommandPart
 {
 public:
-    SshCommandPartTarget(QFileInfo entry, CommandConfig *config);
+    SshCommandPartTarget(QString entry, CommandConfig *config);
 
     QString build(QString host);
 
 protected:
     QString build();
 
-    QFileInfo m_entry;
+    QString m_entry;
     CommandConfig *m_config;
     QString m_host;
 };

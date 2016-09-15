@@ -162,6 +162,8 @@ void Application::initStandardMode(ApplicationConfig *config)
         connect(jobInstance, SIGNAL(started()), manager, SLOT(slot_jobStarted()));
         connect(jobInstance, SIGNAL(running(Payload*)), manager, SLOT(slot_jobRunning(Payload*)));
         connect(jobInstance, SIGNAL(finished(int)), manager, SLOT(slot_jobFinished(int)));
+        connect(jobInstance, SIGNAL(runRequested(QString, Entry)), runner, SLOT(run(QString, Entry)));
+        connect(jobInstance, SIGNAL(runRequested(QString, Predefine)), runner, SLOT(run(QString, Predefine)));
     }
 
     connect(watcher, SIGNAL(fileChanged(QString)), runner, SLOT(runAll(QString)));

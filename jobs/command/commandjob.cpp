@@ -30,9 +30,11 @@
 
 CommandJob::CommandJob()
 {
-    this->m_timer = new QTimer();
+    this->m_entryTimer = new QTimer();
+    this->m_predefineTimer = new QTimer();
 
-    connect(this->m_timer, SIGNAL(timeout()), this, SLOT(slot_execute()));
+    connect(this->m_entryTimer, SIGNAL(timeout()), this, SLOT(execute()));
+    connect(this->m_predefineTimer, SIGNAL(timeout()), this, SLOT(execute()));
 }
 
 void CommandJob::setConfig(Config *config)
@@ -50,42 +52,68 @@ QStringList CommandJob::getEntries()
     return this->m_config->entries();
 }
 
-void CommandJob::run(QString data)
+void CommandJob::run(Entry entry)
 {
-    this->m_files << data;
-
-    if(this->m_timer->isActive()) {
-        this->m_timer->stop();
+    if(this->m_entries.indexOf(entry) < 0) {
+        this->m_entries << entry;
     }
 
-    this->m_timer->start(this->m_config->value("delay").toInt(100));
+    if(this->m_entryTimer->isActive()) {
+        this->m_entryTimer->stop();
+    }
+
+    this->m_entryTimer->start(this->m_config->value("delay").toInt(100));
 }
 
-void CommandJob::slot_execute()
+void CommandJob::run(Predefine predefine)
 {
-    if(this->m_timer->isActive()) {
-        this->m_timer->stop();
+    if(this->m_predefines.indexOf(predefine) < 0) {
+        this->m_predefines << predefine;
     }
 
-    QStringList entries = this->retrieveEntries(this->m_files);
+    if(this->m_predefineTimer->isActive()) {
+        this->m_predefineTimer->stop();
+    }
 
-    this->m_files.clear();
+    this->m_predefineTimer->start(this->m_config->value("delay").toInt(100));
+}
+
+void CommandJob::execute()
+{
+    QTimer *timer = dynamic_cast<QTimer*>(this->sender());
+
+    if(timer == this->m_entryTimer) {
+        this->execute(this->retrieveEntries(this->m_entries));
+    } else if(timer == this->m_predefineTimer) {
+        this->execute(this->m_predefines);
+    }
+}
+
+void CommandJob::execute(QList<Entry> entries)
+{
+    if(this->m_entryTimer->isActive()) {
+        this->m_entryTimer->stop();
+    }
+
+    this->m_entries.clear();
 
     if(entries.isEmpty()) {
         this->m_logger->debug("Command job has nothing to do");
+
+        emit(finished(0));
 
         return;
     }
 
     emit(started());
 
-    foreach(QString entry, entries) {
-        QFileInfo info(entry);
+    this->m_config->setGroup("dirs");
 
+    foreach(Entry entry, entries) {
         QStringList commands;
 
         if(this->m_config->remote(entry)) {
-            SshCommandBuilder builder(info, this->m_config);
+            SshCommandBuilder builder(entry, this->m_config);
             commands = builder.build();
         } else {
             commands << this->m_config->exec(entry);
@@ -134,12 +162,85 @@ void CommandJob::slot_execute()
     }
 }
 
-QStringList CommandJob::retrieveEntries(QStringList files)
+void CommandJob::execute(QList<Predefine> predefines)
 {
-    QStringList entries;
+    if(this->m_predefineTimer->isActive()) {
+        this->m_predefineTimer->stop();
+    }
+
+    this->m_predefines.clear();
+
+    if(predefines.isEmpty()) {
+        this->m_logger->debug("Command job has nothing to do");
+
+        emit(finished(0));
+
+        return;
+    }
+
+    emit(started());
+
+    this->m_config->setGroup("predefines");
+
+    foreach(Predefine predefine, predefines) {
+        QStringList commands;
+
+        if(this->m_config->remote(predefine)) {
+            SshCommandBuilder builder(predefine, this->m_config);
+            commands = builder.build();
+        } else {
+            commands << this->m_config->exec(predefine);
+        }
+
+        foreach(QString command, commands) {
+            QString hash = QCryptographicHash::hash(command.toUtf8(), QCryptographicHash::Md5).toHex();
+
+            QProcess *process = new QProcess();
+
+            process->setProcessChannelMode(QProcess::MergedChannels);
+
+            if(this->m_activeProcessList.keys().contains(hash)) {
+                this->m_logger->debug("Command already in progress " + hash);
+
+                process = this->m_activeProcessList.value(hash);
+
+                if(process->state() == QProcess::Running) {
+                    this->m_logger->debug("Stopping command process");
+
+                    disconnect(process, SIGNAL(finished(int)), this, SLOT(slot_finished(int)));
+                    process->close();
+                    connect(process, SIGNAL(finished(int)), this, SLOT(slot_finished(int)));
+
+                    this->m_logger->debug("Command process stopped");
+                }
+            } else {
+                this->m_logger->debug("Creating new command process");
+
+                connect(process, SIGNAL(started()), this, SLOT(slot_start()));
+                connect(process, SIGNAL(finished(int)), this, SLOT(slot_finished(int)));
+                connect(process, SIGNAL(readyRead()), this, SLOT(slot_read()));
+
+                process->setProperty("entry", predefine);
+                process->setProperty("hash", hash);
+
+                this->m_activeProcessList.insert(hash, process);
+
+                this->m_logger->debug("New command process created");
+            }
+
+            this->m_logger->debug("Starting command process");
+
+            process->start(command);
+        }
+    }
+}
+
+QList<Entry> CommandJob::retrieveEntries(QList<Entry> entries)
+{
+    QList<Entry> result;
 
     foreach(QString entry, this->getEntries()) {
-        foreach(QString file, files) {
+        foreach(QString file, entries) {
             if(file.startsWith(entry)) {
                 QString fileMask = this->m_config->fileMask(entry);
 
@@ -153,13 +254,13 @@ QStringList CommandJob::retrieveEntries(QStringList files)
                     }
                 }
 
-                entries << entry;
+                result << Entry(entry);
                 break;
             }
         }
     }
 
-    return entries;
+    return result;
 }
 
 QString CommandJob::getCommand(QProcess *process)

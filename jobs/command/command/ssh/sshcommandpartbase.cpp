@@ -20,7 +20,7 @@
 
 #include "command/ssh/sshcommandpartbase.h"
 
-SshCommandPartBase::SshCommandPartBase(QFileInfo entry, CommandConfig *config)
+SshCommandPartBase::SshCommandPartBase(QString entry, CommandConfig *config)
 {
     this->m_entry = entry;
     this->m_config = config;
@@ -34,7 +34,7 @@ QString SshCommandPartBase::build()
 QStringList SshCommandPartBase::getArgs()
 {
     QStringList args;
-    QString entry = this->m_entry.absoluteFilePath();
+    QString entry = this->m_entry;
 
     QString keyFile = this->m_config->sshIdentityFile(entry);
 

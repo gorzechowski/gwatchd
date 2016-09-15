@@ -35,12 +35,17 @@ QStringList SynchronizeConfig::entries()
     return this->m_config->value("dirs").toObject().keys();
 }
 
-QStringList SynchronizeConfig::predefines()
+QList<QPair<QString, QString> > SynchronizeConfig::finishedHooks(QString entry)
 {
-    return this->m_config->value("predefines").toObject().keys();
+    return this->hooks("finished", entry);
 }
 
-QList<QPair<QString, QString> > SynchronizeConfig::finishedHooks(QString entry)
+QList<QPair<QString, QString> > SynchronizeConfig::failedHooks(QString entry)
+{
+    return this->hooks("failed", entry);
+}
+
+QList<QPair<QString, QString> > SynchronizeConfig::hooks(QString type, QString entry)
 {
     QList<QPair<QString, QString> > hooks;
 
@@ -50,7 +55,7 @@ QList<QPair<QString, QString> > SynchronizeConfig::finishedHooks(QString entry)
         return hooks;
     }
 
-    value = value.toObject().value("finished");
+    value = value.toObject().value(type);
 
     if(!value.isArray()) {
         return hooks;

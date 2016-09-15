@@ -33,7 +33,7 @@ public:
 
     QJsonValue value(QString key);
 
-    void setGroup(QString group);
+    void setContext(QString context);
 
     QStringList entries();
     bool remote(QString entry);
@@ -55,7 +55,7 @@ public:
 protected:
     Config *m_config;
 
-    QString m_group;
+    QString m_context;
 };
 
 #endif // COMMANDCONFIG_H

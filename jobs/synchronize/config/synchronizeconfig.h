@@ -35,8 +35,9 @@ public:
     QJsonValue value(QString key);
 
     QStringList entries();
-    QStringList predefines();
     QList<QPair<QString, QString> > finishedHooks(QString entry);
+    QList<QPair<QString, QString> > failedHooks(QString entry);
+    QList<QPair<QString, QString> > hooks(QString type, QString entry);
     QString fileMask(QString entry);
     QStringList excludes(QString entry);
     QStringList includes(QString entry);

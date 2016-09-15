@@ -1,7 +1,5 @@
 HEADERS += \
-    $$PWD/commandconfig.h \
-    $$PWD/entrydescriptor.h
+    $$PWD/commandconfig.h
 
 SOURCES += \
-    $$PWD/commandconfig.cpp \
-    $$PWD/entrydescriptor.cpp
+    $$PWD/commandconfig.cpp

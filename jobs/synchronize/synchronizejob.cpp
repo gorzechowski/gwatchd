@@ -64,9 +64,10 @@ void SynchronizeJob::run(Entry entry)
     this->m_timer->start(this->m_config->value("delay").toInt(100));
 }
 
-void SynchronizeJob::run(Predefine predefine)
+void SynchronizeJob::run(Predefine)
 {
-
+    this->m_logger->log("Synchronize job does not support predefines in this moment");
+    return;
 }
 
 void SynchronizeJob::slot_synchronize()
@@ -208,12 +209,18 @@ void SynchronizeJob::slot_finished(int code)
         this->m_logger->log(QString("Synchronizing %1 done").arg(entry));
     }
 
-    foreach(auto hook, this->m_config->finishedHooks(entry)) {
-        this->runHook(hook.first, Predefine(hook.second));
-    }
-
     if(this->m_activeProcessList.isEmpty()) {
         emit(finished(code));
+
+        if(code > 0) {
+            foreach(auto hook, this->m_config->failedHooks(entry)) {
+                this->runHook(hook.first, Predefine(hook.second));
+            }
+        } else {
+            foreach(auto hook, this->m_config->finishedHooks(entry)) {
+                this->runHook(hook.first, Predefine(hook.second));
+            }
+        }
     }
 }
 

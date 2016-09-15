@@ -39,7 +39,10 @@ CommandJob::CommandJob()
 
 void CommandJob::setConfig(Config *config)
 {
-    this->m_config = new CommandConfig(config);
+    this->m_configDirs = new CommandConfig(config);
+
+    this->m_configPredefines = new CommandConfig(config);
+    this->m_configPredefines->setContext("predefines");
 }
 
 void CommandJob::setLogger(Logger *logger)
@@ -49,7 +52,7 @@ void CommandJob::setLogger(Logger *logger)
 
 QStringList CommandJob::getEntries()
 {
-    return this->m_config->entries();
+    return this->m_configDirs->entries();
 }
 
 void CommandJob::run(Entry entry)
@@ -62,7 +65,7 @@ void CommandJob::run(Entry entry)
         this->m_entryTimer->stop();
     }
 
-    this->m_entryTimer->start(this->m_config->value("delay").toInt(100));
+    this->m_entryTimer->start(this->m_configDirs->value("delay").toInt(100));
 }
 
 void CommandJob::run(Predefine predefine)
@@ -75,7 +78,7 @@ void CommandJob::run(Predefine predefine)
         this->m_predefineTimer->stop();
     }
 
-    this->m_predefineTimer->start(this->m_config->value("delay").toInt(100));
+    this->m_predefineTimer->start(this->m_configPredefines->value("delay").toInt(100));
 }
 
 void CommandJob::execute()
@@ -107,16 +110,14 @@ void CommandJob::execute(QList<Entry> entries)
 
     emit(started());
 
-    this->m_config->setGroup("dirs");
-
     foreach(Entry entry, entries) {
         QStringList commands;
 
-        if(this->m_config->remote(entry)) {
-            SshCommandBuilder builder(entry, this->m_config);
+        if(this->m_configDirs->remote(entry)) {
+            SshCommandBuilder builder(entry, this->m_configDirs);
             commands = builder.build();
         } else {
-            commands << this->m_config->exec(entry);
+            commands << this->m_configDirs->exec(entry);
         }
 
         foreach(QString command, commands) {
@@ -180,16 +181,14 @@ void CommandJob::execute(QList<Predefine> predefines)
 
     emit(started());
 
-    this->m_config->setGroup("predefines");
-
     foreach(Predefine predefine, predefines) {
         QStringList commands;
 
-        if(this->m_config->remote(predefine)) {
-            SshCommandBuilder builder(predefine, this->m_config);
+        if(this->m_configPredefines->remote(predefine)) {
+            SshCommandBuilder builder(predefine, this->m_configPredefines);
             commands = builder.build();
         } else {
-            commands << this->m_config->exec(predefine);
+            commands << this->m_configPredefines->exec(predefine);
         }
 
         foreach(QString command, commands) {
@@ -242,7 +241,7 @@ QList<Entry> CommandJob::retrieveEntries(QList<Entry> entries)
     foreach(QString entry, this->getEntries()) {
         foreach(QString file, entries) {
             if(file.startsWith(entry)) {
-                QString fileMask = this->m_config->fileMask(entry);
+                QString fileMask = this->m_configDirs->fileMask(entry);
 
                 if(!fileMask.isEmpty()) {
                     QString fileName = file.split("/").last();

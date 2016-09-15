@@ -46,7 +46,8 @@ public:
     void setLogger(Logger *logger);
 
 protected:
-    CommandConfig *m_config;
+    CommandConfig *m_configDirs;
+    CommandConfig *m_configPredefines;
     QHash<QString, QProcess*> m_activeProcessList;
 
     QTimer *m_entryTimer;

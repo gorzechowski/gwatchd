@@ -35,7 +35,7 @@ void SshCommandPartTargetTest::testBuildNoUser()
 {
     CommandConfig *config = new CommandConfig(new JsonConfig(":/command.json"));
 
-    SshCommandPartTarget *part = new SshCommandPartTarget(QFileInfo("/dir2/file.txt"), config);
+    SshCommandPartTarget *part = new SshCommandPartTarget("/dir2/file.txt", config);
 
     QStringList hosts = config->sshHosts();
 
@@ -50,7 +50,7 @@ void SshCommandPartTargetTest::testBuild()
 {
     CommandConfig *config = new CommandConfig(new JsonConfig(":/command.json"));
 
-    SshCommandPartTarget *part = new SshCommandPartTarget(QFileInfo("/dir1/"), config);
+    SshCommandPartTarget *part = new SshCommandPartTarget("/dir1/", config);
 
     QStringList hosts = config->sshHosts();
 

@@ -35,7 +35,7 @@ void SshCommandPartBaseTest::testBuild()
 {
     CommandConfig *config = new CommandConfig(new JsonConfig(":/command.json"));
 
-    SshCommandPartBase *part = new SshCommandPartBase(QFileInfo("/dir1/"), config);
+    SshCommandPartBase *part = new SshCommandPartBase("/dir1/", config);
 
     QCOMPARE(part->build(), QString("ssh -i /home/user/.ssh/id_rsa -F /home/user/sshConfig -p 22 -o StrictHostKeyChecking=no"));
 }

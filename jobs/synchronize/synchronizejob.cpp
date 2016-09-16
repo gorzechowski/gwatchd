@@ -28,6 +28,7 @@
 #include "command/rsync/rsynccommandbuilder.h"
 #include "notification/runningpayload.h"
 #include "config/synchronizeconfig.h"
+#include "config/settings/factory/rsyncsettingsfactory.h"
 
 SynchronizeJob::SynchronizeJob()
 {
@@ -38,6 +39,7 @@ SynchronizeJob::SynchronizeJob()
 
 void SynchronizeJob::setConfig(Config *config)
 {
+    this->m_c = config;
     this->m_config = new SynchronizeConfig(config);
 }
 
@@ -92,6 +94,8 @@ void SynchronizeJob::slot_synchronize()
 
     foreach(QString entry, entries) {
         QFileInfo info(entry);
+
+        RsyncSettings rsyncSettings = RsyncSettingsFactory::create(Entry(entry), this->m_c);
 
         RsyncCommandBuilder builder(info, this->m_config);
         QStringList commands = builder.build();

@@ -3,3 +3,5 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/synchronizeconfig.cpp
+
+include(settings/settings.pri)

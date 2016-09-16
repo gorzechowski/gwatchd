@@ -27,6 +27,7 @@
 #include <QTimer>
 
 #include "../../core/job/job.h"
+#include "../../core/config/config.h"
 #include "../../core/notification/payload.h"
 #include "config/synchronizeconfig.h"
 
@@ -47,6 +48,7 @@ public:
     void setLogger(Logger *logger);
 
 protected:
+    Config *m_c;
     SynchronizeConfig *m_config;
     QHash<QString, QProcess*> m_activeProcessList;
 

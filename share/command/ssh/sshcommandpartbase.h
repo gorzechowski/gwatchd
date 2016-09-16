@@ -18,31 +18,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include "command/ssh/sshcommandparttarget.h"
+#ifndef SSHCOMMANDPARTBASE_H
+#define SSHCOMMANDPARTBASE_H
 
-SshCommandPartTarget::SshCommandPartTarget(QString entry, CommandConfig *config)
+#include <QFileInfo>
+
+#include "command/commandpart.h"
+#include "../../../share/config/settings/sshsettings.h"
+
+class SshCommandPartBase : public CommandPart
 {
-    this->m_entry = entry;
-    this->m_config = config;
-}
+public:
+    SshCommandPartBase(SshSettings *settings);
 
-QString SshCommandPartTarget::build(QString host)
-{
-    this->m_host = host;
+    QString build();
 
-    return this->build();
-}
+protected:
+    SshSettings *m_settings;
 
-QString SshCommandPartTarget::build()
-{
-    QString target = "%1@%2";
-    QString entry = this->m_entry;
+    QStringList getArgs();
+};
 
-    QString user = this->m_config->sshUser(entry);
-
-    if(user.isEmpty()) {
-        target.remove("@");
-    }
-
-    return target.arg(user, this->m_host);
-}
+#endif // SSHCOMMANDPARTBASE_H

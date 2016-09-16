@@ -27,6 +27,7 @@
 #include "command/ssh/sshcommandbuilder.h"
 #include "notification/runningpayload.h"
 #include "config/commandconfig.h"
+#include "config/settings/factory/sshsettingsfactory.h"
 
 CommandJob::CommandJob()
 {
@@ -39,6 +40,7 @@ CommandJob::CommandJob()
 
 void CommandJob::setConfig(Config *config)
 {
+    this->m_config = config;
     this->m_configDirs = new CommandConfig(config);
 
     this->m_configPredefines = new CommandConfig(config);
@@ -113,8 +115,10 @@ void CommandJob::execute(QList<Entry> entries)
     foreach(Entry entry, entries) {
         QStringList commands;
 
+        SshSettings sshSettings = SshSettingsFactory::create(entry, this->m_config);
+
         if(this->m_configDirs->remote(entry)) {
-            SshCommandBuilder builder(entry, this->m_configDirs);
+            SshCommandBuilder builder(&sshSettings);
             commands = builder.build();
         } else {
             commands << this->m_configDirs->exec(entry);
@@ -184,8 +188,10 @@ void CommandJob::execute(QList<Predefine> predefines)
     foreach(Predefine predefine, predefines) {
         QStringList commands;
 
+        SshSettings sshSettings = SshSettingsFactory::create(predefine, this->m_config);
+
         if(this->m_configPredefines->remote(predefine)) {
-            SshCommandBuilder builder(predefine, this->m_configPredefines);
+            SshCommandBuilder builder(&sshSettings);
             commands = builder.build();
         } else {
             commands << this->m_configPredefines->exec(predefine);

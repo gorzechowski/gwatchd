@@ -15,4 +15,5 @@ unix:!macx {
 
 INCLUDEPATH += \
     $$PWD/../core/ \
+    $$PWD/../share/ \
     /usr/local/include

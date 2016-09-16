@@ -18,31 +18,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include <QString>
+#ifndef SSHCOMMANDPARTTARGETTEST_H
+#define SSHCOMMANDPARTTARGETTEST_H
 
-#include "sshcommandbuilder.h"
+#include <QObject>
 
-#include "command/ssh/sshcommandpartbase.h"
 #include "command/ssh/sshcommandparttarget.h"
 
-SshCommandBuilder::SshCommandBuilder(QString entry, CommandConfig *config)
+class SshCommandPartTargetTest : public QObject
 {
-    this->m_entry = entry;
-    this->m_config = config;
-}
+    Q_OBJECT
+public:
+    SshCommandPartTargetTest(QObject *parent = 0);
 
-QStringList SshCommandBuilder::build()
-{
-    QStringList parts, commands;
+private slots:
+    void testBuildNoUser();
+    void testBuild();
 
-    foreach(QString host, this->m_config->sshHosts(this->m_entry)) {
-        parts.append(SshCommandPartBase(this->m_entry, this->m_config).build());
-        parts.append(SshCommandPartTarget(this->m_entry, this->m_config).build(host));
-        parts.append(QString("\"%1\"").arg(this->m_config->exec(this->m_entry)));
+};
 
-        commands.append(parts.join(" "));
-        parts.clear();
-    }
-
-    return commands;
-}
+#endif // SSHCOMMANDPARTTARGETTEST_H

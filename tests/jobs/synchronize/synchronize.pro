@@ -23,6 +23,7 @@ include(../../../jobs/synchronize/command/command.pri)
 include(../../../jobs/synchronize/config/config.pri)
 include(../../../core/config/config.pri)
 include(../../mockups/mockups.pri)
+include(../../../share/share.pri)
 
 INCLUDEPATH += \
     ../../../jobs/synchronize/

@@ -18,64 +18,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
+#include <QDebug>
+
 #include "synchronizeconfig.h"
 
-SynchronizeConfig::SynchronizeConfig(Config *config, QObject *parent) : QObject(parent)
+SynchronizeConfig::SynchronizeConfig(Config *config, QObject *parent) : QObject(parent), BaseJobConfig(config), SshConfig(config), HooksConfig(config)
 {
     this->m_config = config;
-}
-
-QJsonValue SynchronizeConfig::value(QString key)
-{
-    return this->m_config->value(key);
-}
-
-QStringList SynchronizeConfig::entries()
-{
-    return this->m_config->value("dirs").toObject().keys();
-}
-
-QList<QPair<QString, QString> > SynchronizeConfig::finishedHooks(QString entry)
-{
-    return this->hooks("finished", entry);
-}
-
-QList<QPair<QString, QString> > SynchronizeConfig::failedHooks(QString entry)
-{
-    return this->hooks("failed", entry);
-}
-
-QList<QPair<QString, QString> > SynchronizeConfig::hooks(QString type, QString entry)
-{
-    QList<QPair<QString, QString> > hooks;
-
-    QJsonValue value = this->m_config->value("dirs").toObject().value(entry).toObject().value("hooks");
-
-    if(!value.isObject()) {
-        return hooks;
-    }
-
-    value = value.toObject().value(type);
-
-    if(!value.isArray()) {
-        return hooks;
-    }
-
-    QJsonArray array = value.toArray();
-
-    foreach(QJsonValue hook, array) {
-        if(!hook.isObject()) {
-            continue;
-        }
-
-        QJsonObject object = hook.toObject();
-        QString key = object.keys().first();
-        QString value = object.value(key).toString();
-
-        hooks << QPair<QString, QString>(key, value);
-    }
-
-    return hooks;
 }
 
 QString SynchronizeConfig::fileMask(QString entry)
@@ -139,68 +88,4 @@ QString SynchronizeConfig::targetUser(QString entry)
     }
 
     return value;
-}
-
-QString SynchronizeConfig::sshIdentityFile()
-{
-    return this->m_config->value("ssh").toObject().value("identityFile").toString();
-}
-
-QString SynchronizeConfig::sshIdentityFile(QString entry)
-{
-    QString value = this->m_config->value("dirs").toObject().value(entry).toObject().value("ssh").toObject().value("identityFile").toString();
-
-    if(value.isEmpty()) {
-        return this->sshIdentityFile();
-    }
-
-    return value;
-}
-
-QString SynchronizeConfig::sshConfigFile()
-{
-    return this->m_config->value("ssh").toObject().value("configFile").toString();
-}
-
-QString SynchronizeConfig::sshConfigFile(QString entry)
-{
-    QString value = this->m_config->value("dirs").toObject().value(entry).toObject().value("ssh").toObject().value("configFile").toString();
-
-    if(value.isEmpty()) {
-        return this->sshConfigFile();
-    }
-
-    return value;
-}
-
-int SynchronizeConfig::sshPort()
-{
-    return this->m_config->value("ssh").toObject().value("port").toInt(0);
-}
-
-int SynchronizeConfig::sshPort(QString entry)
-{
-    int value = this->m_config->value("dirs").toObject().value(entry).toObject().value("ssh").toObject().value("port").toInt(-1);
-
-    if(value == -1) {
-        return this->sshPort();
-    }
-
-    return value;
-}
-
-QStringList SynchronizeConfig::sshOptions()
-{
-    return this->m_config->toStringList(this->m_config->value("ssh").toObject().value("options").toArray());
-}
-
-QStringList SynchronizeConfig::sshOptions(QString entry)
-{
-    QJsonValue value = this->m_config->value("dirs").toObject().value(entry).toObject().value("ssh").toObject().value("options");
-
-    if(!value.isArray()) {
-        return this->sshOptions();
-    }
-
-    return this->m_config->toStringList(value.toArray());
 }

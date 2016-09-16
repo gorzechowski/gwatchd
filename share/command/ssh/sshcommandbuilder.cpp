@@ -18,27 +18,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef SSHCOMMANDPARTBASE_H
-#define SSHCOMMANDPARTBASE_H
+#include <QString>
 
-#include <QFileInfo>
+#include "sshcommandbuilder.h"
 
-#include "command/commandpart.h"
-#include "config/commandconfig.h"
+#include "command/ssh/sshcommandpartbase.h"
+#include "command/ssh/sshcommandparttarget.h"
 
-class SshCommandPartBase : public CommandPart
+SshCommandBuilder::SshCommandBuilder(SshSettings *settings)
 {
-public:
-    SshCommandPartBase(QString entry, CommandConfig *config);
+    this->m_settings = settings;
+}
 
-    QString build();
+QStringList SshCommandBuilder::build()
+{
+    QStringList parts, commands;
 
-protected:
-    QString m_entry;
-    CommandConfig *m_config;
-    QString m_host;
+    foreach(QString host, this->m_settings->hosts()) {
+        parts.append(SshCommandPartBase(this->m_settings).build());
+        parts.append(SshCommandPartTarget(this->m_settings).build(host));
+        parts.append(QString("\"%1\"").arg(/*this->m_config->exec(this->m_entry)*/""));
 
-    QStringList getArgs();
-};
+        commands.append(parts.join(" "));
+        parts.clear();
+    }
 
-#endif // SSHCOMMANDPARTBASE_H
+    return commands;
+}

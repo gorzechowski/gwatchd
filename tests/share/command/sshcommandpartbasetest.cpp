@@ -18,22 +18,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef SSHCOMMANDPARTBASEERTEST_H
-#define SSHCOMMANDPARTBASEERTEST_H
+#include <QTest>
 
-#include <QObject>
+#include "config/jsonconfig.h"
+#include "config/settings/factory/sshsettingsfactory.h"
 
-#include "../../../jobs/command/command/ssh/sshcommandpartbase.h"
+#include "sshcommandpartbasetest.h"
 
-class SshCommandPartBaseTest : public QObject
+SshCommandPartBaseTest::SshCommandPartBaseTest(QObject *parent) :
+    QObject(parent)
 {
-    Q_OBJECT
-public:
-    SshCommandPartBaseTest(QObject *parent = 0);
 
-private slots:
-    void testBuild();
+}
 
-};
+void SshCommandPartBaseTest::testBuild()
+{
+    SshSettings sshSettings = SshSettingsFactory::create(Entry("/dir1/"), new JsonConfig(":/command.json"));
 
-#endif // SSHCOMMANDPARTBASEERTEST_H
+    SshCommandPartBase *part = new SshCommandPartBase(&sshSettings);
+
+    QCOMPARE(part->build(), QString("ssh -i /home/user/.ssh/id_rsa -F /home/user/sshConfig -p 22 -o StrictHostKeyChecking=no"));
+}

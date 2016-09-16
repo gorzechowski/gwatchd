@@ -25,19 +25,16 @@
 #include <QPair>
 
 #include "../../../core/config/config.h"
+#include "../../../share/config/sshconfig.h"
+#include "../../../share/config/hooksconfig.h"
+#include "../../../share/config/basejobconfig.h"
 
-class SynchronizeConfig : public QObject
+class SynchronizeConfig : public QObject, public BaseJobConfig, public SshConfig, public HooksConfig
 {
     Q_OBJECT
 public:
     SynchronizeConfig(Config *config, QObject *parent = 0);
 
-    QJsonValue value(QString key);
-
-    QStringList entries();
-    QList<QPair<QString, QString> > finishedHooks(QString entry);
-    QList<QPair<QString, QString> > failedHooks(QString entry);
-    QList<QPair<QString, QString> > hooks(QString type, QString entry);
     QString fileMask(QString entry);
     QStringList excludes(QString entry);
     QStringList includes(QString entry);
@@ -47,14 +44,6 @@ public:
     QString targetPath(QString entry);
     QString targetUser();
     QString targetUser(QString entry);
-    QString sshIdentityFile();
-    QString sshIdentityFile(QString entry);
-    QString sshConfigFile();
-    QString sshConfigFile(QString entry);
-    int sshPort();
-    int sshPort(QString entry);
-    QStringList sshOptions();
-    QStringList sshOptions(QString entry);
 
 protected:
     Config *m_config;

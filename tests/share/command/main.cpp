@@ -18,23 +18,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef SSHCOMMANDPARTTARGETTEST_H
-#define SSHCOMMANDPARTTARGETTEST_H
+#include <QCoreApplication>
+#include <QTest>
 
-#include <QObject>
+#include "sshcommandpartbasetest.h"
+#include "sshcommandparttargettest.h"
 
-#include "../../../jobs/command/command/ssh/sshcommandparttarget.h"
-
-class SshCommandPartTargetTest : public QObject
+int main(int argc, char *argv[])
 {
-    Q_OBJECT
-public:
-    SshCommandPartTargetTest(QObject *parent = 0);
+    QCoreApplication app(argc, argv);
+    app.setAttribute(Qt::AA_Use96Dpi, true);
 
-private slots:
-    void testBuildNoUser();
-    void testBuild();
+    SshCommandPartBaseTest baseTest;
+    SshCommandPartTargetTest targetTest;
 
-};
+    int res = 0;
 
-#endif // SSHCOMMANDPARTTARGETTEST_H
+    res += QTest::qExec(&baseTest, argc, argv);
+    res += QTest::qExec(&targetTest, argc, argv);
+
+    return res;
+}

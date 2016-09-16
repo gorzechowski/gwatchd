@@ -21,8 +21,8 @@
 #include <QTest>
 #include <QFileInfo>
 
-#include "config/commandconfig.h"
 #include "config/jsonconfig.h"
+#include "config/settings/factory/sshsettingsfactory.h"
 
 #include "sshcommandparttargettest.h"
 
@@ -33,11 +33,11 @@ SshCommandPartTargetTest::SshCommandPartTargetTest(QObject *parent) :
 
 void SshCommandPartTargetTest::testBuildNoUser()
 {
-    CommandConfig *config = new CommandConfig(new JsonConfig(":/command.json"));
+    SshSettings sshSettings = SshSettingsFactory::create(Entry("/dir2/file.txt"), new JsonConfig(":/command.json"));
 
-    SshCommandPartTarget *part = new SshCommandPartTarget("/dir2/file.txt", config);
+    SshCommandPartTarget *part = new SshCommandPartTarget(&sshSettings);
 
-    QStringList hosts = config->sshHosts();
+    QStringList hosts = sshSettings.hosts();
 
     QCOMPARE(hosts.count(), 1);
 
@@ -48,11 +48,11 @@ void SshCommandPartTargetTest::testBuildNoUser()
 
 void SshCommandPartTargetTest::testBuild()
 {
-    CommandConfig *config = new CommandConfig(new JsonConfig(":/command.json"));
+    SshSettings sshSettings = SshSettingsFactory::create(Entry("/dir1/"), new JsonConfig(":/command.json"));
 
-    SshCommandPartTarget *part = new SshCommandPartTarget("/dir1/", config);
+    SshCommandPartTarget *part = new SshCommandPartTarget(&sshSettings);
 
-    QStringList hosts = config->sshHosts();
+    QStringList hosts = sshSettings.hosts();
 
     QCOMPARE(hosts.count(), 1);
 

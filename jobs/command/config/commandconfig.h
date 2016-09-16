@@ -24,38 +24,21 @@
 #include <QObject>
 
 #include "../../../core/config/config.h"
+#include "../../../share/config/sshconfig.h"
+#include "../../../share/config/basejobconfig.h"
 
-class CommandConfig : public QObject
+class CommandConfig : public QObject, public BaseJobConfig, public SshConfig
 {
     Q_OBJECT
 public:
     CommandConfig(Config *config, QObject *parent = 0);
 
-    QJsonValue value(QString key);
-
-    void setContext(QString context);
-
-    QStringList entries();
     bool remote(QString entry);
     QString exec(QString entry);
     QString fileMask(QString entry);
-    QStringList sshHosts();
-    QStringList sshHosts(QString entry);
-    QString sshUser();
-    QString sshUser(QString entry);
-    QString sshIdentityFile();
-    QString sshIdentityFile(QString entry);
-    QString sshConfigFile();
-    QString sshConfigFile(QString entry);
-    int sshPort();
-    int sshPort(QString entry);
-    QStringList sshOptions();
-    QStringList sshOptions(QString entry);
 
 protected:
     Config *m_config;
-
-    QString m_context;
 };
 
 #endif // COMMANDCONFIG_H

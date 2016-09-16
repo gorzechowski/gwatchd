@@ -18,21 +18,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include <QCoreApplication>
-#include <QTest>
+#include "command/ssh/sshcommandparttarget.h"
 
-#include "commandconfigtest.h"
-
-int main(int argc, char *argv[])
+SshCommandPartTarget::SshCommandPartTarget(SshSettings *settings)
 {
-    QCoreApplication app(argc, argv);
-    app.setAttribute(Qt::AA_Use96Dpi, true);
+    this->m_settings = settings;
+}
 
-    CommandConfigTest configTest;
+QString SshCommandPartTarget::build(QString host)
+{
+    this->m_host = host;
 
-    int res = 0;
+    return this->build();
+}
 
-    res += QTest::qExec(&configTest, argc, argv);
+QString SshCommandPartTarget::build()
+{
+    QString target = "%1@%2";
 
-    return res;
+    QString user = this->m_settings->user();
+
+    if(user.isEmpty()) {
+        target.remove("@");
+    }
+
+    return target.arg(user, this->m_host);
 }

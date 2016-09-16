@@ -46,6 +46,7 @@ public:
     void setLogger(Logger *logger);
 
 protected:
+    Config *m_config;
     CommandConfig *m_configDirs;
     CommandConfig *m_configPredefines;
     QHash<QString, QProcess*> m_activeProcessList;

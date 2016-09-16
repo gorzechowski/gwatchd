@@ -18,24 +18,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include <QTest>
+#ifndef SSHCOMMANDBUILDER_H
+#define SSHCOMMANDBUILDER_H
 
-#include "config/commandconfig.h"
-#include "config/jsonconfig.h"
+#include <QFileInfo>
 
-#include "sshcommandpartbasetest.h"
+#include "command/commandbuilder.h"
+#include "command/commandpart.h"
+#include "../../config/settings/sshsettings.h"
+#include "../../../core/job/job.h"
 
-SshCommandPartBaseTest::SshCommandPartBaseTest(QObject *parent) :
-    QObject(parent)
+class SshCommandBuilder : public CommandBuilder
 {
+public:
+    SshCommandBuilder(SshSettings *settings);
 
-}
+    QStringList build();
 
-void SshCommandPartBaseTest::testBuild()
-{
-    CommandConfig *config = new CommandConfig(new JsonConfig(":/command.json"));
+protected:
+    SshSettings *m_settings;
+    QList<CommandPart*> m_parts;
+};
 
-    SshCommandPartBase *part = new SshCommandPartBase("/dir1/", config);
-
-    QCOMPARE(part->build(), QString("ssh -i /home/user/.ssh/id_rsa -F /home/user/sshConfig -p 22 -o StrictHostKeyChecking=no"));
-}
+#endif // SSHCOMMANDBUILDER_H

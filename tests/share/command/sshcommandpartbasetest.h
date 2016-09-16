@@ -18,27 +18,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef SSHCOMMANDBUILDER_H
-#define SSHCOMMANDBUILDER_H
+#ifndef SSHCOMMANDPARTBASEERTEST_H
+#define SSHCOMMANDPARTBASEERTEST_H
 
-#include <QFileInfo>
+#include <QObject>
 
-#include "command/commandbuilder.h"
-#include "command/commandpart.h"
-#include "config/commandconfig.h"
-#include "../../core/job/job.h"
+#include "command/ssh/sshcommandpartbase.h"
 
-class SshCommandBuilder : public CommandBuilder
+class SshCommandPartBaseTest : public QObject
 {
+    Q_OBJECT
 public:
-    SshCommandBuilder(QString entry, CommandConfig *config);
+    SshCommandPartBaseTest(QObject *parent = 0);
 
-    QStringList build();
+private slots:
+    void testBuild();
 
-protected:
-    QList<CommandPart*> m_parts;
-    QString m_entry;
-    CommandConfig *m_config;
 };
 
-#endif // SSHCOMMANDBUILDER_H
+#endif // SSHCOMMANDPARTBASEERTEST_H

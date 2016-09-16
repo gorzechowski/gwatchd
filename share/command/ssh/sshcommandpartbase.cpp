@@ -20,10 +20,9 @@
 
 #include "command/ssh/sshcommandpartbase.h"
 
-SshCommandPartBase::SshCommandPartBase(QString entry, CommandConfig *config)
+SshCommandPartBase::SshCommandPartBase(SshSettings *settings)
 {
-    this->m_entry = entry;
-    this->m_config = config;
+    this->m_settings = settings;
 }
 
 QString SshCommandPartBase::build()
@@ -34,27 +33,26 @@ QString SshCommandPartBase::build()
 QStringList SshCommandPartBase::getArgs()
 {
     QStringList args;
-    QString entry = this->m_entry;
 
-    QString keyFile = this->m_config->sshIdentityFile(entry);
+    QString keyFile = this->m_settings->identityFile();
 
     if(!keyFile.isEmpty()) {
         args << "-i " + keyFile;
     }
 
-    QString configFile = this->m_config->sshConfigFile(entry);
+    QString configFile = this->m_settings->configFile();
 
     if(!configFile.isEmpty()) {
         args << "-F " + configFile;
     }
 
-    int port = this->m_config->sshPort(entry);
+    int port = this->m_settings->port();
 
     if(port > 0) {
         args << "-p " + QString::number(port);
     }
 
-    QStringList options = this->m_config->sshOptions(entry);
+    QStringList options = this->m_settings->options();
 
     if(!options.empty()) {
         foreach(QString option, options) {

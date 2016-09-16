@@ -24,21 +24,20 @@
 #include <QFileInfo>
 
 #include "command/commandpart.h"
-#include "config/commandconfig.h"
+#include "../../../share/config/settings/sshsettings.h"
 
 class SshCommandPartTarget : public CommandPart
 {
 public:
-    SshCommandPartTarget(QString entry, CommandConfig *config);
+    SshCommandPartTarget(SshSettings *settings);
 
     QString build(QString host);
 
 protected:
-    QString build();
-
-    QString m_entry;
-    CommandConfig *m_config;
+    SshSettings *m_settings;
     QString m_host;
+
+    QString build();
 };
 
 #endif // SSHCOMMANDPARTTARGET_H

@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS += command
+SUBDIRS += command config

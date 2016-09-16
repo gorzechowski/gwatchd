@@ -18,24 +18,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include "commandconfig.h"
+#include <QTest>
 
-CommandConfig::CommandConfig(Config *config, QObject *parent) : QObject(parent), BaseJobConfig(config), SshConfig(config)
+#include "commandsettingstest.h"
+
+CommandSettingsTest::CommandSettingsTest(QObject *parent) : QObject(parent)
 {
 
 }
 
-bool CommandConfig::remote(QString entry)
+void CommandSettingsTest::initTestCase()
 {
-    return this->m_config->value(this->context()).toObject().value(entry).toObject().value("remote").toBool(false);
+    this->m_settings = new CommandSettings(true, "./script", "local.*");
 }
 
-QString CommandConfig::exec(QString entry)
+void CommandSettingsTest::testValues()
 {
-    return this->m_config->value(this->context()).toObject().value(entry).toObject().value("exec").toString();
-}
-
-QString CommandConfig::fileMask(QString entry)
-{
-    return this->m_config->value(this->context()).toObject().value(entry).toObject().value("fileMask").toString();
+    QCOMPARE(this->m_settings->remote(), true);
+    QCOMPARE(this->m_settings->exec(), QString("./script"));
+    QCOMPARE(this->m_settings->fileMask(), QString("local.*"));
 }

@@ -31,12 +31,13 @@
 class SshCommandBuilder : public CommandBuilder
 {
 public:
-    SshCommandBuilder(SshSettings *settings);
+    SshCommandBuilder(SshSettings *sshSettings, QString command);
 
     QStringList build();
 
 protected:
-    SshSettings *m_settings;
+    SshSettings *m_sshSettings;
+    QString m_command;
     QList<CommandPart*> m_parts;
 };
 

@@ -18,31 +18,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include <QString>
+#ifndef COMMANDSETTINGSTEST_H
+#define COMMANDSETTINGSTEST_H
 
-#include "sshcommandbuilder.h"
+#include <QObject>
 
-#include "command/ssh/sshcommandpartbase.h"
-#include "command/ssh/sshcommandparttarget.h"
+#include "../../../jobs/command/config/settings/commandsettings.h"
 
-SshCommandBuilder::SshCommandBuilder(SshSettings *sshSettings, QString command)
+class CommandSettingsTest : public QObject
 {
-    this->m_sshSettings = sshSettings;
-    this->m_command = command;
-}
+    Q_OBJECT
+public:
+    CommandSettingsTest(QObject *parent = 0);
 
-QStringList SshCommandBuilder::build()
-{
-    QStringList parts, commands;
+protected:
+    CommandSettings *m_settings;
 
-    foreach(QString host, this->m_sshSettings->hosts()) {
-        parts.append(SshCommandPartBase(this->m_sshSettings).build());
-        parts.append(SshCommandPartTarget(this->m_sshSettings).build(host));
-        parts.append(QString("\"%1\"").arg(this->m_command));
+private slots:
+    void initTestCase();
 
-        commands.append(parts.join(" "));
-        parts.clear();
-    }
+    void testValues();
+};
 
-    return commands;
-}
+#endif // COMMANDSETTINGSTEST_H

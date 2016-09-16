@@ -18,29 +18,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef COMMANDCONFIGTEST_H
-#define COMMANDCONFIGTEST_H
+#include <QCoreApplication>
+#include <QTest>
 
-#include <QObject>
+#include "sshsettingstest.h"
 
-#include "../../../jobs/command/config/commandconfig.h"
-#include "config/jsonconfig.h"
-
-class CommandConfigTest : public QObject
+int main(int argc, char *argv[])
 {
-    Q_OBJECT
-public:
-    CommandConfigTest(QObject *parent = 0);
+    QCoreApplication app(argc, argv);
+    app.setAttribute(Qt::AA_Use96Dpi, true);
 
-protected:
-    CommandConfig *m_config;
+    SshSettingsTest settingsTest;
 
-private slots:
-    void initTestCase();
+    int res = 0;
 
-    void testValue();
-    void testListValue();
-    void testMissingFile();
-};
+    res += QTest::qExec(&settingsTest, argc, argv);
 
-#endif // COMMANDCONFIGTEST_H
+    return res;
+}

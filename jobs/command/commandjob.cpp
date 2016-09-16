@@ -26,8 +26,8 @@
 #include "commandjob.h"
 #include "command/ssh/sshcommandbuilder.h"
 #include "notification/runningpayload.h"
-#include "config/commandconfig.h"
 #include "config/settings/factory/sshsettingsfactory.h"
+#include "config/settings/factory/commandsettingsfactory.h"
 
 CommandJob::CommandJob()
 {
@@ -41,10 +41,6 @@ CommandJob::CommandJob()
 void CommandJob::setConfig(Config *config)
 {
     this->m_config = config;
-    this->m_configDirs = new CommandConfig(config);
-
-    this->m_configPredefines = new CommandConfig(config);
-    this->m_configPredefines->setContext("predefines");
 }
 
 void CommandJob::setLogger(Logger *logger)
@@ -54,7 +50,7 @@ void CommandJob::setLogger(Logger *logger)
 
 QStringList CommandJob::getEntries()
 {
-    return this->m_configDirs->entries();
+    return this->m_config->value("dirs").toObject().keys();
 }
 
 void CommandJob::run(Entry entry)
@@ -67,7 +63,7 @@ void CommandJob::run(Entry entry)
         this->m_entryTimer->stop();
     }
 
-    this->m_entryTimer->start(this->m_configDirs->value("delay").toInt(100));
+    this->m_entryTimer->start(this->m_config->value("delay").toInt(100));
 }
 
 void CommandJob::run(Predefine predefine)
@@ -80,7 +76,7 @@ void CommandJob::run(Predefine predefine)
         this->m_predefineTimer->stop();
     }
 
-    this->m_predefineTimer->start(this->m_configPredefines->value("delay").toInt(100));
+    this->m_predefineTimer->start(this->m_config->value("delay").toInt(100));
 }
 
 void CommandJob::execute()
@@ -116,12 +112,13 @@ void CommandJob::execute(QList<Entry> entries)
         QStringList commands;
 
         SshSettings sshSettings = SshSettingsFactory::create(entry, this->m_config);
+        CommandSettings commandSettings = CommandSettingsFactory::create(entry, this->m_config);
 
-        if(this->m_configDirs->remote(entry)) {
-            SshCommandBuilder builder(&sshSettings);
+        if(commandSettings.remote()) {
+            SshCommandBuilder builder(&sshSettings, commandSettings.exec());
             commands = builder.build();
         } else {
-            commands << this->m_configDirs->exec(entry);
+            commands << commandSettings.exec();
         }
 
         foreach(QString command, commands) {
@@ -189,12 +186,13 @@ void CommandJob::execute(QList<Predefine> predefines)
         QStringList commands;
 
         SshSettings sshSettings = SshSettingsFactory::create(predefine, this->m_config);
+        CommandSettings commandSettings = CommandSettingsFactory::create(predefine, this->m_config);
 
-        if(this->m_configPredefines->remote(predefine)) {
-            SshCommandBuilder builder(&sshSettings);
+        if(commandSettings.remote()) {
+            SshCommandBuilder builder(&sshSettings, commandSettings.exec());
             commands = builder.build();
         } else {
-            commands << this->m_configPredefines->exec(predefine);
+            commands << commandSettings.exec();
         }
 
         foreach(QString command, commands) {
@@ -247,7 +245,8 @@ QList<Entry> CommandJob::retrieveEntries(QList<Entry> entries)
     foreach(QString entry, this->getEntries()) {
         foreach(QString file, entries) {
             if(file.startsWith(entry)) {
-                QString fileMask = this->m_configDirs->fileMask(entry);
+                CommandSettings commandSettings = CommandSettingsFactory::create(Entry(entry), this->m_config);
+                QString fileMask = commandSettings.fileMask();
 
                 if(!fileMask.isEmpty()) {
                     QString fileName = file.split("/").last();

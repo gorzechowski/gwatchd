@@ -21,18 +21,18 @@
 #include <QCoreApplication>
 #include <QTest>
 
-#include "commandconfigtest.h"
+#include "commandsettingstest.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
     app.setAttribute(Qt::AA_Use96Dpi, true);
 
-    CommandConfigTest configTest;
+    CommandSettingsTest settingsTest;
 
     int res = 0;
 
-    res += QTest::qExec(&configTest, argc, argv);
+    res += QTest::qExec(&settingsTest, argc, argv);
 
     return res;
 }

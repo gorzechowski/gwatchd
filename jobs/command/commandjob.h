@@ -27,7 +27,6 @@
 #include <QTimer>
 
 #include "../../core/job/job.h"
-#include "config/commandconfig.h"
 
 class CommandJob : public QObject, public Job
 {
@@ -47,8 +46,6 @@ public:
 
 protected:
     Config *m_config;
-    CommandConfig *m_configDirs;
-    CommandConfig *m_configPredefines;
     QHash<QString, QProcess*> m_activeProcessList;
 
     QTimer *m_entryTimer;

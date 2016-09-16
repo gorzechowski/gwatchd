@@ -18,27 +18,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef COMMANDCONFIG_H
-#define COMMANDCONFIG_H
+#ifndef SSHSETTINGSTEST_H
+#define SSHSETTINGSTEST_H
 
 #include <QObject>
 
-#include "../../../core/config/config.h"
-#include "../../../share/config/sshconfig.h"
-#include "../../../share/config/basejobconfig.h"
+#include "config/settings/sshsettings.h"
 
-class CommandConfig : public QObject, public BaseJobConfig, public SshConfig
+class SshSettingsTest : public QObject
 {
     Q_OBJECT
 public:
-    CommandConfig(Config *config, QObject *parent = 0);
-
-    bool remote(QString entry);
-    QString exec(QString entry);
-    QString fileMask(QString entry);
+    SshSettingsTest(QObject *parent = 0);
 
 protected:
-    Config *m_config;
+    SshSettings *m_settings;
+
+private slots:
+    void initTestCase();
+
+    void testValues();
+
 };
 
-#endif // COMMANDCONFIG_H
+#endif // SSHSETTINGSTEST_H

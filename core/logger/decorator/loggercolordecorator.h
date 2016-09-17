@@ -18,37 +18,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include "loggercomposite.h"
+#ifndef LOGGERCOLORDECORATOR_H
+#define LOGGERCOLORDECORATOR_H
 
-LoggerComposite::LoggerComposite()
+#include <QObject>
+
+#include "logger/logger.h"
+
+class LoggerColorDecorator : public QObject, public Logger
 {
+    Q_OBJECT
+public:
+    LoggerColorDecorator(Logger *logger, QObject *parent = 0);
 
-}
+    void log(QString content);
+    void debug(QString content);
+    void error(QString content);
 
-void LoggerComposite::log(QString content)
-{
-    foreach(Logger *logger, this->m_loggers) {
-        logger->log(content);
-    }
-}
+protected:
+    Logger *m_logger;
 
-void LoggerComposite::debug(QString content)
-{
-    if(!this->m_isDebug) return;
+    QString m_color;
+    QString m_colorDebug;
+    QString m_colorError;
+};
 
-    foreach(Logger *logger, this->m_loggers) {
-        logger->debug(content);
-    }
-}
-
-void LoggerComposite::error(QString content)
-{
-    foreach(Logger *logger, this->m_loggers) {
-        logger->error(content);
-    }
-}
-
-void LoggerComposite::add(Logger *logger)
-{
-    this->m_loggers << logger;
-}
+#endif // LOGGERCOLORDECORATOR_H

@@ -32,9 +32,13 @@ public:
     LoggerTimestampDecorator(Logger *logger, QObject *parent = 0);
 
     void log(QString content);
+    void debug(QString content);
+    void error(QString content);
 
 protected:
     Logger *m_logger;
+
+    QString timestamp();
 };
 
 #endif // LOGGERTIMESTAMPDECORATOR_H

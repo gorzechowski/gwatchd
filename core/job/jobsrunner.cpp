@@ -20,7 +20,6 @@
 
 #include <QEventLoop>
 #include <QSystemSemaphore>
-#include <QDebug>
 
 #include "jobsrunner.h"
 

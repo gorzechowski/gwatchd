@@ -18,37 +18,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include "loggercomposite.h"
+#include "loggercolordecorator.h"
 
-LoggerComposite::LoggerComposite()
+LoggerColorDecorator::LoggerColorDecorator(Logger *logger, QObject *parent) : QObject(parent)
 {
+    this->m_logger = logger;
 
+    this->m_color = "\x1B[39m";
+    this->m_colorDebug = "\x1B[90m";
+    this->m_colorError = "\x1B[31m";
 }
 
-void LoggerComposite::log(QString content)
+void LoggerColorDecorator::log(QString content)
 {
-    foreach(Logger *logger, this->m_loggers) {
-        logger->log(content);
-    }
+    this->m_logger->log(content);
 }
 
-void LoggerComposite::debug(QString content)
+void LoggerColorDecorator::debug(QString content)
 {
-    if(!this->m_isDebug) return;
+    content.prepend(this->m_colorDebug);
+    content.append(this->m_color);
 
-    foreach(Logger *logger, this->m_loggers) {
-        logger->debug(content);
-    }
+    this->m_logger->debug(content);
 }
 
-void LoggerComposite::error(QString content)
+void LoggerColorDecorator::error(QString content)
 {
-    foreach(Logger *logger, this->m_loggers) {
-        logger->error(content);
-    }
-}
+    content.prepend(this->m_colorError);
+    content.append(this->m_color);
 
-void LoggerComposite::add(Logger *logger)
-{
-    this->m_loggers << logger;
+    this->m_logger->error(content);
 }

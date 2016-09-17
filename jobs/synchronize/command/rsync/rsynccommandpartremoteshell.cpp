@@ -18,7 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include <QDebug>
 #include "command/rsync/rsynccommandpartremoteshell.h"
 #include "command/ssh/sshcommandbuilder.h"
 

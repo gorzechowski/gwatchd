@@ -19,7 +19,6 @@
  */
 
 #include <QHostAddress>
-#include <QDebug>
 
 #include "socketserver.h"
 

@@ -34,16 +34,14 @@ void LoggerLevelDecorator::log(QString content)
 
 void LoggerLevelDecorator::debug(QString content)
 {
-    if(!this->m_isDebug) return;
-
     content.prepend("<debug> ");
 
-    this->m_logger->log(content);
+    this->m_logger->debug(content);
 }
 
 void LoggerLevelDecorator::error(QString content)
 {
     content.prepend("<error> ");
 
-    this->m_logger->log(content);
+    this->m_logger->error(content);
 }

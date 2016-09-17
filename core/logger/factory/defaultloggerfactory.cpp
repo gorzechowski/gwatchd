@@ -23,6 +23,7 @@
 #include "logger/simplelogger.h"
 #include "logger/decorator/loggertimestampdecorator.h"
 #include "logger/decorator/loggerleveldecorator.h"
+#include "logger/decorator/loggercolordecorator.h"
 
 #include "defaultloggerfactory.h"
 
@@ -33,15 +34,19 @@ DefaultLoggerFactory::DefaultLoggerFactory()
 
 Logger* DefaultLoggerFactory::create(QString filePath, ApplicationConfig *config, bool isDebug)
 {
-    LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
+    Logger *fileLogger = new LoggerLevelDecorator(
         new LoggerTimestampDecorator(
-            new FileLogger(filePath, config)
+            new LoggerColorDecorator(
+                new FileLogger(filePath, config)
+            )
         )
     );
 
-    LoggerLevelDecorator *simpleLogger = new LoggerLevelDecorator(
+    Logger *simpleLogger = new LoggerLevelDecorator(
         new LoggerTimestampDecorator(
-            new SimpleLogger()
+            new LoggerColorDecorator(
+                new SimpleLogger()
+            )
         )
     );
 

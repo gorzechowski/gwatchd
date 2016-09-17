@@ -19,7 +19,6 @@
  */
 
 #include <QString>
-#include <QDebug>
 
 #include "sshcommandbuilder.h"
 

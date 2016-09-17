@@ -90,7 +90,7 @@ void JobsRunner::run(QString name, Predefine predefine)
 
     job->run(predefine);
 
-    QSystemSemaphore semaphore("gwatchd:" + name + ":" + predefine);
+    QSystemSemaphore semaphore("" + name + ":" + predefine);
 
     loop.exec();
 

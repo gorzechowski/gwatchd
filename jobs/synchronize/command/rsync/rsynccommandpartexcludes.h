@@ -24,18 +24,17 @@
 #include <QFileInfo>
 
 #include "command/commandpart.h"
-#include "config/synchronizeconfig.h"
+#include "config/settings/rsyncsettings.h"
 
 class RsyncCommandPartExcludes : public CommandPart
 {
 public:
-    RsyncCommandPartExcludes(QFileInfo entry, SynchronizeConfig *config);
+    RsyncCommandPartExcludes(RsyncSettings *settings);
 
     QString build();
 
 protected:
-    QFileInfo m_entry;
-    SynchronizeConfig *m_config;
+    RsyncSettings *m_settings;
 };
 
 #endif // RSYNCCOMMANDPARTEXCLUDES_H

@@ -24,20 +24,17 @@
 #include <QFileInfo>
 
 #include "command/commandpart.h"
-#include "config/synchronizeconfig.h"
+#include "config/settings/sshsettings.h"
 
 class RsyncCommandPartRemoteShell : public CommandPart
 {
 public:
-    RsyncCommandPartRemoteShell(QFileInfo entry, SynchronizeConfig *config);
+    RsyncCommandPartRemoteShell(SshSettings *sshSettings);
 
     QString build();
 
 protected:
-    QFileInfo m_entry;
-    SynchronizeConfig *m_config;
-
-    QStringList getArgs();
+    SshSettings *m_settings;
 };
 
 #endif // RSYNCCOMMANDPARTREMOTESHELL_H

@@ -15,7 +15,7 @@ CommandSettings CommandSettingsFactory::create(Entry entry, Config *config)
 
 CommandSettings CommandSettingsFactory::create(Predefine predefine, Config *config)
 {
-    CommandSettingsFactory factory("predefine", config);
+    CommandSettingsFactory factory("predefines", config);
 
     return factory.create(predefine);
 }

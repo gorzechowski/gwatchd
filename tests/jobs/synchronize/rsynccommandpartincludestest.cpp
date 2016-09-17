@@ -22,22 +22,20 @@
 #include <QFileInfo>
 
 #include "rsynccommandpartincludestest.h"
+#include "config/settings/factory/rsyncsettingsfactory.h"
 
 RsyncCommandPartIncludesTest::RsyncCommandPartIncludesTest(QObject *parent) :
     QObject(parent)
 {
 }
 
-void RsyncCommandPartIncludesTest::initTestCase()
-{
-    this->m_config = new SynchronizeConfig(new JsonConfig(":/synchronize.json"));
-
-    this->m_commandPart = new RsyncCommandPartIncludes(QFileInfo("/dir1/"), this->m_config);
-}
-
 void RsyncCommandPartIncludesTest::testBuild()
 {
-    QCOMPARE(this->m_commandPart->build(), QString("--include=\"important.local\" --include=\"important2.local\""));
+    RsyncSettings settings = RsyncSettingsFactory::create(Entry("/dir1/"), new JsonConfig(":/synchronize.json"));
+
+    RsyncCommandPartIncludes part(&settings);
+
+    QCOMPARE(part.build(), QString("--include=\"important.local\" --include=\"important2.local\""));
 }
 
 #include "moc_rsynccommandpartincludestest.cpp"

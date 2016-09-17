@@ -8,16 +8,14 @@ SOURCES += \
     rsynccommandpartexcludestest.cpp \
     rsynccommandpartincludestest.cpp \
     rsynccommandpartremoteshelltest.cpp \
-    rsynccommandparttargettest.cpp \
-    synchronizeconfigtest.cpp
+    rsynccommandparttargettest.cpp
 
 HEADERS += \
     rsynccommandpartbasetest.h \
     rsynccommandpartexcludestest.h \
     rsynccommandpartincludestest.h \
     rsynccommandpartremoteshelltest.h \
-    rsynccommandparttargettest.h \
-    synchronizeconfigtest.h
+    rsynccommandparttargettest.h
 
 include(../../../jobs/synchronize/command/command.pri)
 include(../../../jobs/synchronize/config/config.pri)

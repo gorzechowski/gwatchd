@@ -31,6 +31,7 @@
 class SshCommandBuilder : public CommandBuilder
 {
 public:
+    SshCommandBuilder(SshSettings *sshSettings);
     SshCommandBuilder(SshSettings *sshSettings, QString command);
 
     QStringList build();

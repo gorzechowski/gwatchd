@@ -1,7 +1,5 @@
-HEADERS += \
-    $$PWD/synchronizeconfig.h
+HEADERS +=
 
-SOURCES += \
-    $$PWD/synchronizeconfig.cpp
+SOURCES +=
 
 include(settings/settings.pri)

@@ -29,7 +29,7 @@
 #include "../../core/job/job.h"
 #include "../../core/config/config.h"
 #include "../../core/notification/payload.h"
-#include "config/synchronizeconfig.h"
+#include "config/settings/hookdescriptor.h"
 
 class SynchronizeJob : public QObject, public Job
 {
@@ -48,8 +48,7 @@ public:
     void setLogger(Logger *logger);
 
 protected:
-    Config *m_c;
-    SynchronizeConfig *m_config;
+    Config *m_config;
     QHash<QString, QProcess*> m_activeProcessList;
 
     QTimer *m_timer;
@@ -57,7 +56,7 @@ protected:
 
     QStringList retrieveEntries(QStringList files);
 
-    void runHook(QString name, Predefine predefine);
+    void runHooks(QList<HookDescriptor> hooks);
 
 private slots:
     void slot_start();

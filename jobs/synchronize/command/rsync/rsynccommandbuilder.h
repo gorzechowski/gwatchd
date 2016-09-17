@@ -25,19 +25,20 @@
 
 #include "command/commandbuilder.h"
 #include "command/commandpart.h"
-#include "config/synchronizeconfig.h"
+#include "config/settings/rsyncsettings.h"
+#include "config/settings/sshsettings.h"
 
 class RsyncCommandBuilder : public CommandBuilder
 {
 public:
-    RsyncCommandBuilder(QFileInfo entry, SynchronizeConfig *config);
+    RsyncCommandBuilder(RsyncSettings *rsyncSettings, SshSettings *sshSettings);
 
     QStringList build();
 
 protected:
+    RsyncSettings *m_rsyncSettings;
+    SshSettings *m_sshSettings;
     QList<CommandPart*> m_parts;
-    QFileInfo m_entry;
-    SynchronizeConfig *m_config;
 };
 
 #endif // RSYNCCOMMANDBUILDER_H

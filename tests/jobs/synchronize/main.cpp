@@ -26,7 +26,6 @@
 #include "rsynccommandpartincludestest.h"
 #include "rsynccommandpartremoteshelltest.h"
 #include "rsynccommandparttargettest.h"
-#include "synchronizeconfigtest.h"
 
 int main(int argc, char *argv[])
 {
@@ -39,8 +38,6 @@ int main(int argc, char *argv[])
     RsyncCommandPartRemoteShellTest remoteShellTest;
     RsyncCommandPartTargetTest targetTest;
 
-    SynchronizeConfigTest configTest;
-
     int res = 0;
 
     res += QTest::qExec(&baseTest, argc, argv);
@@ -48,7 +45,6 @@ int main(int argc, char *argv[])
     res += QTest::qExec(&includesTest, argc, argv);
     res += QTest::qExec(&remoteShellTest, argc, argv);
     res += QTest::qExec(&targetTest, argc, argv);
-    res += QTest::qExec(&configTest, argc, argv);
 
     return res;
 }

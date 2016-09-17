@@ -19,11 +19,18 @@
  */
 
 #include <QString>
+#include <QDebug>
 
 #include "sshcommandbuilder.h"
 
 #include "command/ssh/sshcommandpartbase.h"
 #include "command/ssh/sshcommandparttarget.h"
+
+SshCommandBuilder::SshCommandBuilder(SshSettings *sshSettings)
+{
+    this->m_sshSettings = sshSettings;
+    this->m_command = "";
+}
 
 SshCommandBuilder::SshCommandBuilder(SshSettings *sshSettings, QString command)
 {
@@ -34,14 +41,33 @@ SshCommandBuilder::SshCommandBuilder(SshSettings *sshSettings, QString command)
 QStringList SshCommandBuilder::build()
 {
     QStringList parts, commands;
+    QStringList hosts = this->m_sshSettings->hosts();
 
-    foreach(QString host, this->m_sshSettings->hosts()) {
+    if(hosts.count() > 0) {
+        foreach(QString host, this->m_sshSettings->hosts()) {
+            parts.append(SshCommandPartBase(this->m_sshSettings).build());
+            parts.append(SshCommandPartTarget(this->m_sshSettings).build(host));
+
+            if(!this->m_command.isEmpty()) {
+                parts.append(QString("\"%1\"").arg(this->m_command));
+            }
+
+            QString command = parts.join(" ");
+
+            if(command.trimmed() != "ssh") {
+                commands.append(command);
+            }
+
+            parts.clear();
+        }
+    } else {
         parts.append(SshCommandPartBase(this->m_sshSettings).build());
-        parts.append(SshCommandPartTarget(this->m_sshSettings).build(host));
-        parts.append(QString("\"%1\"").arg(this->m_command));
 
-        commands.append(parts.join(" "));
-        parts.clear();
+        QString command = parts.join(" ");
+
+        if(command.trimmed() != "ssh") {
+            commands.append(command);
+        }
     }
 
     return commands;

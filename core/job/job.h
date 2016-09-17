@@ -31,12 +31,14 @@ class Entry: public QString
 {
 public:
     Entry(QString string): QString(string) {}
+    Entry() {}
 };
 
 class Predefine: public QString
 {
 public:
     Predefine(QString string): QString(string) {}
+    Predefine() {}
 };
 
 class Job

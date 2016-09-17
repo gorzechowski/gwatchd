@@ -27,8 +27,9 @@
 #include "synchronizejob.h"
 #include "command/rsync/rsynccommandbuilder.h"
 #include "notification/runningpayload.h"
-#include "config/synchronizeconfig.h"
 #include "config/settings/factory/rsyncsettingsfactory.h"
+#include "config/settings/factory/sshsettingsfactory.h"
+#include "config/settings/factory/hookssettingsfactory.h"
 
 SynchronizeJob::SynchronizeJob()
 {
@@ -39,8 +40,7 @@ SynchronizeJob::SynchronizeJob()
 
 void SynchronizeJob::setConfig(Config *config)
 {
-    this->m_c = config;
-    this->m_config = new SynchronizeConfig(config);
+    this->m_config = config;
 }
 
 void SynchronizeJob::setLogger(Logger *logger)
@@ -50,7 +50,7 @@ void SynchronizeJob::setLogger(Logger *logger)
 
 QStringList SynchronizeJob::getEntries()
 {
-    return this->m_config->entries();
+    return this->m_config->value("dirs").toObject().keys();
 }
 
 void SynchronizeJob::run(Entry entry)
@@ -93,11 +93,10 @@ void SynchronizeJob::slot_synchronize()
     emit(started());
 
     foreach(QString entry, entries) {
-        QFileInfo info(entry);
+        RsyncSettings rsyncSettings = RsyncSettingsFactory::create(Entry(entry), this->m_config);
+        SshSettings sshSettings = SshSettingsFactory::create(Entry(entry), this->m_config);
 
-        RsyncSettings rsyncSettings = RsyncSettingsFactory::create(Entry(entry), this->m_c);
-
-        RsyncCommandBuilder builder(info, this->m_config);
+        RsyncCommandBuilder builder(&rsyncSettings, &sshSettings);
         QStringList commands = builder.build();
 
         foreach(QString command, commands) {
@@ -150,7 +149,7 @@ QStringList SynchronizeJob::retrieveEntries(QStringList files)
     foreach(QString entry, this->getEntries()) {
         foreach(QString file, files) {
             if(file.startsWith(entry)) {
-                QString fileMask = this->m_config->fileMask(entry);
+                QString fileMask = this->m_config->value("dirs").toObject().value(entry).toObject().value("fileMask").toString();
 
                 if(!fileMask.isEmpty()) {
                     QString fileName = file.split("/").last();
@@ -171,13 +170,15 @@ QStringList SynchronizeJob::retrieveEntries(QStringList files)
     return entries;
 }
 
-void SynchronizeJob::runHook(QString name, Predefine predefine)
+void SynchronizeJob::runHooks(QList<HookDescriptor> hooks)
 {
-    QSystemSemaphore semaphore("gwatchd:" + name + ":" + predefine);
+    foreach(HookDescriptor hook, hooks) {
+        QSystemSemaphore semaphore(QString("%1:%2").arg(hook.jobName(), hook.predefine()));
 
-    emit(runRequested(name, predefine));
+        emit(runRequested(hook.jobName(), hook.predefine()));
 
-    semaphore.acquire();
+        semaphore.acquire();
+    }
 }
 
 void SynchronizeJob::slot_start()
@@ -216,17 +217,10 @@ void SynchronizeJob::slot_finished(int code)
     if(this->m_activeProcessList.isEmpty()) {
         emit(finished(code));
 
-        typedef QPair<QString, QString> Hook;
+        HooksSettings hooksSettings = HooksSettingsFactory::create(Entry(entry), this->m_config);
+        QList<HookDescriptor> hooks = code > 0 ? hooksSettings.failedHooks() : hooksSettings.finishedHooks();
 
-        if(code > 0) {
-            foreach(Hook hook, this->m_config->failedHooks(entry)) {
-                this->runHook(hook.first, Predefine(hook.second));
-            }
-        } else {
-            foreach(Hook hook, this->m_config->finishedHooks(entry)) {
-                this->runHook(hook.first, Predefine(hook.second));
-            }
-        }
+        this->runHooks(hooks);
     }
 }
 

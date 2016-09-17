@@ -24,7 +24,6 @@
 #include <QObject>
 #include <QThread>
 
-#include "job/jobmanager.h"
 #include "watcher/watcher.h"
 #include "logger/logger.h"
 

@@ -24,7 +24,6 @@
 #include <QObject>
 
 #include "../../../jobs/synchronize/command/rsync/rsynccommandpartincludes.h"
-#include "config/synchronizeconfig.h"
 #include "config/jsonconfig.h"
 
 class RsyncCommandPartIncludesTest : public QObject
@@ -33,13 +32,7 @@ class RsyncCommandPartIncludesTest : public QObject
 public:
     RsyncCommandPartIncludesTest(QObject *parent = 0);
 
-private:
-    SynchronizeConfig *m_config;
-    RsyncCommandPartIncludes *m_commandPart;
-
 private slots:
-    void initTestCase();
-
     void testBuild();
 
 };

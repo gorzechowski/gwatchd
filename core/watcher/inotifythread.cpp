@@ -22,7 +22,6 @@
 #include <QDirIterator>
 #include <QFileInfo>
 #include <QCoreApplication>
-#include <QDebug>
 #include <string.h>
 
 #include <sys/inotify.h>

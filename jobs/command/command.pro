@@ -6,9 +6,9 @@ SOURCES += commandjob.cpp
 
 HEADERS += commandjob.h
 
-include(config/config.pri)
-include(command/command.pri)
 include(notification/notification.pri)
+include(config/config.pri)
+include(../../share/share.pri)
 
 OTHER_FILES += \
     commandjob.json

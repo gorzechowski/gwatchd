@@ -18,40 +18,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include <QDebug>
 #include <QCryptographicHash>
 #include <QFileInfo>
+#include <QRegularExpression>
+#include <QSystemSemaphore>
 
 #include "synchronizejob.h"
 #include "command/rsync/rsynccommandbuilder.h"
 #include "notification/runningpayload.h"
-#include "config/synchronizeconfig.h"
+#include "config/settings/factory/rsyncsettingsfactory.h"
+#include "config/settings/factory/sshsettingsfactory.h"
+#include "config/settings/factory/hookssettingsfactory.h"
 
 SynchronizeJob::SynchronizeJob()
 {
     this->m_timer = new QTimer();
 
-    connect(this->m_timer, SIGNAL(timeout()), this, SLOT(slot_synchronize()));
+    connect(this->m_timer, SIGNAL(timeout()), this, SLOT(synchronize()));
 }
 
-void SynchronizeJob::setConfig(Config *config)
+void SynchronizeJob::run(Entry entry)
 {
-    this->m_config = new SynchronizeConfig(config);
-}
-
-void SynchronizeJob::setLogger(Logger *logger)
-{
-    this->m_logger = logger;
-}
-
-QStringList SynchronizeJob::getEntries()
-{
-    return this->m_config->entries();
-}
-
-void SynchronizeJob::run(QString data)
-{
-    this->m_files << data;
+    if(this->m_files.indexOf(entry) < 0) {
+        this->m_files << entry;
+    }
 
     if(this->m_timer->isActive()) {
         this->m_timer->stop();
@@ -60,31 +50,37 @@ void SynchronizeJob::run(QString data)
     this->m_timer->start(this->m_config->value("delay").toInt(100));
 }
 
-void SynchronizeJob::slot_synchronize()
+void SynchronizeJob::run(Predefine)
+{
+    this->m_logger->log("Synchronize job does not support predefines in this moment");
+    return;
+}
+
+void SynchronizeJob::synchronize()
 {
     if(this->m_timer->isActive()) {
         this->m_timer->stop();
     }
 
-    emit(started());
-
-    QStringList entries;
-
-    foreach(QString entry, this->getEntries()) {
-        foreach(QString file, this->m_files) {
-            if(file.startsWith(entry)) {
-                entries << entry;
-                break;
-            }
-        }
-    }
+    QStringList entries = this->retrieveEntries(this->m_files);
 
     this->m_files.clear();
 
-    foreach(QString entry, entries) {
-        QFileInfo info(entry);
+    if(entries.isEmpty()) {
+        this->m_logger->debug("Synchronize job has nothing to do");
 
-        RsyncCommandBuilder builder(info, this->m_config);
+        emit(finished(0));
+
+        return;
+    }
+
+    emit(started());
+
+    foreach(QString entry, entries) {
+        RsyncSettings rsyncSettings = RsyncSettingsFactory::create(Entry(entry), this->m_config);
+        SshSettings sshSettings = SshSettingsFactory::create(Entry(entry), this->m_config);
+
+        RsyncCommandBuilder builder(&rsyncSettings, &sshSettings);
         QStringList commands = builder.build();
 
         foreach(QString command, commands) {
@@ -130,6 +126,45 @@ void SynchronizeJob::slot_synchronize()
     }
 }
 
+QStringList SynchronizeJob::retrieveEntries(QStringList files)
+{
+    QStringList entries;
+
+    foreach(QString entry, this->getEntries()) {
+        foreach(QString file, files) {
+            if(file.startsWith(entry)) {
+                QString fileMask = this->m_config->value("dirs").toObject().value(entry).toObject().value("fileMask").toString();
+
+                if(!fileMask.isEmpty()) {
+                    QString fileName = file.split("/").last();
+                    QRegularExpression regex(fileMask);
+                    QRegularExpressionMatch match = regex.match(fileName);
+
+                    if(!match.hasMatch()) {
+                        continue;
+                    }
+                }
+
+                entries << entry;
+                break;
+            }
+        }
+    }
+
+    return entries;
+}
+
+void SynchronizeJob::runHooks(QList<HookDescriptor> hooks)
+{
+    foreach(HookDescriptor hook, hooks) {
+        QSystemSemaphore semaphore(QString("%1:%2").arg(hook.jobName(), hook.predefine()));
+
+        emit(runRequested(hook.jobName(), hook.predefine()));
+
+        semaphore.acquire();
+    }
+}
+
 void SynchronizeJob::slot_start()
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
@@ -160,11 +195,16 @@ void SynchronizeJob::slot_finished(int code)
     if(code > 0) {
         this->m_logger->error(QString("Synchronizing %1 failed").arg(entry));
     } else {
-        this->m_logger->log(QString("Synchronizing %1 done").arg(process->property("entry").toString()));
+        this->m_logger->log(QString("Synchronizing %1 done").arg(entry));
     }
 
     if(this->m_activeProcessList.isEmpty()) {
         emit(finished(code));
+
+        HooksSettings hooksSettings = HooksSettingsFactory::create(Entry(entry), this->m_config);
+        QList<HookDescriptor> hooks = code > 0 ? hooksSettings.failedHooks() : hooksSettings.finishedHooks();
+
+        this->runHooks(hooks);
     }
 }
 

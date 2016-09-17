@@ -4,19 +4,14 @@ TARGET = commandTest
 
 SOURCES += \
     main.cpp \
-    sshcommandpartbasetest.cpp \
-    sshcommandparttargettest.cpp \
-    commandconfigtest.cpp
+    commandsettingstest.cpp
 
 HEADERS += \
-    sshcommandpartbasetest.h \
-    sshcommandparttargettest.h \
-    commandconfigtest.h
+    commandsettingstest.h
 
-include(../../../jobs/command/command/command.pri)
-include(../../../jobs/command/config/config.pri)
-include(../../../core/config/config.pri)
+include(../../../jobs/command/config/settings/settings.pri)
 include(../../mockups/mockups.pri)
+include(../../../share/share.pri)
 
 INCLUDEPATH += \
     ../../../jobs/command/

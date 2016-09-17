@@ -1,14 +1,13 @@
+include(decorator/decorator.pri)
+include(factory/factory.pri)
+
 HEADERS += \
-    logger/decorator/loggertimestampdecorator.h \
-    logger/filelogger.h \
-    logger/logger.h \
+    $$PWD/filelogger.h \
+    $$PWD/logger.h \
     $$PWD/simplelogger.h \
-    $$PWD/loggercomposite.h \
-    $$PWD/decorator/loggerleveldecorator.h
+    $$PWD/loggercomposite.h
 
 SOURCES += \
-    logger/decorator/loggertimestampdecorator.cpp \
-    logger/filelogger.cpp \
+    $$PWD/filelogger.cpp \
     $$PWD/simplelogger.cpp \
-    $$PWD/loggercomposite.cpp \
-    $$PWD/decorator/loggerleveldecorator.cpp
+    $$PWD/loggercomposite.cpp

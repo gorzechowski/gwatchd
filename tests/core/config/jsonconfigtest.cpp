@@ -19,7 +19,6 @@
  */
 
 #include <QTest>
-#include <QDebug>
 
 #include "jsonconfigtest.h"
 

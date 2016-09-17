@@ -27,8 +27,9 @@
 #include <QTimer>
 
 #include "../../core/job/job.h"
+#include "../../core/config/config.h"
 #include "../../core/notification/payload.h"
-#include "config/synchronizeconfig.h"
+#include "config/settings/hookdescriptor.h"
 
 class SynchronizeJob : public QObject, public Job
 {
@@ -40,29 +41,32 @@ class SynchronizeJob : public QObject, public Job
 public:
     SynchronizeJob();
 
-    QStringList getEntries();
-    void run(QString data);
-    void setConfig(Config *config);
-    void setLogger(Logger *logger);
+    void run(Entry entry);
+    void run(Predefine predefine);
 
 protected:
-    SynchronizeConfig *m_config;
     QHash<QString, QProcess*> m_activeProcessList;
 
     QTimer *m_timer;
     QStringList m_files;
+
+    QStringList retrieveEntries(QStringList files);
+
+    void runHooks(QList<HookDescriptor> hooks);
 
 private slots:
     void slot_start();
     void slot_finished(int code);
     void slot_read();
 
-    void slot_synchronize();
+    void synchronize();
 
 signals:
     void started();
     void running(Payload*);
     void finished(int);
+    void runRequested(QString, Entry);
+    void runRequested(QString, Predefine);
 };
 
 #endif // SYNCHRONIZEJOB_H

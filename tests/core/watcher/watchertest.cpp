@@ -22,7 +22,6 @@
 #include <QSignalSpy>
 #include <QEventLoop>
 #include <QThread>
-#include <QDebug>
 #include <QProcess>
 
 #include "watchertest.h"

@@ -18,22 +18,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include <QDebug>
 #include <QSystemSemaphore>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
 #include "application.h"
-#include "job/jobmanager.h"
-#include "logger/loggercomposite.h"
-#include "logger/filelogger.h"
-#include "logger/simplelogger.h"
-#include "logger/decorator/loggertimestampdecorator.h"
-#include "logger/decorator/loggerleveldecorator.h"
+#include "job/jobsloader.h"
+#include "job/jobscollector.h"
+#include "job/jobsrunner.h"
+#include "logger/factory/defaultloggerfactory.h"
 #include "watcher/watcher.h"
 #include "notification/notificationmanager.h"
 #include "notification/notifier/socketnotifier.h"
+#include "notification/jobsnotificationmanager.h"
 #include "socket/socketserver.h"
 
 QSystemSemaphore semaphore("gwatchd");
@@ -82,26 +80,7 @@ QString Application::configDir()
 
 Logger* Application::getLogger(ApplicationConfig *config)
 {
-    LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
-        new LoggerTimestampDecorator(
-            new FileLogger(config->logsDirPath() + "/gwatchd.log", config)
-        )
-    );
-
-    LoggerLevelDecorator *simpleLogger = new LoggerLevelDecorator(
-        new LoggerTimestampDecorator(
-            new SimpleLogger()
-        )
-    );
-
-    LoggerComposite *logger = new LoggerComposite();
-
-    logger->add(fileLogger);
-    logger->add(simpleLogger);
-
-    logger->setDebug(this->isDebug());
-
-    return logger;
+    return DefaultLoggerFactory::create(config->logsDirPath() + "/gwatchd.log", config, this->isDebug());
 }
 
 void Application::parseArguments()
@@ -136,17 +115,34 @@ void Application::initStandardMode(ApplicationConfig *config)
 {
     Logger *logger = this->getLogger(config);
 
-    JobManager *manager = new JobManager(this->isDebug(), logger, config);
+    JobsCollector *collector = new JobsCollector(
+        config->fileInfo().path() + "/job",
+        this->applicationDirPath() + "/jobs",
+        logger
+    );
+    JobsLoader *loader = new JobsLoader(config, logger);
+    JobsRunner *runner = new JobsRunner(loader, logger);
+    JobsNotificationManager *manager = new JobsNotificationManager(logger);
 
-    manager->loadAvailableJobs();
+    foreach(JobDescriptor descriptor, collector->collectedJobs()) {
+        loader->loadJob(descriptor, this->isDebug());
+    }
 
     Watcher *watcher = new Watcher(logger);
 
-    foreach(Job *job, manager->getLoadedJobs().values()) {
+    foreach(Job *job, loader->getLoadedJobs().values()) {
         watcher->addEntries(job->getEntries());
+
+        QObject *jobInstance = dynamic_cast<QObject*>(job);
+
+        connect(jobInstance, SIGNAL(started()), manager, SLOT(slot_jobStarted()));
+        connect(jobInstance, SIGNAL(running(Payload*)), manager, SLOT(slot_jobRunning(Payload*)));
+        connect(jobInstance, SIGNAL(finished(int)), manager, SLOT(slot_jobFinished(int)));
+        connect(jobInstance, SIGNAL(runRequested(QString, Entry)), runner, SLOT(run(QString, Entry)));
+        connect(jobInstance, SIGNAL(runRequested(QString, Predefine)), runner, SLOT(run(QString, Predefine)));
     }
 
-    connect(watcher, SIGNAL(fileChanged(QString)), manager, SLOT(slot_runJobs(QString)));
+    connect(watcher, SIGNAL(fileChanged(QString)), runner, SLOT(runAll(QString)));
 
     QEventLoop loop;
 
@@ -187,14 +183,22 @@ void Application::initSingleMode(ApplicationConfig *config)
 {
     Logger *logger = this->getLogger(config);
 
-    JobManager *manager = new JobManager(this->isDebug(), logger, config);
+    JobsCollector *collector = new JobsCollector(
+        config->fileInfo().path() + "/job",
+        this->applicationDirPath() + "/jobs",
+        logger
+    );
+    JobsLoader *loader = new JobsLoader(config, logger);
+    JobsRunner *runner = new JobsRunner(loader, logger);
 
-    manager->loadAvailableJobs();
+    foreach(JobDescriptor descriptor, collector->collectedJobs()) {
+        loader->loadJob(descriptor, this->isDebug());
+    }
 
     QString runJobName = this->m_parser->runJobName();
     QStringList runJobArgs = this->m_parser->runJobArgs();
 
-    manager->runJob(runJobName, runJobArgs);
+    runner->run(runJobName, runJobArgs);
 
     ::exit(0);
 }

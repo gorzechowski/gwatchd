@@ -19,7 +19,6 @@
  */
 
 #include <QFile>
-#include <QDebug>
 
 #include "jsonconfig.h"
 

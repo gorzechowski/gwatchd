@@ -27,29 +27,31 @@
 #include "command/rsync/rsynccommandpartremoteshell.h"
 #include "command/rsync/rsynccommandparttarget.h"
 
-RsyncCommandBuilder::RsyncCommandBuilder(QFileInfo entry, SynchronizeConfig *config)
+RsyncCommandBuilder::RsyncCommandBuilder(RsyncSettings *rsyncSettings, SshSettings *sshSettings)
 {
-    this->m_entry = entry;
-    this->m_config = config;
+    this->m_rsyncSettings = rsyncSettings;
+    this->m_sshSettings = sshSettings;
 }
 
 QStringList RsyncCommandBuilder::build()
 {
     QStringList parts, commands;
 
-    QString entry = this->m_entry.absoluteFilePath();
+    QString source = this->m_rsyncSettings->source();
 
-    if(this->m_entry.isDir() && !entry.endsWith("/")) {
-        entry.append("/");
+    QFileInfo entry(this->m_rsyncSettings->source());
+
+    if(entry.isDir() && !source.endsWith("/")) {
+        source.append("/");
     }
 
-    foreach(QString host, this->m_config->targetHosts(this->m_entry.absoluteFilePath())) {
+    foreach(QString host, this->m_rsyncSettings->targetHosts()) {
         parts.append(RsyncCommandPartBase().build());
-        parts.append(RsyncCommandPartIncludes(this->m_entry, this->m_config).build());
-        parts.append(RsyncCommandPartExcludes(this->m_entry, this->m_config).build());
-        parts.append(entry);
-        parts.append(RsyncCommandPartRemoteShell(this->m_entry, this->m_config).build());
-        parts.append(RsyncCommandPartTarget(this->m_entry, this->m_config).build(host));
+        parts.append(RsyncCommandPartIncludes(this->m_rsyncSettings).build());
+        parts.append(RsyncCommandPartExcludes(this->m_rsyncSettings).build());
+        parts.append(source);
+        parts.append(RsyncCommandPartRemoteShell(this->m_sshSettings).build());
+        parts.append(RsyncCommandPartTarget(this->m_rsyncSettings).build(host));
 
         commands.append(parts.join(" "));
         parts.clear();

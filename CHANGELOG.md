@@ -4,6 +4,7 @@
 - [Bug][[#11](https://github.com/gorzechowski/gwatchd/issues/11)] Daemon mode does not work under MacOS
 - [Feature][[#18](https://github.com/gorzechowski/gwatchd/issues/18)] Possibility to watch files
 - [Feature][[#24](https://github.com/gorzechowski/gwatchd/issues/24)] Change config format to JSON
+- [Feature][[#19](https://github.com/gorzechowski/gwatchd/issues/19)] Command job
 
 #### **1.1.0** _(13-08-2016)_
 - [Bug][[#4](https://github.com/gorzechowski/gwatchd/issues/4)] I can execute gwatchd with any parameters

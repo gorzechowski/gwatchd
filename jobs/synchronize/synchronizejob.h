@@ -41,14 +41,10 @@ class SynchronizeJob : public QObject, public Job
 public:
     SynchronizeJob();
 
-    QStringList getEntries();
     void run(Entry entry);
     void run(Predefine predefine);
-    void setConfig(Config *config);
-    void setLogger(Logger *logger);
 
 protected:
-    Config *m_config;
     QHash<QString, QProcess*> m_activeProcessList;
 
     QTimer *m_timer;
@@ -63,7 +59,7 @@ private slots:
     void slot_finished(int code);
     void slot_read();
 
-    void slot_synchronize();
+    void synchronize();
 
 signals:
     void started();

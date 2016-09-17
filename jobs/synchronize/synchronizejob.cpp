@@ -34,22 +34,7 @@ SynchronizeJob::SynchronizeJob()
 {
     this->m_timer = new QTimer();
 
-    connect(this->m_timer, SIGNAL(timeout()), this, SLOT(slot_synchronize()));
-}
-
-void SynchronizeJob::setConfig(Config *config)
-{
-    this->m_config = config;
-}
-
-void SynchronizeJob::setLogger(Logger *logger)
-{
-    this->m_logger = logger;
-}
-
-QStringList SynchronizeJob::getEntries()
-{
-    return this->m_config->value("dirs").toObject().keys();
+    connect(this->m_timer, SIGNAL(timeout()), this, SLOT(synchronize()));
 }
 
 void SynchronizeJob::run(Entry entry)
@@ -71,7 +56,7 @@ void SynchronizeJob::run(Predefine)
     return;
 }
 
-void SynchronizeJob::slot_synchronize()
+void SynchronizeJob::synchronize()
 {
     if(this->m_timer->isActive()) {
         this->m_timer->stop();

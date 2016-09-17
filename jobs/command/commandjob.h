@@ -38,14 +38,10 @@ class CommandJob : public QObject, public Job
 public:
     CommandJob();
 
-    QStringList getEntries();
     void run(Entry entry);
     void run(Predefine predefine);
-    void setConfig(Config *config);
-    void setLogger(Logger *logger);
 
 protected:
-    Config *m_config;
     QHash<QString, QProcess*> m_activeProcessList;
 
     QTimer *m_entryTimer;
@@ -64,7 +60,6 @@ private slots:
     void slot_finished(int code);
     void slot_read();
 
-    void slot_execute();
     void execute();
 
 signals:

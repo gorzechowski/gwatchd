@@ -37,21 +37,6 @@ CommandJob::CommandJob()
     connect(this->m_predefineTimer, SIGNAL(timeout()), this, SLOT(execute()));
 }
 
-void CommandJob::setConfig(Config *config)
-{
-    this->m_config = config;
-}
-
-void CommandJob::setLogger(Logger *logger)
-{
-    this->m_logger = logger;
-}
-
-QStringList CommandJob::getEntries()
-{
-    return this->m_config->value("dirs").toObject().keys();
-}
-
 void CommandJob::run(Entry entry)
 {
     if(this->m_entries.indexOf(entry) < 0) {

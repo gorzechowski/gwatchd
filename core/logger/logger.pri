@@ -1,4 +1,5 @@
 include(decorator/decorator.pri)
+include(factory/factory.pri)
 
 HEADERS += \
     $$PWD/filelogger.h \

@@ -18,31 +18,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef JOBSLOADER_H
-#define JOBSLOADER_H
+#ifndef DEFAULTLOGGERFACTORY_H
+#define DEFAULTLOGGERFACTORY_H
 
-#include <QObject>
-
-#include "config/applicationconfig.h"
-#include "job/job.h"
-#include "job/jobdescriptor.h"
 #include "logger/logger.h"
+#include "config/applicationconfig.h"
 
-class JobsLoader : public QObject
+class DefaultLoggerFactory
 {
-    Q_OBJECT
 public:
-    JobsLoader(ApplicationConfig *config, Logger *logger, QObject *parent = 0);
+    DefaultLoggerFactory();
 
-    QHash<QString, Job*> getLoadedJobs();
-
-    bool loadJob(JobDescriptor jobDescriptor, bool isDebug = false);
-
-protected:
-    ApplicationConfig *m_config;
-    Logger *m_logger;
-
-    QHash<QString, Job*> m_loaded;
+    static Logger* create(QString filePath, ApplicationConfig *config, bool isDebug = false);
 };
 
-#endif // JOBSLOADER_H
+#endif // DEFAULTLOGGERFACTORY_H

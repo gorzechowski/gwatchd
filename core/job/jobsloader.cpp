@@ -23,11 +23,7 @@
 #include "jobsloader.h"
 
 #include "config/jsonconfig.h"
-#include "logger/filelogger.h"
-#include "logger/simplelogger.h"
-#include "logger/loggercomposite.h"
-#include "logger/decorator/loggertimestampdecorator.h"
-#include "logger/decorator/loggerleveldecorator.h"
+#include "logger/factory/defaultloggerfactory.h"
 
 JobsLoader::JobsLoader(ApplicationConfig *config, Logger *logger, QObject *parent) : QObject(parent)
 {
@@ -40,7 +36,7 @@ QHash<QString, Job*> JobsLoader::getLoadedJobs()
     return this->m_loaded;
 }
 
-bool JobsLoader::loadJob(JobDescriptor jobDescriptor)
+bool JobsLoader::loadJob(JobDescriptor jobDescriptor, bool isDebug)
 {
     QPluginLoader loader(jobDescriptor.pluginPath());
 
@@ -59,26 +55,11 @@ bool JobsLoader::loadJob(JobDescriptor jobDescriptor)
             QJsonObject metaData = loader.metaData().value("MetaData").toObject();
             JsonConfig *config = new JsonConfig(jobDescriptor.configPath());
 
-            LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
-                new LoggerTimestampDecorator(
-                    new FileLogger(
-                        QString("%1/job/%2.log").arg(logDirPath).arg(jobDescriptor.name()),
-                        this->m_config
-                    )
-                )
+            Logger *logger = DefaultLoggerFactory::create(
+                QString("%1/job/%2.log").arg(logDirPath).arg(jobDescriptor.name()),
+                this->m_config,
+                isDebug
             );
-
-            LoggerLevelDecorator *simpleLogger = new LoggerLevelDecorator(
-                new LoggerTimestampDecorator(new SimpleLogger())
-            );
-
-            LoggerComposite *logger = new LoggerComposite();
-
-            logger->add(fileLogger);
-            logger->add(simpleLogger);
-
-            logger->setDebug(true);
-//            logger->setDebug(this->m_isDebug);
 
             loadedJob->setConfig(config);
             loadedJob->setLogger(logger);

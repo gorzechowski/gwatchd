@@ -28,11 +28,7 @@
 #include "job/jobsloader.h"
 #include "job/jobscollector.h"
 #include "job/jobsrunner.h"
-#include "logger/loggercomposite.h"
-#include "logger/filelogger.h"
-#include "logger/simplelogger.h"
-#include "logger/decorator/loggertimestampdecorator.h"
-#include "logger/decorator/loggerleveldecorator.h"
+#include "logger/factory/defaultloggerfactory.h"
 #include "watcher/watcher.h"
 #include "notification/notificationmanager.h"
 #include "notification/notifier/socketnotifier.h"
@@ -85,26 +81,7 @@ QString Application::configDir()
 
 Logger* Application::getLogger(ApplicationConfig *config)
 {
-    LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
-        new LoggerTimestampDecorator(
-            new FileLogger(config->logsDirPath() + "/gwatchd.log", config)
-        )
-    );
-
-    LoggerLevelDecorator *simpleLogger = new LoggerLevelDecorator(
-        new LoggerTimestampDecorator(
-            new SimpleLogger()
-        )
-    );
-
-    LoggerComposite *logger = new LoggerComposite();
-
-    logger->add(fileLogger);
-    logger->add(simpleLogger);
-
-    logger->setDebug(this->isDebug());
-
-    return logger;
+    return DefaultLoggerFactory::create(config->logsDirPath() + "/gwatchd.log", config, this->isDebug());
 }
 
 void Application::parseArguments()
@@ -149,7 +126,7 @@ void Application::initStandardMode(ApplicationConfig *config)
     JobsNotificationManager *manager = new JobsNotificationManager(logger);
 
     foreach(JobDescriptor descriptor, collector->collectedJobs()) {
-        loader->loadJob(descriptor);
+        loader->loadJob(descriptor, this->isDebug());
     }
 
     Watcher *watcher = new Watcher(logger);
@@ -216,7 +193,7 @@ void Application::initSingleMode(ApplicationConfig *config)
     JobsRunner *runner = new JobsRunner(loader, logger);
 
     foreach(JobDescriptor descriptor, collector->collectedJobs()) {
-        loader->loadJob(descriptor);
+        loader->loadJob(descriptor, this->isDebug());
     }
 
     QString runJobName = this->m_parser->runJobName();

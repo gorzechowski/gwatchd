@@ -18,23 +18,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include <QCoreApplication>
-#include <QTest>
+#ifndef HOOKSSETTINGSTEST_H
+#define HOOKSSETTINGSTEST_H
 
-#include "sshsettingstest.h"
-#include "hookdescriptortest.h"
-#include "hookssettingstest.h"
+#include <QObject>
 
-int main(int argc, char *argv[])
+#include "config/settings/hookssettings.h"
+
+class HooksSettingsTest : public QObject
 {
-    QCoreApplication app(argc, argv);
-    app.setAttribute(Qt::AA_Use96Dpi, true);
+    Q_OBJECT
+public:
+    HooksSettingsTest(QObject *parent = 0);
 
-    int res = 0;
+protected:
+    HooksSettings *m_settings;
 
-    res += QTest::qExec(new SshSettingsTest(), argc, argv);
-    res += QTest::qExec(new HooksSettingsTest(), argc, argv);
-    res += QTest::qExec(new HookDescriptorTest(), argc, argv);
+private slots:
+    void initTestCase();
 
-    return res;
-}
+    void testFinishedHooks();
+    void testFailedHooks();
+
+};
+
+#endif // HOOKSSETTINGSTEST_H

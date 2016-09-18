@@ -23,32 +23,21 @@
 
 #include "config/jsonconfig.h"
 
-#include "sshsettingstest.h"
+#include "hookdescriptortest.h"
 
-SshSettingsTest::SshSettingsTest(QObject *parent) :
+HookDescriptorTest::HookDescriptorTest(QObject *parent) :
     QObject(parent)
 {
 
 }
 
-void SshSettingsTest::initTestCase()
+void HookDescriptorTest::initTestCase()
 {
-    this->m_settings = new SshSettings(
-                QStringList() << "host1" << "host2",
-                "user",
-                "/home/user/.ssh/key",
-                "/etc/sshConfig",
-                2222,
-                QStringList() << "StrictHostKeyChecking=no"
-    );
+    this->m_descriptor = new HookDescriptor("command", Predefine("example"));
 }
 
-void SshSettingsTest::testValues()
+void HookDescriptorTest::testValues()
 {
-    QCOMPARE(this->m_settings->hosts(), QStringList() << "host1" << "host2");
-    QCOMPARE(this->m_settings->user(), QString("user"));
-    QCOMPARE(this->m_settings->identityFile(), QString("/home/user/.ssh/key"));
-    QCOMPARE(this->m_settings->configFile(), QString("/etc/sshConfig"));
-    QCOMPARE(this->m_settings->port(), 2222);
-    QCOMPARE(this->m_settings->options(), QStringList() << "StrictHostKeyChecking=no");
+    QCOMPARE(this->m_descriptor->jobName(), QString("command"));
+    QCOMPARE(this->m_descriptor->predefine(), Predefine("example"));
 }

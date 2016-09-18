@@ -23,32 +23,32 @@
 
 #include "config/jsonconfig.h"
 
-#include "sshsettingstest.h"
+#include "rsyncsettingstest.h"
 
-SshSettingsTest::SshSettingsTest(QObject *parent) :
+RsyncSettingsTest::RsyncSettingsTest(QObject *parent) :
     QObject(parent)
 {
 
 }
 
-void SshSettingsTest::initTestCase()
+void RsyncSettingsTest::initTestCase()
 {
-    this->m_settings = new SshSettings(
-                QStringList() << "host1" << "host2",
-                "user",
-                "/home/user/.ssh/key",
-                "/etc/sshConfig",
-                2222,
-                QStringList() << "StrictHostKeyChecking=no"
+    this->m_settings = new RsyncSettings(
+        "/some/dir",
+        QStringList() << "*.sh",
+        QStringList(),
+        QStringList() << "host1" << "host2",
+        "/some/remote/dir",
+        "user1"
     );
 }
 
-void SshSettingsTest::testValues()
+void RsyncSettingsTest::testValues()
 {
-    QCOMPARE(this->m_settings->hosts(), QStringList() << "host1" << "host2");
-    QCOMPARE(this->m_settings->user(), QString("user"));
-    QCOMPARE(this->m_settings->identityFile(), QString("/home/user/.ssh/key"));
-    QCOMPARE(this->m_settings->configFile(), QString("/etc/sshConfig"));
-    QCOMPARE(this->m_settings->port(), 2222);
-    QCOMPARE(this->m_settings->options(), QStringList() << "StrictHostKeyChecking=no");
+    QCOMPARE(this->m_settings->source(), QString("/some/dir"));
+    QCOMPARE(this->m_settings->excludes(), QStringList() << "*.sh");
+    QCOMPARE(this->m_settings->includes(), QStringList());
+    QCOMPARE(this->m_settings->targetHosts(), QStringList() << "host1" << "host2");
+    QCOMPARE(this->m_settings->targetPath(), QString("/some/remote/dir"));
+    QCOMPARE(this->m_settings->targetUser(), QString("user1"));
 }

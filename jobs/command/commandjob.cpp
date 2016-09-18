@@ -239,10 +239,11 @@ QList<Entry> CommandJob::retrieveEntries(QList<Entry> entries)
     foreach(QString entry, this->getEntries()) {
         foreach(QString file, entries) {
             if(file.startsWith(entry)) {
+                QFileInfo info(file);
                 CommandSettings commandSettings = CommandSettingsFactory::create(Entry(entry), this->m_config);
                 QString fileMask = commandSettings.fileMask();
 
-                if(!fileMask.isEmpty()) {
+                if(!fileMask.isEmpty() && info.isFile()) {
                     QString fileName = file.split("/").last();
                     QRegularExpression regex(fileMask);
                     QRegularExpressionMatch match = regex.match(fileName);

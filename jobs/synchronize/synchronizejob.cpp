@@ -133,9 +133,10 @@ QStringList SynchronizeJob::retrieveEntries(QStringList files)
     foreach(QString entry, this->getEntries()) {
         foreach(QString file, files) {
             if(file.startsWith(entry)) {
+                QFileInfo info(file);
                 QString fileMask = this->m_config->value("dirs").toObject().value(entry).toObject().value("fileMask").toString();
 
-                if(!fileMask.isEmpty()) {
+                if(!fileMask.isEmpty() && info.isFile()) {
                     QString fileName = file.split("/").last();
                     QRegularExpression regex(fileMask);
                     QRegularExpressionMatch match = regex.match(fileName);

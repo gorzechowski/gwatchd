@@ -26,16 +26,18 @@
 class CommandSettings
 {
 public:
-    CommandSettings(bool remote, QString exec, QString fileMask);
+    CommandSettings(bool remote, QString exec, QString fileMask, QString workingDir);
 
     bool remote();
     QString exec();
     QString fileMask();
+    QString workingDir();
 
 protected:
     bool m_remote;
     QString m_exec;
     QString m_fileMask;
+    QString m_workingDir;
 };
 
 #endif // COMMANDSETTINGS_H

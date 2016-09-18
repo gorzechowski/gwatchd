@@ -22,17 +22,19 @@
 #include <QTest>
 
 #include "sshsettingstest.h"
+#include "hookdescriptortest.h"
+#include "hookssettingstest.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
     app.setAttribute(Qt::AA_Use96Dpi, true);
 
-    SshSettingsTest settingsTest;
-
     int res = 0;
 
-    res += QTest::qExec(&settingsTest, argc, argv);
+    res += QTest::qExec(new SshSettingsTest(), argc, argv);
+    res += QTest::qExec(new HooksSettingsTest(), argc, argv);
+    res += QTest::qExec(new HookDescriptorTest(), argc, argv);
 
     return res;
 }

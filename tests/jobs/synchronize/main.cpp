@@ -26,25 +26,21 @@
 #include "rsynccommandpartincludestest.h"
 #include "rsynccommandpartremoteshelltest.h"
 #include "rsynccommandparttargettest.h"
+#include "rsyncsettingstest.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
     app.setAttribute(Qt::AA_Use96Dpi, true);
 
-    RsyncCommandPartBaseTest baseTest;
-    RsyncCommandPartExcludesTest excludesTest;
-    RsyncCommandPartIncludesTest includesTest;
-    RsyncCommandPartRemoteShellTest remoteShellTest;
-    RsyncCommandPartTargetTest targetTest;
-
     int res = 0;
 
-    res += QTest::qExec(&baseTest, argc, argv);
-    res += QTest::qExec(&excludesTest, argc, argv);
-    res += QTest::qExec(&includesTest, argc, argv);
-    res += QTest::qExec(&remoteShellTest, argc, argv);
-    res += QTest::qExec(&targetTest, argc, argv);
+    res += QTest::qExec(new RsyncCommandPartBaseTest(), argc, argv);
+    res += QTest::qExec(new RsyncCommandPartExcludesTest(), argc, argv);
+    res += QTest::qExec(new RsyncCommandPartIncludesTest(), argc, argv);
+    res += QTest::qExec(new RsyncCommandPartRemoteShellTest(), argc, argv);
+    res += QTest::qExec(new RsyncCommandPartTargetTest(), argc, argv);
+    res += QTest::qExec(new RsyncSettingsTest(), argc, argv);
 
     return res;
 }

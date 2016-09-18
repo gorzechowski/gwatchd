@@ -18,32 +18,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include "commandsettings.h"
+#ifndef HOOKSSETTINGSTEST_H
+#define HOOKSSETTINGSTEST_H
 
-CommandSettings::CommandSettings(bool remote, QString exec, QString fileMask, QString workingDir)
-{
-    this->m_remote = remote;
-    this->m_exec = exec;
-    this->m_fileMask = fileMask;
-    this->m_workingDir = workingDir;
-}
+#include <QObject>
 
-bool CommandSettings::remote()
-{
-    return this->m_remote;
-}
+#include "config/settings/hookssettings.h"
 
-QString CommandSettings::exec()
+class HooksSettingsTest : public QObject
 {
-    return this->m_exec;
-}
+    Q_OBJECT
+public:
+    HooksSettingsTest(QObject *parent = 0);
 
-QString CommandSettings::fileMask()
-{
-    return this->m_fileMask;
-}
+protected:
+    HooksSettings *m_settings;
 
-QString CommandSettings::workingDir()
-{
-    return this->m_workingDir;
-}
+private slots:
+    void initTestCase();
+
+    void testFinishedHooks();
+    void testFailedHooks();
+
+};
+
+#endif // HOOKSSETTINGSTEST_H

@@ -143,6 +143,12 @@ void CommandJob::execute(QList<Entry> entries)
 
             this->m_logger->debug("Starting command process");
 
+            if(!commandSettings.workingDir().isEmpty()) {
+                process->setWorkingDirectory(commandSettings.workingDir());
+            } else {
+                process->setWorkingDirectory(entry);
+            }
+
             process->start(command);
         }
     }
@@ -217,6 +223,10 @@ void CommandJob::execute(QList<Predefine> predefines)
 
             this->m_logger->debug("Starting command process");
 
+            if(!commandSettings.workingDir().isEmpty()) {
+                process->setWorkingDirectory(commandSettings.workingDir());
+            }
+
             process->start(command);
         }
     }
@@ -229,10 +239,11 @@ QList<Entry> CommandJob::retrieveEntries(QList<Entry> entries)
     foreach(QString entry, this->getEntries()) {
         foreach(QString file, entries) {
             if(file.startsWith(entry)) {
+                QFileInfo info(file);
                 CommandSettings commandSettings = CommandSettingsFactory::create(Entry(entry), this->m_config);
                 QString fileMask = commandSettings.fileMask();
 
-                if(!fileMask.isEmpty()) {
+                if(!fileMask.isEmpty() && info.isFile()) {
                     QString fileName = file.split("/").last();
                     QRegularExpression regex(fileMask);
                     QRegularExpressionMatch match = regex.match(fileName);

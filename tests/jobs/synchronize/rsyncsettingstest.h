@@ -18,32 +18,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include "commandsettings.h"
+#ifndef RSYNCSETTINGSTEST_H
+#define RSYNCSETTINGSTEST_H
 
-CommandSettings::CommandSettings(bool remote, QString exec, QString fileMask, QString workingDir)
-{
-    this->m_remote = remote;
-    this->m_exec = exec;
-    this->m_fileMask = fileMask;
-    this->m_workingDir = workingDir;
-}
+#include <QObject>
 
-bool CommandSettings::remote()
-{
-    return this->m_remote;
-}
+#include "config/settings/rsyncsettings.h"
 
-QString CommandSettings::exec()
+class RsyncSettingsTest : public QObject
 {
-    return this->m_exec;
-}
+    Q_OBJECT
+public:
+    RsyncSettingsTest(QObject *parent = 0);
 
-QString CommandSettings::fileMask()
-{
-    return this->m_fileMask;
-}
+protected:
+    RsyncSettings *m_settings;
 
-QString CommandSettings::workingDir()
-{
-    return this->m_workingDir;
-}
+private slots:
+    void initTestCase();
+
+    void testValues();
+
+};
+
+#endif // RSYNCSETTINGSTEST_H

@@ -18,24 +18,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef COMMANDSETTINGS_H
-#define COMMANDSETTINGS_H
+#ifndef SETTINGSFACTORY_H
+#define SETTINGSFACTORY_H
 
 #include <QString>
 
-class CommandSettings
+#include "job/job.h"
+#include "config/config.h"
+#include "../settings.h"
+
+class SettingsFactory
 {
 public:
-    CommandSettings(bool remote, QString exec, QString workingDir);
+    SettingsFactory(QString context, Config *config);
 
-    bool remote();
-    QString exec();
-    QString workingDir();
+    static Settings create(Entry entry, Config *config);
+    static Settings create(Predefine predefine, Config *config);
+
+    Settings create(QString entry);
 
 protected:
-    bool m_remote;
-    QString m_exec;
-    QString m_workingDir;
+    QString m_context;
+    Config *m_config;
+
+    QString fileMask(QString entry);
 };
 
-#endif // COMMANDSETTINGS_H
+#endif // SETTINGSFACTORY_H

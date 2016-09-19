@@ -43,7 +43,6 @@ protected:
 
     bool remote(QString entry);
     QString exec(QString entry);
-    QString fileMask(QString entry);
     QString workingDir(QString entry);
 };
 

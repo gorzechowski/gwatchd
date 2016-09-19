@@ -45,7 +45,6 @@ CommandSettings CommandSettingsFactory::create(QString entry)
     return CommandSettings(
         this->remote(entry),
         this->exec(entry),
-        this->fileMask(entry),
         this->workingDir(entry)
     );
 }
@@ -58,11 +57,6 @@ bool CommandSettingsFactory::remote(QString entry)
 QString CommandSettingsFactory::exec(QString entry)
 {
     return this->m_config->value(this->m_context).toObject().value(entry).toObject().value("exec").toString();
-}
-
-QString CommandSettingsFactory::fileMask(QString entry)
-{
-    return this->m_config->value(this->m_context).toObject().value(entry).toObject().value("fileMask").toString();
 }
 
 QString CommandSettingsFactory::workingDir(QString entry)

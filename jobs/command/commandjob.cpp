@@ -29,6 +29,7 @@
 #include "config/settings/factory/sshsettingsfactory.h"
 #include "config/settings/factory/commandsettingsfactory.h"
 #include "config/settings/factory/hookssettingsfactory.h"
+#include "config/settings/factory/settingsfactory.h"
 
 CommandJob::CommandJob()
 {
@@ -246,8 +247,8 @@ QList<Entry> CommandJob::retrieveEntries(QList<Entry> entries)
         foreach(QString file, entries) {
             if(file.startsWith(entry)) {
                 QFileInfo info(file);
-                CommandSettings commandSettings = CommandSettingsFactory::create(Entry(entry), this->m_config);
-                QString fileMask = commandSettings.fileMask();
+                Settings settings = SettingsFactory::create(Entry(entry), this->m_config);
+                QString fileMask = settings.fileMask();
 
                 if(!fileMask.isEmpty() && info.isFile()) {
                     QString fileName = file.split("/").last();
@@ -300,7 +301,7 @@ void CommandJob::slot_start()
 
     RunningPayload *payload = new RunningPayload();
 
-    payload->addEntryInfo(entry, RunningPayload::Started);
+    payload->addCommandInfo(command, RunningPayload::Started);
 
     emit(running(payload));
 }
@@ -313,7 +314,7 @@ void CommandJob::slot_finished(int code)
     QString command = this->getCommand(process);
     RunningPayload *payload = new RunningPayload();
 
-    payload->addEntryInfo(entry, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
+    payload->addCommandInfo(command, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
 
     emit(running(payload));
 

@@ -29,6 +29,7 @@
 #include "config/settings/factory/rsyncsettingsfactory.h"
 #include "config/settings/factory/sshsettingsfactory.h"
 #include "config/settings/factory/hookssettingsfactory.h"
+#include "config/settings/factory/settingsfactory.h"
 
 SynchronizeJob::SynchronizeJob()
 {
@@ -220,7 +221,8 @@ QList<Entry> SynchronizeJob::retrieveEntries(QList<Entry> entries)
         foreach(QString file, entries) {
             if(file.startsWith(entry)) {
                 QFileInfo info(file);
-                QString fileMask = this->m_config->value("dirs").toObject().value(entry).toObject().value("fileMask").toString();
+                Settings settings = SettingsFactory::create(Entry(entry), this->m_config);
+                QString fileMask = settings.fileMask();
 
                 if(!fileMask.isEmpty() && info.isFile()) {
                     QString fileName = file.split("/").last();

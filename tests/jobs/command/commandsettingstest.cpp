@@ -29,13 +29,12 @@ CommandSettingsTest::CommandSettingsTest(QObject *parent) : QObject(parent)
 
 void CommandSettingsTest::initTestCase()
 {
-    this->m_settings = new CommandSettings(true, "./script", "local.*", "/");
+    this->m_settings = new CommandSettings(true, "./script", "/");
 }
 
 void CommandSettingsTest::testValues()
 {
     QCOMPARE(this->m_settings->remote(), true);
     QCOMPARE(this->m_settings->exec(), QString("./script"));
-    QCOMPARE(this->m_settings->fileMask(), QString("local.*"));
     QCOMPARE(this->m_settings->workingDir(), QString("/"));
 }

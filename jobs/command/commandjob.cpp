@@ -21,12 +21,14 @@
 #include <QCryptographicHash>
 #include <QFileInfo>
 #include <QRegularExpression>
+#include <QSystemSemaphore>
 
 #include "commandjob.h"
 #include "command/ssh/sshcommandbuilder.h"
 #include "notification/runningpayload.h"
 #include "config/settings/factory/sshsettingsfactory.h"
 #include "config/settings/factory/commandsettingsfactory.h"
+#include "config/settings/factory/hookssettingsfactory.h"
 
 CommandJob::CommandJob()
 {
@@ -146,7 +148,11 @@ void CommandJob::execute(QList<Entry> entries)
             if(!commandSettings.workingDir().isEmpty()) {
                 process->setWorkingDirectory(commandSettings.workingDir());
             } else {
-                process->setWorkingDirectory(entry);
+                QFileInfo info(entry);
+
+                if(info.isDir()) {
+                    process->setWorkingDirectory(entry);
+                }
             }
 
             process->start(command);
@@ -262,6 +268,23 @@ QList<Entry> CommandJob::retrieveEntries(QList<Entry> entries)
     return result;
 }
 
+void CommandJob::runHooks(QList<HookDescriptor> hooks)
+{
+    foreach(HookDescriptor hook, hooks) {
+        QString hookKey = QString("%1:%2").arg(hook.jobName(), hook.predefine());
+
+        this->m_logger->debug(QString("Requesting hook %1").arg(hookKey));
+
+        QSystemSemaphore semaphore(hookKey);
+
+        emit(runRequested(hook.jobName(), hook.predefine()));
+
+        semaphore.acquire();
+
+        this->m_logger->debug("Hook finished work");
+    }
+}
+
 QString CommandJob::getCommand(QProcess *process)
 {
     return QString("%1 %2").arg(process->program(), process->arguments().join(" "));
@@ -304,6 +327,17 @@ void CommandJob::slot_finished(int code)
 
     if(this->m_activeProcessList.isEmpty()) {
         emit(finished(code));
+
+        this->m_logger->debug("Looking for hooks");
+
+        HooksSettings hooksSettings = HooksSettingsFactory::create(Entry(entry), this->m_config);
+        QList<HookDescriptor> hooks = code > 0 ? hooksSettings.failedHooks() : hooksSettings.finishedHooks();
+
+        if(hooks.count() >= 1) {
+            this->runHooks(hooks);
+        } else {
+            this->m_logger->debug("No hooks found");
+        }
     }
 }
 

@@ -27,6 +27,7 @@
 #include <QTimer>
 
 #include "../../core/job/job.h"
+#include "config/settings/hookdescriptor.h"
 
 class CommandJob : public QObject, public Job
 {
@@ -50,6 +51,9 @@ protected:
     QList<Predefine> m_predefines;
 
     QList<Entry> retrieveEntries(QList<Entry> entries);
+
+    void runHooks(QList<HookDescriptor> hooks);
+
     QString getCommand(QProcess *process);
 
     void execute(QList<Entry> entries);

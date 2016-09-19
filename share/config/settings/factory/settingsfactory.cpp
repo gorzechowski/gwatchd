@@ -18,24 +18,36 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef COMMANDSETTINGS_H
-#define COMMANDSETTINGS_H
+#include "settingsfactory.h"
 
-#include <QString>
-
-class CommandSettings
+SettingsFactory::SettingsFactory(QString context, Config *config)
 {
-public:
-    CommandSettings(bool remote, QString exec, QString workingDir);
+    this->m_context = context;
+    this->m_config = config;
+}
 
-    bool remote();
-    QString exec();
-    QString workingDir();
+Settings SettingsFactory::create(Entry entry, Config *config)
+{
+    SettingsFactory factory("dirs", config);
 
-protected:
-    bool m_remote;
-    QString m_exec;
-    QString m_workingDir;
-};
+    return factory.create(entry);
+}
 
-#endif // COMMANDSETTINGS_H
+Settings SettingsFactory::create(Predefine predefine, Config *config)
+{
+    SettingsFactory factory("predefines", config);
+
+    return factory.create(predefine);
+}
+
+Settings SettingsFactory::create(QString entry)
+{
+    return Settings(
+        this->fileMask(entry)
+    );
+}
+
+QString SettingsFactory::fileMask(QString entry)
+{
+    return this->m_config->value(this->m_context).toObject().value(entry).toObject().value("fileMask").toString();
+}

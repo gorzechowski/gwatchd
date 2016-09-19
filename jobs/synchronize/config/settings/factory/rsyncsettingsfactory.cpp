@@ -33,6 +33,13 @@ RsyncSettings RsyncSettingsFactory::create(Entry entry, Config *config)
     return factory.create(entry);
 }
 
+RsyncSettings RsyncSettingsFactory::create(Predefine predefine, Config *config)
+{
+    RsyncSettingsFactory factory("predefines", config);
+
+    return factory.create(config->value("predefines").toObject().value(predefine).toObject().value("source").toString());
+}
+
 RsyncSettings RsyncSettingsFactory::create(QString entry)
 {
     return RsyncSettings(

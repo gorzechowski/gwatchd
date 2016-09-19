@@ -18,24 +18,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef COMMANDSETTINGS_H
-#define COMMANDSETTINGS_H
+#include <QTest>
+#include <QStringList>
 
-#include <QString>
+#include "config/jsonconfig.h"
 
-class CommandSettings
+#include "settingstest.h"
+
+SettingsTest::SettingsTest(QObject *parent) :
+    QObject(parent)
 {
-public:
-    CommandSettings(bool remote, QString exec, QString workingDir);
 
-    bool remote();
-    QString exec();
-    QString workingDir();
+}
 
-protected:
-    bool m_remote;
-    QString m_exec;
-    QString m_workingDir;
-};
+void SettingsTest::initTestCase()
+{
+    this->m_settings = new Settings("local.*");
+}
 
-#endif // COMMANDSETTINGS_H
+void SettingsTest::testValues()
+{
+    QCOMPARE(this->m_settings->fileMask(), QString("local.*"));
+}

@@ -24,6 +24,7 @@
 #include "sshsettingstest.h"
 #include "hookdescriptortest.h"
 #include "hookssettingstest.h"
+#include "settingstest.h"
 
 int main(int argc, char *argv[])
 {
@@ -35,6 +36,7 @@ int main(int argc, char *argv[])
     res += QTest::qExec(new SshSettingsTest(), argc, argv);
     res += QTest::qExec(new HooksSettingsTest(), argc, argv);
     res += QTest::qExec(new HookDescriptorTest(), argc, argv);
+    res += QTest::qExec(new SettingsTest(), argc, argv);
 
     return res;
 }

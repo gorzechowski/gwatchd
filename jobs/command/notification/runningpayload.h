@@ -33,7 +33,7 @@ class RunningPayload: public Payload
 public:
     RunningPayload();
 
-    void addEntryInfo(QString entry, int state);
+    void addCommandInfo(QString command, int state);
 
     enum State {
         Started = 0,

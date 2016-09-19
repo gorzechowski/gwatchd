@@ -20,11 +20,10 @@
 
 #include "commandsettings.h"
 
-CommandSettings::CommandSettings(bool remote, QString exec, QString fileMask, QString workingDir)
+CommandSettings::CommandSettings(bool remote, QString exec, QString workingDir)
 {
     this->m_remote = remote;
     this->m_exec = exec;
-    this->m_fileMask = fileMask;
     this->m_workingDir = workingDir;
 }
 
@@ -36,11 +35,6 @@ bool CommandSettings::remote()
 QString CommandSettings::exec()
 {
     return this->m_exec;
-}
-
-QString CommandSettings::fileMask()
-{
-    return this->m_fileMask;
 }
 
 QString CommandSettings::workingDir()

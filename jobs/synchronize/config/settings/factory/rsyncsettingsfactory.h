@@ -33,6 +33,7 @@ public:
     RsyncSettingsFactory(QString context, Config *config);
 
     static RsyncSettings create(Entry entry, Config *config);
+    static RsyncSettings create(Predefine entry, Config *config);
 
     RsyncSettings create(QString entry);
 

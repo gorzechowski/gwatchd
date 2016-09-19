@@ -18,24 +18,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef COMMANDSETTINGS_H
-#define COMMANDSETTINGS_H
+#include "settings.h"
 
-#include <QString>
-
-class CommandSettings
+Settings::Settings(QString fileMask)
 {
-public:
-    CommandSettings(bool remote, QString exec, QString workingDir);
+    this->m_fileMask = fileMask;
+}
 
-    bool remote();
-    QString exec();
-    QString workingDir();
-
-protected:
-    bool m_remote;
-    QString m_exec;
-    QString m_workingDir;
-};
-
-#endif // COMMANDSETTINGS_H
+QString Settings::fileMask()
+{
+    return this->m_fileMask;
+}

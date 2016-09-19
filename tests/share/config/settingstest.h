@@ -18,24 +18,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef COMMANDSETTINGS_H
-#define COMMANDSETTINGS_H
+#ifndef SETTINGSTEST_H
+#define SETTINGSTEST_H
 
-#include <QString>
+#include <QObject>
 
-class CommandSettings
+#include "config/settings/settings.h"
+
+class SettingsTest : public QObject
 {
+    Q_OBJECT
 public:
-    CommandSettings(bool remote, QString exec, QString workingDir);
-
-    bool remote();
-    QString exec();
-    QString workingDir();
+    SettingsTest(QObject *parent = 0);
 
 protected:
-    bool m_remote;
-    QString m_exec;
-    QString m_workingDir;
+    Settings *m_settings;
+
+private slots:
+    void initTestCase();
+
+    void testValues();
+
 };
 
-#endif // COMMANDSETTINGS_H
+#endif // SETTINGSTEST_H

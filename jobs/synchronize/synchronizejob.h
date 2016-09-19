@@ -47,12 +47,17 @@ public:
 protected:
     QHash<QString, QProcess*> m_activeProcessList;
 
-    QTimer *m_timer;
-    QStringList m_files;
+    QTimer *m_entryTimer;
+    QTimer *m_predefineTimer;
+    QList<Entry> m_entries;
+    QList<Predefine> m_predefines;
 
-    QStringList retrieveEntries(QStringList files);
+    QList<Entry> retrieveEntries(QList<Entry> entries);
 
     void runHooks(QList<HookDescriptor> hooks);
+
+    void synchronize(QList<Entry> entries);
+    void synchronize(QList<Predefine> predefines);
 
 private slots:
     void slot_start();

@@ -71,7 +71,7 @@ void CommandJob::execute()
     QTimer *timer = dynamic_cast<QTimer*>(this->sender());
 
     if(timer == this->m_entryTimer) {
-        this->execute(this->retrieveEntries(this->m_entries));
+        this->execute(this->m_entries.filterEntries(this->getEntries(), this->m_config));
     } else if(timer == this->m_predefineTimer) {
         this->execute(this->m_predefines);
     }
@@ -237,36 +237,6 @@ void CommandJob::execute(QList<Predefine> predefines)
             process->start(command);
         }
     }
-}
-
-QList<Entry> CommandJob::retrieveEntries(QList<Entry> entries)
-{
-    QList<Entry> result;
-
-    foreach(QString entry, this->getEntries()) {
-        foreach(QString file, entries) {
-            if(file.startsWith(entry)) {
-                QFileInfo info(file);
-                Settings settings = SettingsFactory::create(Entry(entry), this->m_config);
-                QString fileMask = settings.fileMask();
-
-                if(!fileMask.isEmpty() && info.isFile()) {
-                    QString fileName = file.split("/").last();
-                    QRegularExpression regex(fileMask);
-                    QRegularExpressionMatch match = regex.match(fileName);
-
-                    if(!match.hasMatch()) {
-                        continue;
-                    }
-                }
-
-                result << Entry(entry);
-                break;
-            }
-        }
-    }
-
-    return result;
 }
 
 void CommandJob::runHooks(QList<HookDescriptor> hooks)

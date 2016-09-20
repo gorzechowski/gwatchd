@@ -28,6 +28,7 @@
 
 #include "../../core/job/job.h"
 #include "config/settings/hookdescriptor.h"
+#include "job/entrylist.h"
 
 class CommandJob : public QObject, public Job
 {
@@ -47,10 +48,8 @@ protected:
 
     QTimer *m_entryTimer;
     QTimer *m_predefineTimer;
-    QList<Entry> m_entries;
+    EntryList m_entries;
     QList<Predefine> m_predefines;
-
-    QList<Entry> retrieveEntries(QList<Entry> entries);
 
     void runHooks(QList<HookDescriptor> hooks);
 

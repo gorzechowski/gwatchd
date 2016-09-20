@@ -30,6 +30,7 @@
 #include "../../core/config/config.h"
 #include "../../core/notification/payload.h"
 #include "config/settings/hookdescriptor.h"
+#include "job/entrylist.h"
 
 class SynchronizeJob : public QObject, public Job
 {
@@ -49,10 +50,8 @@ protected:
 
     QTimer *m_entryTimer;
     QTimer *m_predefineTimer;
-    QList<Entry> m_entries;
+    EntryList m_entries;
     QList<Predefine> m_predefines;
-
-    QList<Entry> retrieveEntries(QList<Entry> entries);
 
     void runHooks(QList<HookDescriptor> hooks);
 

@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS += command config
+SUBDIRS += command config job

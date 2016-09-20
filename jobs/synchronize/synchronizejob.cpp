@@ -71,7 +71,7 @@ void SynchronizeJob::synchronize()
     QTimer *timer = dynamic_cast<QTimer*>(this->sender());
 
     if(timer == this->m_entryTimer) {
-        this->synchronize(this->retrieveEntries(this->m_entries));
+        this->synchronize(this->m_entries.filterEntries(this->getEntries(), this->m_config));
     } else if(timer == this->m_predefineTimer) {
         this->synchronize(this->m_predefines);
     }
@@ -211,36 +211,6 @@ void SynchronizeJob::synchronize(QList<Predefine> predefines)
             process->start(command);
         }
     }
-}
-
-QList<Entry> SynchronizeJob::retrieveEntries(QList<Entry> entries)
-{
-    QList<Entry> result;
-
-    foreach(QString entry, this->getEntries()) {
-        foreach(QString file, entries) {
-            if(file.startsWith(entry)) {
-                QFileInfo info(file);
-                Settings settings = SettingsFactory::create(Entry(entry), this->m_config);
-                QString fileMask = settings.fileMask();
-
-                if(!fileMask.isEmpty() && info.isFile()) {
-                    QString fileName = file.split("/").last();
-                    QRegularExpression regex(fileMask);
-                    QRegularExpressionMatch match = regex.match(fileName);
-
-                    if(!match.hasMatch()) {
-                        continue;
-                    }
-                }
-
-                result << Entry(entry);
-                break;
-            }
-        }
-    }
-
-    return result;
 }
 
 void SynchronizeJob::runHooks(QList<HookDescriptor> hooks)

@@ -220,7 +220,7 @@ void CommandJob::execute(QList<Predefine> predefines)
                 connect(process, SIGNAL(finished(int)), this, SLOT(slot_finished(int)));
                 connect(process, SIGNAL(readyRead()), this, SLOT(slot_read()));
 
-                process->setProperty("entry", predefine);
+                process->setProperty("predefine", predefine);
                 process->setProperty("hash", hash);
 
                 this->m_activeProcessList.insert(hash, process);
@@ -264,7 +264,6 @@ QString CommandJob::getCommand(QProcess *process)
 void CommandJob::slot_start()
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
-    QString entry = process->property("entry").toString();
     QString command = this->getCommand(process);
 
     this->m_logger->log(QString("Running command: %1").arg(command));
@@ -280,7 +279,6 @@ void CommandJob::slot_finished(int code)
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
 
-    QString entry = process->property("entry").toString();
     QString command = this->getCommand(process);
     RunningPayload *payload = new RunningPayload();
 
@@ -301,7 +299,17 @@ void CommandJob::slot_finished(int code)
 
         this->m_logger->debug("Looking for hooks");
 
-        HooksSettings hooksSettings = HooksSettingsFactory::create(Entry(entry), this->m_config);
+        HooksSettings hooksSettings;
+
+        Entry entry = process->property("entry").toString();
+        Predefine predefine = process->property("predefine").toString();
+
+        if(!entry.isEmpty()) {
+            hooksSettings = HooksSettingsFactory::create(entry, this->m_config);
+        } else {
+            hooksSettings = HooksSettingsFactory::create(predefine, this->m_config);
+        }
+
         QList<HookDescriptor> hooks = code > 0 ? hooksSettings.failedHooks() : hooksSettings.finishedHooks();
 
         if(hooks.count() >= 1) {

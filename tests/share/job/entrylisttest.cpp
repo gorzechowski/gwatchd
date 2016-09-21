@@ -34,7 +34,7 @@ EntryListTest::EntryListTest(QObject *parent) :
 void EntryListTest::initTestCase()
 {
     this->m_config = new JsonConfig(":/command.json");
-    this->m_list << Entry("/dir3/test.txt") << Entry("/dir3/src/file.php") << Entry("/dir3/config/autoload/local.conf") << Entry("/dir3/some/dir/path/localFile");
+    this->m_list << Entry("/dir1/test.txt") << Entry("/dir3/src/file.php") << Entry("/dir3/config/autoload/local.conf") << Entry("/dir2/some/dir/path/local.file");
 }
 
 void EntryListTest::testFilterEntries()
@@ -42,5 +42,5 @@ void EntryListTest::testFilterEntries()
     EntryList filtered = this->m_list.filterEntries(QStringList() << "/dir3/", this->m_config);
 
     QCOMPARE(filtered.count(), 1);
-    QCOMPARE(filtered.at(0), Entry("/dir3/config/autoload/local.conf"));
+    QCOMPARE(filtered.at(0), Entry("/dir3/"));
 }

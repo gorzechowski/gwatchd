@@ -34,6 +34,7 @@ public:
     HooksSettingsFactory(QString context, Config *config);
 
     static HooksSettings create(Entry entry, Config *config);
+    static HooksSettings create(Predefine predefine, Config *config);
 
     HooksSettings create(QString entry);
 

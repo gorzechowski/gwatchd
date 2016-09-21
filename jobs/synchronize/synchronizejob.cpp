@@ -198,7 +198,7 @@ void SynchronizeJob::synchronize(QList<Predefine> predefines)
                 connect(process, SIGNAL(finished(int)), this, SLOT(slot_finished(int)));
                 connect(process, SIGNAL(readyRead()), this, SLOT(slot_read()));
 
-                process->setProperty("entry", predefine);
+                process->setProperty("predefine", predefine);
                 process->setProperty("hash", hash);
 
                 this->m_activeProcessList.insert(hash, process);
@@ -233,13 +233,17 @@ void SynchronizeJob::runHooks(QList<HookDescriptor> hooks)
 void SynchronizeJob::slot_start()
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
-    QString entry = process->property("entry").toString();
+    QString data = process->property("entry").toString();
 
-    this->m_logger->log(QString("Synchronizing %1...").arg(entry));
+    if(data.isEmpty()) {
+        data = process->property("predefine").toString();
+    }
+
+    this->m_logger->log(QString("Synchronizing %1...").arg(data));
 
     RunningPayload *payload = new RunningPayload();
 
-    payload->addEntryInfo(entry, RunningPayload::Started);
+    payload->addEntryInfo(data, RunningPayload::Started);
 
     emit(running(payload));
 }
@@ -248,19 +252,28 @@ void SynchronizeJob::slot_finished(int code)
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
 
-    QString entry = process->property("entry").toString();
     RunningPayload *payload = new RunningPayload();
 
-    payload->addEntryInfo(entry, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
+    Entry entry = process->property("entry").toString();
+    Predefine predefine = process->property("predefine").toString();
+    QString data;
+
+    if(!entry.isEmpty()) {
+        payload->addEntryInfo(entry, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
+        data = entry;
+    } else {
+        payload->addEntryInfo(predefine, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
+        data = predefine;
+    }
 
     emit(running(payload));
 
     this->m_activeProcessList.remove(process->property("hash").toString());
 
     if(code > 0) {
-        this->m_logger->error(QString("Synchronizing %1 failed").arg(entry));
+        this->m_logger->error(QString("Synchronizing %1 failed").arg(data));
     } else {
-        this->m_logger->log(QString("Synchronizing %1 done").arg(entry));
+        this->m_logger->log(QString("Synchronizing %1 done").arg(data));
     }
 
     if(this->m_activeProcessList.isEmpty()) {
@@ -268,7 +281,14 @@ void SynchronizeJob::slot_finished(int code)
 
         this->m_logger->debug("Looking for hooks");
 
-        HooksSettings hooksSettings = HooksSettingsFactory::create(Entry(entry), this->m_config);
+        HooksSettings hooksSettings;
+
+        if(!entry.isEmpty()) {
+            hooksSettings = HooksSettingsFactory::create(entry, this->m_config);
+        } else {
+            hooksSettings = HooksSettingsFactory::create(predefine, this->m_config);
+        }
+
         QList<HookDescriptor> hooks = code > 0 ? hooksSettings.failedHooks() : hooksSettings.finishedHooks();
 
         if(hooks.count() >= 1) {

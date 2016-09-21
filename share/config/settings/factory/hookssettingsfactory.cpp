@@ -33,6 +33,13 @@ HooksSettings HooksSettingsFactory::create(Entry entry, Config *config)
     return factory.create(entry);
 }
 
+HooksSettings HooksSettingsFactory::create(Predefine predefine, Config *config)
+{
+    HooksSettingsFactory factory("predefines", config);
+
+    return factory.create(predefine);
+}
+
 HooksSettings HooksSettingsFactory::create(QString entry)
 {
     return HooksSettings(

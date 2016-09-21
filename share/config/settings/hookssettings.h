@@ -26,6 +26,7 @@
 class HooksSettings
 {
 public:
+    inline HooksSettings() {}
     HooksSettings(
         QList<HookDescriptor> finishedHooks,
         QList<HookDescriptor> failedHooks

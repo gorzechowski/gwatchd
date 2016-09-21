@@ -51,7 +51,7 @@ EntryList EntryList::filterEntries(QStringList list, Config *config)
                     }
                 }
 
-                result << entry;
+                result << value;
                 break;
             }
         }

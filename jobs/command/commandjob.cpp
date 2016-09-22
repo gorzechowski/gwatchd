@@ -71,7 +71,7 @@ void CommandJob::execute()
     QTimer *timer = dynamic_cast<QTimer*>(this->sender());
 
     if(timer == this->m_entryTimer) {
-        this->execute(this->retrieveEntries(this->m_entries));
+        this->execute(this->m_entries.filterEntries(this->getEntries(), this->m_config));
     } else if(timer == this->m_predefineTimer) {
         this->execute(this->m_predefines);
     }
@@ -220,7 +220,7 @@ void CommandJob::execute(QList<Predefine> predefines)
                 connect(process, SIGNAL(finished(int)), this, SLOT(slot_finished(int)));
                 connect(process, SIGNAL(readyRead()), this, SLOT(slot_read()));
 
-                process->setProperty("entry", predefine);
+                process->setProperty("predefine", predefine);
                 process->setProperty("hash", hash);
 
                 this->m_activeProcessList.insert(hash, process);
@@ -237,36 +237,6 @@ void CommandJob::execute(QList<Predefine> predefines)
             process->start(command);
         }
     }
-}
-
-QList<Entry> CommandJob::retrieveEntries(QList<Entry> entries)
-{
-    QList<Entry> result;
-
-    foreach(QString entry, this->getEntries()) {
-        foreach(QString file, entries) {
-            if(file.startsWith(entry)) {
-                QFileInfo info(file);
-                Settings settings = SettingsFactory::create(Entry(entry), this->m_config);
-                QString fileMask = settings.fileMask();
-
-                if(!fileMask.isEmpty() && info.isFile()) {
-                    QString fileName = file.split("/").last();
-                    QRegularExpression regex(fileMask);
-                    QRegularExpressionMatch match = regex.match(fileName);
-
-                    if(!match.hasMatch()) {
-                        continue;
-                    }
-                }
-
-                result << Entry(entry);
-                break;
-            }
-        }
-    }
-
-    return result;
 }
 
 void CommandJob::runHooks(QList<HookDescriptor> hooks)
@@ -294,7 +264,6 @@ QString CommandJob::getCommand(QProcess *process)
 void CommandJob::slot_start()
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
-    QString entry = process->property("entry").toString();
     QString command = this->getCommand(process);
 
     this->m_logger->log(QString("Running command: %1").arg(command));
@@ -310,7 +279,6 @@ void CommandJob::slot_finished(int code)
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
 
-    QString entry = process->property("entry").toString();
     QString command = this->getCommand(process);
     RunningPayload *payload = new RunningPayload();
 
@@ -331,7 +299,17 @@ void CommandJob::slot_finished(int code)
 
         this->m_logger->debug("Looking for hooks");
 
-        HooksSettings hooksSettings = HooksSettingsFactory::create(Entry(entry), this->m_config);
+        HooksSettings hooksSettings;
+
+        Entry entry = process->property("entry").toString();
+        Predefine predefine = process->property("predefine").toString();
+
+        if(!entry.isEmpty()) {
+            hooksSettings = HooksSettingsFactory::create(entry, this->m_config);
+        } else {
+            hooksSettings = HooksSettingsFactory::create(predefine, this->m_config);
+        }
+
         QList<HookDescriptor> hooks = code > 0 ? hooksSettings.failedHooks() : hooksSettings.finishedHooks();
 
         if(hooks.count() >= 1) {

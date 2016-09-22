@@ -18,33 +18,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef HOOKSSETTINGSFACTORY_H
-#define HOOKSSETTINGSFACTORY_H
+#ifndef ENTRYLISTTEST_H
+#define ENTRYLISTTEST_H
 
-#include <QString>
+#include <QObject>
 
-#include "../hookssettings.h"
-#include "../hookdescriptor.h"
+#include "job/entrylist.h"
 #include "config/config.h"
-#include "job/job.h"
 
-class HooksSettingsFactory
+class EntryListTest : public QObject
 {
+    Q_OBJECT
 public:
-    HooksSettingsFactory(QString context, Config *config);
-
-    static HooksSettings create(Entry entry, Config *config);
-    static HooksSettings create(Predefine predefine, Config *config);
-
-    HooksSettings create(QString entry);
+    EntryListTest(QObject *parent = 0);
 
 protected:
-    QString m_context;
+    EntryList m_list;
     Config *m_config;
 
-    QList<HookDescriptor> finishedHooks(QString entry);
-    QList<HookDescriptor> failedHooks(QString entry);
-    QList<HookDescriptor> hooks(QString type, QString entry);
+private slots:
+    void initTestCase();
+
+    void testFilterEntries();
+
 };
 
-#endif // HOOKSSETTINGSFACTORY_H
+#endif // ENTRYLISTTEST_H

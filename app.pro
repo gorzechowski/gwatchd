@@ -71,15 +71,7 @@ unix {
         libs.files += $$[QT_INSTALL_LIBS]/QtWebSockets.framework
     }
 
-    tests.path = $$TARGET_DIR/tests
-    tests.files = \
-        $$OUT_PWD/tests/core/config/*Test \
-        $$OUT_PWD/tests/core/notification/*Test \
-        $$OUT_PWD/tests/core/watcher/*Test \
-        $$OUT_PWD/tests/jobs/synchronize/*Test \
-        $$OUT_PWD/tests/jobs/command/*Test
-
-    INSTALLS += core jobs libs tests
+    INSTALLS += core jobs libs
 }
 
 macx {

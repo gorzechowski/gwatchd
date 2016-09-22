@@ -18,33 +18,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef HOOKSSETTINGSFACTORY_H
-#define HOOKSSETTINGSFACTORY_H
+#include <QCoreApplication>
+#include <QTest>
 
-#include <QString>
+#include "entrylisttest.h"
 
-#include "../hookssettings.h"
-#include "../hookdescriptor.h"
-#include "config/config.h"
-#include "job/job.h"
-
-class HooksSettingsFactory
+int main(int argc, char *argv[])
 {
-public:
-    HooksSettingsFactory(QString context, Config *config);
+    QCoreApplication app(argc, argv);
+    app.setAttribute(Qt::AA_Use96Dpi, true);
 
-    static HooksSettings create(Entry entry, Config *config);
-    static HooksSettings create(Predefine predefine, Config *config);
+    int res = 0;
 
-    HooksSettings create(QString entry);
+    res += QTest::qExec(new EntryListTest(), argc, argv);
 
-protected:
-    QString m_context;
-    Config *m_config;
-
-    QList<HookDescriptor> finishedHooks(QString entry);
-    QList<HookDescriptor> failedHooks(QString entry);
-    QList<HookDescriptor> hooks(QString type, QString entry);
-};
-
-#endif // HOOKSSETTINGSFACTORY_H
+    return res;
+}

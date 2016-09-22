@@ -18,33 +18,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef HOOKSSETTINGSFACTORY_H
-#define HOOKSSETTINGSFACTORY_H
+#include <QTest>
+#include <QStringList>
 
-#include <QString>
+#include "config/jsonconfig.h"
 
-#include "../hookssettings.h"
-#include "../hookdescriptor.h"
-#include "config/config.h"
-#include "job/job.h"
+#include "entrylisttest.h"
 
-class HooksSettingsFactory
+EntryListTest::EntryListTest(QObject *parent) :
+    QObject(parent)
 {
-public:
-    HooksSettingsFactory(QString context, Config *config);
 
-    static HooksSettings create(Entry entry, Config *config);
-    static HooksSettings create(Predefine predefine, Config *config);
+}
 
-    HooksSettings create(QString entry);
+void EntryListTest::initTestCase()
+{
+    this->m_config = new JsonConfig(":/command.json");
+    this->m_list << Entry("/dir1/test.txt") << Entry("/dir3/src/file.php") << Entry("/dir3/config/autoload/local.conf") << Entry("/dir2/some/dir/path/local.file");
+}
 
-protected:
-    QString m_context;
-    Config *m_config;
+void EntryListTest::testFilterEntries()
+{
+    EntryList filtered = this->m_list.filterEntries(QStringList() << "/dir3/", this->m_config);
 
-    QList<HookDescriptor> finishedHooks(QString entry);
-    QList<HookDescriptor> failedHooks(QString entry);
-    QList<HookDescriptor> hooks(QString type, QString entry);
-};
-
-#endif // HOOKSSETTINGSFACTORY_H
+    QCOMPARE(filtered.count(), 1);
+    QCOMPARE(filtered.at(0), Entry("/dir3/"));
+}

@@ -18,33 +18,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef HOOKSSETTINGSFACTORY_H
-#define HOOKSSETTINGSFACTORY_H
+#ifndef ENTRYLIST_H
+#define ENTRYLIST_H
 
-#include <QString>
+#include <QList>
 
-#include "../hookssettings.h"
-#include "../hookdescriptor.h"
-#include "config/config.h"
 #include "job/job.h"
+#include "config/config.h"
 
-class HooksSettingsFactory
+class EntryList: public QList<Entry>
 {
 public:
-    HooksSettingsFactory(QString context, Config *config);
+    EntryList();
 
-    static HooksSettings create(Entry entry, Config *config);
-    static HooksSettings create(Predefine predefine, Config *config);
-
-    HooksSettings create(QString entry);
-
-protected:
-    QString m_context;
-    Config *m_config;
-
-    QList<HookDescriptor> finishedHooks(QString entry);
-    QList<HookDescriptor> failedHooks(QString entry);
-    QList<HookDescriptor> hooks(QString type, QString entry);
+    EntryList filterEntries(QStringList list, Config *config);
 };
 
-#endif // HOOKSSETTINGSFACTORY_H
+#endif // ENTRYLIST_H

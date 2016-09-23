@@ -75,6 +75,8 @@ unix {
 }
 
 macx {
+    QMAKE_STRIP = strip -x
+
     install_name_tool.target = install_name_tool
     install_name_tool.commands = \
         install_name_tool -change @rpath/QtWebSockets.framework/Versions/5/QtWebSockets @executable_path/libs/QtWebSockets.framework/Versions/5/QtWebSockets $$TARGET_DIR/gwatchd && \

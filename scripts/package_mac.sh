@@ -4,13 +4,12 @@ OPTIND=1
 
 input=""
 output=""
-temp="/tmp/gwatchd.tmp.pkg"
 
 currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 while getopts "i:o:" opt; do
     case "$opt" in
-        i)  input=$OPTARG
+        i)  input="$(pwd)/$OPTARG"
             ;;
         o)  output=$OPTARG
             ;;
@@ -22,13 +21,20 @@ if [ -z $input ]; then
     exit 1
 fi
 
+if [[ ! -d $input ]]; then
+    echo "Input is not directory"
+    exit 1
+fi
+
 if [ -z $output ]; then
     echo "Output file not specified"
     exit 1
 fi
 
-pkgbuild --root $input --identifier pl.gorzechowski.gwatchd $temp
+temp="gwatchd.pkg"
 
-productbuild --package-path $temp --distribution "${currentDir}/../dist/distribution.xml" $output
+pkgbuild --root $input --identifier pl.gorzechowski.gwatchd "${temp}"
 
-rm $temp
+productbuild --package-path "${temp}" --distribution "${currentDir}/../dist/distribution.xml" "${output}"
+
+rm "$temp" && echo "Temporary ${temp} file removed"

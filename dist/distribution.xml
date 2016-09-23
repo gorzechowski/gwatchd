@@ -5,7 +5,7 @@
 
     <options customize="always" />
 
-    <pkg-ref id="pl.gorzechowski.gwatchd">gwatchd.pkg</pkg-ref>
+    <pkg-ref id="pl.gorzechowski.gwatchd">#gwatchd.pkg</pkg-ref>
 
     <choices-outline>
         <line choice="pl.gorzechowski.gwatchd" />

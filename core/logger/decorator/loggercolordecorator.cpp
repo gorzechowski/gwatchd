@@ -27,6 +27,7 @@ LoggerColorDecorator::LoggerColorDecorator(Logger *logger, QObject *parent) : QO
     this->m_color = "\x1B[39m";
     this->m_colorDebug = "\x1B[90m";
     this->m_colorError = "\x1B[31m";
+    this->m_colorWarning = "\x1B[33m";
 }
 
 void LoggerColorDecorator::log(QString content)
@@ -48,4 +49,12 @@ void LoggerColorDecorator::error(QString content)
     content.append(this->m_color);
 
     this->m_logger->error(content);
+}
+
+void LoggerColorDecorator::warning(QString content)
+{
+    content.prepend(this->m_colorWarning);
+    content.append(this->m_color);
+
+    this->m_logger->warning(content);
 }

@@ -27,21 +27,28 @@ LoggerLevelDecorator::LoggerLevelDecorator(Logger *logger, QObject *parent): QOb
 
 void LoggerLevelDecorator::log(QString content)
 {
-    content.prepend("<info>  ");
+    content.prepend("<info>    ");
 
     this->m_logger->log(content);
 }
 
 void LoggerLevelDecorator::debug(QString content)
 {
-    content.prepend("<debug> ");
+    content.prepend("<debug>   ");
 
     this->m_logger->debug(content);
 }
 
 void LoggerLevelDecorator::error(QString content)
 {
-    content.prepend("<error> ");
+    content.prepend("<error>   ");
 
     this->m_logger->error(content);
+}
+
+void LoggerLevelDecorator::warning(QString content)
+{
+    content.prepend("<warning> ");
+
+    this->m_logger->warning(content);
 }

@@ -46,7 +46,7 @@ class Job
 public:
     virtual ~Job() {}
 
-    virtual QStringList getEntries() { return this->m_config->value("dirs").toObject().keys(); }
+    virtual QStringList getEntries() { return this->m_config->value("entries").toObject().keys(); }
     virtual void run(Entry entry) = 0;
     virtual void run(Predefine predefine) = 0;
     virtual void setConfig(Config *config) { m_config = config; }

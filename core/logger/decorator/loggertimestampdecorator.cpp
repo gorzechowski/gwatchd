@@ -49,6 +49,13 @@ void LoggerTimestampDecorator::error(QString content)
     this->m_logger->error(content);
 }
 
+void LoggerTimestampDecorator::warning(QString content)
+{
+    content.prepend(this->timestamp());
+
+    this->m_logger->warning(content);
+}
+
 QString LoggerTimestampDecorator::timestamp()
 {
     return QDateTime::currentDateTime().toString("[yyyy-MM-dd hh:mm:ss] ");

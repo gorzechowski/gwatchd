@@ -47,7 +47,7 @@ QJsonObject RunningPayload::toJsonObject()
         dirs.insert(dir, details);
     }
 
-    root.insert("dirs", dirs);
+    root.insert("entries", dirs);
 
     return root;
 }

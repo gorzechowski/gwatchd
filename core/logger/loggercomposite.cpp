@@ -48,6 +48,13 @@ void LoggerComposite::error(QString content)
     }
 }
 
+void LoggerComposite::warning(QString content)
+{
+    foreach(Logger *logger, this->m_loggers) {
+        logger->warning(content);
+    }
+}
+
 void LoggerComposite::add(Logger *logger)
 {
     this->m_loggers << logger;

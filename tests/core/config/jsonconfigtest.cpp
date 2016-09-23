@@ -44,8 +44,8 @@ void JsonConfigTest::testValue()
     QCOMPARE(this->m_config->value("ssh").toObject().value("identityFile").toString(), QString("/home/user/.ssh/id_rsa"));
 
     QCOMPARE(this->m_config->value("ssh").toObject().value("port").toInt(), 22);
-    QCOMPARE(this->m_config->value("dirs").toObject().value("/dir2/").toObject().value("ssh").toObject().value("port").toInt(), 2222);
+    QCOMPARE(this->m_config->value("entries").toObject().value("/dir2/").toObject().value("ssh").toObject().value("port").toInt(), 2222);
 
     QCOMPARE(this->m_config->value("target").toObject().value("user").toString(), QString("user"));
-    QCOMPARE(this->m_config->value("dirs").toObject().value("/dir2/").toObject().value("target").toObject().value("user").toString(), QString("otherUser"));
+    QCOMPARE(this->m_config->value("entries").toObject().value("/dir2/").toObject().value("target").toObject().value("user").toString(), QString("otherUser"));
 }

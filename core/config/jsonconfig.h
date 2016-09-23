@@ -26,6 +26,7 @@
 #include <QStringList>
 
 #include "config/config.h"
+#include "logger/logger.h"
 
 class JsonConfig : public Config
 {
@@ -33,10 +34,15 @@ class JsonConfig : public Config
 public:
     JsonConfig(QString filePath, QObject *parent = 0);
 
+    void setLogger(Logger *logger);
+
     QJsonValue value(QString key);
 
 protected:
+    Logger *m_logger;
     QJsonObject m_main;
+
+    void logDeprecated(QString deprecated, QString replacement);
 };
 
 #endif // JSONCONFIG_H

@@ -53,13 +53,16 @@ bool JobsLoader::loadJob(JobDescriptor jobDescriptor, bool isDebug)
             QString logDirPath = this->m_config->logsDirPath();
 
             QJsonObject metaData = loader.metaData().value("MetaData").toObject();
-            JsonConfig *config = new JsonConfig(jobDescriptor.configPath());
 
             Logger *logger = DefaultLoggerFactory::create(
                 QString("%1/job/%2.log").arg(logDirPath).arg(jobDescriptor.name()),
                 this->m_config,
                 isDebug
             );
+
+            JsonConfig *config = new JsonConfig(jobDescriptor.configPath());
+            config->addDeprecated(metaData.value("config").toObject().value("deprecated").toArray());
+            config->setLogger(logger);
 
             loadedJob->setConfig(config);
             loadedJob->setLogger(logger);

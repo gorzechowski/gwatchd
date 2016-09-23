@@ -28,7 +28,7 @@ RsyncSettingsFactory::RsyncSettingsFactory(QString context, Config *config)
 
 RsyncSettings RsyncSettingsFactory::create(Entry entry, Config *config)
 {
-    RsyncSettingsFactory factory("dirs", config);
+    RsyncSettingsFactory factory("entries", config);
 
     return factory.create(entry);
 }

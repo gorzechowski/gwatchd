@@ -34,6 +34,7 @@ public:
     void log(QString content);
     void debug(QString content);
     void error(QString content);
+    void warning(QString content);
 
 protected:
     Logger *m_logger;
@@ -41,6 +42,7 @@ protected:
     QString m_color;
     QString m_colorDebug;
     QString m_colorError;
+    QString m_colorWarning;
 };
 
 #endif // LOGGERCOLORDECORATOR_H

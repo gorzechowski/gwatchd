@@ -28,7 +28,7 @@ SshSettingsFactory::SshSettingsFactory(QString context, Config *config)
 
 SshSettings SshSettingsFactory::create(Entry entry, Config *config)
 {
-    SshSettingsFactory factory("dirs", config);
+    SshSettingsFactory factory("entries", config);
 
     return factory.create(entry);
 }

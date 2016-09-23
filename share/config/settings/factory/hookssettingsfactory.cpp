@@ -28,7 +28,7 @@ HooksSettingsFactory::HooksSettingsFactory(QString context, Config *config)
 
 HooksSettings HooksSettingsFactory::create(Entry entry, Config *config)
 {
-    HooksSettingsFactory factory("dirs", config);
+    HooksSettingsFactory factory("entries", config);
 
     return factory.create(entry);
 }

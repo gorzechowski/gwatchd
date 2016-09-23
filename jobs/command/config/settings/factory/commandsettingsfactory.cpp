@@ -28,7 +28,7 @@ CommandSettingsFactory::CommandSettingsFactory(QString context, Config *config)
 
 CommandSettings CommandSettingsFactory::create(Entry entry, Config *config)
 {
-    CommandSettingsFactory factory("dirs", config);
+    CommandSettingsFactory factory("entries", config);
 
     return factory.create(entry);
 }

@@ -35,9 +35,37 @@ JsonConfig::JsonConfig(QString filePath, QObject *parent) : Config(filePath, par
     }
 }
 
+void JsonConfig::setLogger(Logger *logger)
+{
+    this->m_logger = logger;
+}
+
 QJsonValue JsonConfig::value(QString key)
 {
-    QJsonValue value = this->m_main.value(key);
+    if(this->m_deprecated.keys().contains(key) && this->m_logger) {
+        this->logDeprecated(key, this->m_deprecated.value(key));
+    }
 
-    return value;
+    if(this->m_deprecated.values().contains(key)) {
+        if(!this->m_main.value(key).isObject()) {
+            QString deprecated = this->m_deprecated.key(key);
+
+            this->logDeprecated(deprecated, key);
+
+            key = deprecated;
+        }
+    }
+
+    return this->m_main.value(key);
+}
+
+void JsonConfig::logDeprecated(QString deprecated, QString replacement)
+{
+    QString log = QString("Key \"%1\" in \"%2\" is deprecated").arg(deprecated, this->fileInfo().fileName());
+
+    if(!replacement.isEmpty()) {
+        log.append(QString(". Please use \"%1\" instead").arg(replacement));
+    }
+
+    this->m_logger->warning(log);
 }

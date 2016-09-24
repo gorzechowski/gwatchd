@@ -11,7 +11,7 @@
             "example.com"
         ]
 	},
-	"dirs": {
+    "entries": {
 		"/dir1/": {
             "exec": "mkdir -p /tmp/test",
             "ssh": {

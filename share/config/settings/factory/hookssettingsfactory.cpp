@@ -82,10 +82,12 @@ QList<HookDescriptor> HooksSettingsFactory::hooks(QString type, QString entry)
         }
 
         QJsonObject object = hook.toObject();
-        QString jobName = object.keys().first();
-        Predefine predefine = Predefine(object.value(jobName).toString());
 
-        hooks << HookDescriptor(jobName, predefine);
+        QString jobName = object.value("job").toString();
+        Predefine predefine = Predefine(object.value("predefine").toString());
+        QString fileMask = object.value("fileMask").toString();
+
+        hooks << HookDescriptor(jobName, predefine, fileMask);
     }
 
     return hooks;

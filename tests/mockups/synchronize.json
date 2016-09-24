@@ -14,7 +14,7 @@
 			"StrictHostKeyChecking=no"
 		]
 	},
-	"dirs": {
+    "entries": {
 		"/dir1/": {
 			"target": {
 				"path": "/backup/dir1/"

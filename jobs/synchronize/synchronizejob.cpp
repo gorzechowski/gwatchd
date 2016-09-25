@@ -77,11 +77,13 @@ void SynchronizeJob::synchronize()
     }
 }
 
-void SynchronizeJob::synchronize(QList<Entry> entries)
+void SynchronizeJob::synchronize(EntryList entries)
 {
     if(this->m_entryTimer->isActive()) {
         this->m_entryTimer->stop();
     }
+
+    EntryList changed = this->m_entries;
 
     this->m_entries.clear();
 
@@ -104,6 +106,10 @@ void SynchronizeJob::synchronize(QList<Entry> entries)
 
         foreach(QString command, commands) {
             QString hash = QCryptographicHash::hash(command.toUtf8(), QCryptographicHash::Md5).toHex();
+
+            if(!this->m_files.contains(hash)) {
+                this->m_files.insert(hash, changed);
+            }
 
             QProcess *process = new QProcess();
 
@@ -213,9 +219,13 @@ void SynchronizeJob::synchronize(QList<Predefine> predefines)
     }
 }
 
-void SynchronizeJob::runHooks(QList<HookDescriptor> hooks)
+void SynchronizeJob::runHooks(QList<HookDescriptor> hooks, EntryList list)
 {
     foreach(HookDescriptor hook, hooks) {
+        if(!hook.fileMask().isEmpty() && list.filter(QRegularExpression(hook.fileMask())).count() < 1) {
+            continue;
+        }
+
         QString hookKey = QString("%1:%2").arg(hook.jobName(), hook.predefine());
 
         this->m_logger->debug(QString("Requesting hook %1").arg(hookKey));
@@ -254,6 +264,7 @@ void SynchronizeJob::slot_finished(int code)
 
     RunningPayload *payload = new RunningPayload();
 
+    QString hash = process->property("hash").toString();
     Entry entry = process->property("entry").toString();
     Predefine predefine = process->property("predefine").toString();
     QString data;
@@ -268,7 +279,7 @@ void SynchronizeJob::slot_finished(int code)
 
     emit(running(payload));
 
-    this->m_activeProcessList.remove(process->property("hash").toString());
+    this->m_activeProcessList.remove(hash);
 
     if(code > 0) {
         this->m_logger->error(QString("Synchronizing %1 failed").arg(data));
@@ -292,7 +303,9 @@ void SynchronizeJob::slot_finished(int code)
         QList<HookDescriptor> hooks = code > 0 ? hooksSettings.failedHooks() : hooksSettings.finishedHooks();
 
         if(hooks.count() >= 1) {
-            this->runHooks(hooks);
+            this->runHooks(hooks, this->m_files.value(hash));
+
+            this->m_files.remove(hash);
         } else {
             this->m_logger->debug("No hooks found");
         }

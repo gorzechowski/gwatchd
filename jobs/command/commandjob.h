@@ -51,11 +51,13 @@ protected:
     EntryList m_entries;
     QList<Predefine> m_predefines;
 
-    void runHooks(QList<HookDescriptor> hooks);
+    QHash<QString, EntryList> m_files;
+
+    void runHooks(QList<HookDescriptor> hooks, EntryList list);
 
     QString getCommand(QProcess *process);
 
-    void execute(QList<Entry> entries);
+    void execute(EntryList entries);
     void execute(QList<Predefine> predefines);
 
 private slots:

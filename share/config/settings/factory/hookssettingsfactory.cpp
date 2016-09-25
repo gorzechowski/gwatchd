@@ -85,7 +85,11 @@ QList<HookDescriptor> HooksSettingsFactory::hooks(QString type, QString entry)
 
         QString jobName = object.value("job").toString();
         Predefine predefine = Predefine(object.value("predefine").toString());
-        QString fileMask = object.value("fileMask").toString();
+        QString fileMask = "";
+
+        if(this->m_context == "entries") {
+            fileMask = object.value("fileMask").toString();
+        }
 
         hooks << HookDescriptor(jobName, predefine, fileMask);
     }

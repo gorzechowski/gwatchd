@@ -32,6 +32,7 @@ public:
     EntryList();
 
     EntryList filterEntries(QStringList list, Config *config);
+    EntryList filter(QRegularExpression regex);
 };
 
 #endif // ENTRYLIST_H

@@ -20,10 +20,11 @@
 
 #include "hookdescriptor.h"
 
-HookDescriptor::HookDescriptor(QString jobName, Predefine predefine)
+HookDescriptor::HookDescriptor(QString jobName, Predefine predefine, QString fileMask)
 {
     this->m_jobName = jobName;
     this->m_predefine = predefine;
+    this->m_fileMask = fileMask;
 }
 
 QString HookDescriptor::jobName()
@@ -34,4 +35,9 @@ QString HookDescriptor::jobName()
 Predefine HookDescriptor::predefine()
 {
     return this->m_predefine;
+}
+
+QString HookDescriptor::fileMask()
+{
+    return this->m_fileMask;
 }

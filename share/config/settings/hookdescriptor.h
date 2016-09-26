@@ -28,14 +28,16 @@
 class HookDescriptor
 {
 public:
-    HookDescriptor(QString jobName, Predefine predefine);
+    HookDescriptor(QString jobName, Predefine predefine, QString fileMask);
 
     QString jobName();
     Predefine predefine();
+    QString fileMask();
 
 protected:
     QString m_jobName;
     Predefine m_predefine;
+    QString m_fileMask;
 };
 
 #endif // HOOKDESCRIPTOR_H

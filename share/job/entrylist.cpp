@@ -59,3 +59,26 @@ EntryList EntryList::filterEntries(QStringList list, Config *config)
 
     return result;
 }
+
+EntryList EntryList::filter(QRegularExpression regex)
+{
+    EntryList result;
+
+    foreach(Entry entry, *this) {
+        QFileInfo info(entry);
+
+        if(info.isFile() || info.fileName().contains(QRegularExpression(".*\\..*"))) {
+            QString fileName = entry.split("/").last();
+            QRegularExpressionMatch match = regex.match(fileName);
+
+            if(!match.hasMatch()) {
+                continue;
+            }
+        }
+
+        result << entry;
+        break;
+    }
+
+    return result;
+}

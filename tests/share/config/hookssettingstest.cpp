@@ -34,8 +34,8 @@ HooksSettingsTest::HooksSettingsTest(QObject *parent) :
 void HooksSettingsTest::initTestCase()
 {
     this->m_settings = new HooksSettings(
-        QList<HookDescriptor>() << HookDescriptor("command", Predefine("finished")) << HookDescriptor("synchronize", Predefine("finished2")),
-        QList<HookDescriptor>() << HookDescriptor("command", Predefine("failed"))
+        QList<HookDescriptor>() << HookDescriptor("command", Predefine("finished"), "txt$") << HookDescriptor("synchronize", Predefine("finished2"), ""),
+        QList<HookDescriptor>() << HookDescriptor("command", Predefine("failed"), "^abc")
     );
 }
 
@@ -47,11 +47,13 @@ void HooksSettingsTest::testFinishedHooks()
 
     QCOMPARE(hook.jobName(), QString("command"));
     QCOMPARE(hook.predefine(), Predefine("finished"));
+    QCOMPARE(hook.fileMask(), QString("txt$"));
 
     hook = this->m_settings->finishedHooks().at(1);
 
     QCOMPARE(hook.jobName(), QString("synchronize"));
     QCOMPARE(hook.predefine(), Predefine("finished2"));
+    QCOMPARE(hook.fileMask(), QString(""));
 }
 
 void HooksSettingsTest::testFailedHooks()
@@ -62,4 +64,5 @@ void HooksSettingsTest::testFailedHooks()
 
     QCOMPARE(hook.jobName(), QString("command"));
     QCOMPARE(hook.predefine(), Predefine("failed"));
+    QCOMPARE(hook.fileMask(), QString("^abc"));
 }

@@ -77,11 +77,13 @@ void CommandJob::execute()
     }
 }
 
-void CommandJob::execute(QList<Entry> entries)
+void CommandJob::execute(EntryList entries)
 {
     if(this->m_entryTimer->isActive()) {
         this->m_entryTimer->stop();
     }
+
+    EntryList changed = this->m_entries;
 
     this->m_entries.clear();
 
@@ -110,6 +112,10 @@ void CommandJob::execute(QList<Entry> entries)
 
         foreach(QString command, commands) {
             QString hash = QCryptographicHash::hash(command.toUtf8(), QCryptographicHash::Md5).toHex();
+
+            if(!this->m_files.contains(hash)) {
+                this->m_files.insert(hash, changed);
+            }
 
             QProcess *process = new QProcess();
 
@@ -239,9 +245,13 @@ void CommandJob::execute(QList<Predefine> predefines)
     }
 }
 
-void CommandJob::runHooks(QList<HookDescriptor> hooks)
+void CommandJob::runHooks(QList<HookDescriptor> hooks, EntryList list)
 {
     foreach(HookDescriptor hook, hooks) {
+        if(!hook.fileMask().isEmpty() && list.filter(QRegularExpression(hook.fileMask())).count() < 1) {
+            continue;
+        }
+
         QString hookKey = QString("%1:%2").arg(hook.jobName(), hook.predefine());
 
         this->m_logger->debug(QString("Requesting hook %1").arg(hookKey));
@@ -279,6 +289,7 @@ void CommandJob::slot_finished(int code)
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
 
+    QString hash = process->property("hash").toString();
     QString command = this->getCommand(process);
     RunningPayload *payload = new RunningPayload();
 
@@ -286,7 +297,7 @@ void CommandJob::slot_finished(int code)
 
     emit(running(payload));
 
-    this->m_activeProcessList.remove(process->property("hash").toString());
+    this->m_activeProcessList.remove(hash);
 
     if(code > 0) {
         this->m_logger->error(QString("Command %1 failed").arg(command));
@@ -313,7 +324,9 @@ void CommandJob::slot_finished(int code)
         QList<HookDescriptor> hooks = code > 0 ? hooksSettings.failedHooks() : hooksSettings.finishedHooks();
 
         if(hooks.count() >= 1) {
-            this->runHooks(hooks);
+            this->runHooks(hooks, this->m_files.value(hash));
+
+            this->m_files.remove(hash);
         } else {
             this->m_logger->debug("No hooks found");
         }

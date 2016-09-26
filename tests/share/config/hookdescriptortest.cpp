@@ -33,11 +33,12 @@ HookDescriptorTest::HookDescriptorTest(QObject *parent) :
 
 void HookDescriptorTest::initTestCase()
 {
-    this->m_descriptor = new HookDescriptor("command", Predefine("example"));
+    this->m_descriptor = new HookDescriptor("command", Predefine("example"), "*");
 }
 
 void HookDescriptorTest::testValues()
 {
     QCOMPARE(this->m_descriptor->jobName(), QString("command"));
     QCOMPARE(this->m_descriptor->predefine(), Predefine("example"));
+    QCOMPARE(this->m_descriptor->fileMask(), QString("*"));
 }

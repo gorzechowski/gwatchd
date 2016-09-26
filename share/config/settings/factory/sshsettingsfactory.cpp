@@ -35,7 +35,7 @@ SshSettings SshSettingsFactory::create(Entry entry, Config *config)
 
 SshSettings SshSettingsFactory::create(Predefine predefine, Config *config)
 {
-    SshSettingsFactory factory("predefine", config);
+    SshSettingsFactory factory("predefines", config);
 
     return factory.create(predefine);
 }

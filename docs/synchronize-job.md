@@ -12,7 +12,7 @@ Required properties:
 | target.user `<string>`         | Destination user name                |
 | target.hosts `<array>`         | Destination hosts list               |
 | target.path `<string>`         | Destination path - dir property only |
-| dirs `<object>`                | Directories to watch                 |
+| entries `<object>`             | Directories and files to watch       |
 
 Optional properties:
 
@@ -22,10 +22,10 @@ Optional properties:
 | ssh.configFile `<string>`           | Config file path                                                 |
 | ssh.port `<integer>`                | Port                                                             |
 | ssh.options `<array>`               | Options list                                                     |
-| dirs._dir_.includes `<array>`       | Includes list                                                    |
-| dirs._dir_.excludes `<array>`       | Excludes list                                                    |
-| dirs._dir_.hooks.finished `<array>` | Hooks triggered when job finished without error. It is array of objects in which key is job name and value is predefine name |
-| dirs._dir_.hooks.failed `<array>`   | Hooks triggered when job failed. It is array of objects in which key is job name and value is predefine name |
+| entries._dir_.includes `<array>`       | Includes list                                                    |
+| entries._dir_.excludes `<array>`       | Excludes list                                                    |
+| entries._dir_.hooks.finished `<array>` | Hooks triggered when job finished without error. It is array of objects in which key is job name and value is predefine name |
+| entries._dir_.hooks.failed `<array>`   | Hooks triggered when job failed. It is array of objects in which key is job name and value is predefine name |
 | delay `<integer>`: 100              | Time in ms measured from watcher event, after which job starts   |
 
 Example config:
@@ -64,7 +64,8 @@ Example config:
             "hooks": {
                 "finished": [
                     {
-                        "command": "example"
+                        "job": "command",
+                        "predefine": "example"
                     }
                 ]
             }

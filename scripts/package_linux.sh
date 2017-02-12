@@ -7,7 +7,8 @@ output=""
 
 currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-startup="${currentDir}/package_linux_startup.sh"
+startupDir="${currentDir}"
+startup="package_linux_startup.sh"
 
 while getopts "i:o:" opt; do
     case "$opt" in
@@ -28,4 +29,4 @@ if [ -z $output ]; then
     exit 1
 fi
 
-eval "${currentDir}/makeself.sh ${input} ${output} 'GWatchD' ${startup}"
+eval "cp ${startupDir}/${startup} ${input}/. && ${currentDir}/makeself.sh ${input} ${output} 'GWatchD' ./${startup}"

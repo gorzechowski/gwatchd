@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-#### **1.2.0** _(UNRELEASED)_
+#### **1.2.0** _(22-03-2017)_
 - [Bug][[#11](https://github.com/gorzechowski/gwatchd/issues/11)] Daemon mode does not work under MacOS
 - [Feature][[#18](https://github.com/gorzechowski/gwatchd/issues/18)] Possibility to watch files
 - [Feature][[#24](https://github.com/gorzechowski/gwatchd/issues/24)] Change config format to JSON

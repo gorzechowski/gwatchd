@@ -5,7 +5,7 @@
 ## Description
 GWatchD uses inotify/kqueue to monitor file system events. If an event occur, it executes processes (called "job") assigned to directory in which watcher reported any change.
 
-Each job is a plugin which has own config file located in `config/job` dir with name like `<job_name>.yml`, for example `synchronize.yml`. Daemon also has own config file: `config/config.yml`.
+Each job is a plugin which has own config file located in `config/job` dir with name like `<job_name>.json`, for example `synchronize.json`. Daemon also has own config file: `config/config.json`.
 
 Logs can be found in `logs` and `logs/job` dirs. Daemon and plugins have separate log files (just like config files).
 

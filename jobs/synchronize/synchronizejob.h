@@ -27,7 +27,10 @@
 #include <QTimer>
 
 #include "../../core/job/job.h"
+#include "../../core/config/config.h"
 #include "../../core/notification/payload.h"
+#include "config/settings/hookdescriptor.h"
+#include "job/entrylist.h"
 
 class SynchronizeJob : public QObject, public Job
 {
@@ -39,38 +42,37 @@ class SynchronizeJob : public QObject, public Job
 public:
     SynchronizeJob();
 
-    QStringList getDirs();
-    void run(QString data);
-    void setConfig(Config *config);
-    void setLogger(Logger *logger);
-    void init();
-
-    QString generateCommand(QString dir);
+    void run(Entry entry);
+    void run(Predefine predefine);
 
 protected:
     QHash<QString, QProcess*> m_activeProcessList;
 
-    QTimer *m_timer;
-    QStringList m_files;
+    QTimer *m_entryTimer;
+    QTimer *m_predefineTimer;
+    EntryList m_entries;
+    QList<Predefine> m_predefines;
 
-    QString getExcludes(int dirIndex);
-    QString getIncludes(int dirIndex);
+    QHash<QString, EntryList> m_files;
 
-    QMap<QString, QString> getSshParams(int dirIndex);
+    void runHooks(QList<HookDescriptor> hooks, EntryList list);
 
-    void executeHook(QString type);
+    void synchronize(EntryList entries);
+    void synchronize(QList<Predefine> predefines);
 
 private slots:
     void slot_start();
     void slot_finished(int code);
     void slot_read();
 
-    void slot_synchronize();
+    void synchronize();
 
 signals:
     void started();
     void running(Payload*);
     void finished(int);
+    void runRequested(QString, Entry);
+    void runRequested(QString, Predefine);
 };
 
 #endif // SYNCHRONIZEJOB_H

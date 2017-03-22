@@ -24,32 +24,42 @@
 #include <QThread>
 #include <QStringList>
 #include <QMap>
+#include <QHash>
+#include <QTime>
+
+#include "logger/logger.h"
 
 class KQueueThread : public QThread
 {
     Q_OBJECT
 public:
-    KQueueThread(QStringList dirs, QObject *parent = 0);
+    KQueueThread(QStringList entries, Logger *logger, QObject *parent = 0);
 
     void run();
 
 protected:
-    QStringList m_dirs;
+    QStringList m_entries;
+    Logger *m_logger;
 
     QMap<int, QString> m_watches;
+
+    QHash<QString, QTime> m_debounce;
 
     int m_kq;
 
     QStringList findNewEntries(QString);
     QStringList getEntriesForDir(QString, QMap<int, QString>);
     QStringList getEntriesForDir(QString);
-    bool addWatcher(QString, bool emitSignal = true);
+    bool addWatcher(QString);
+
+    void watchAdded(QString entry);
+    void watchAddFailed(QString entry, int error);
+
+    void debounce(QString data);
 
 signals:
     void fileChanged(QString data);
     void watchesAddDone();
-    void watchAdded(QString dir);
-    void watchAddFailed(QString dir, int error);
 
 public slots:
     void slot_stop();

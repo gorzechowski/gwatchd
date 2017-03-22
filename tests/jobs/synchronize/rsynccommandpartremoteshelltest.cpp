@@ -19,26 +19,34 @@
  */
 
 #include <QTest>
+#include <QFileInfo>
 
 #include "rsynccommandpartremoteshelltest.h"
+#include "config/settings/factory/sshsettingsfactory.h"
 
 RsyncCommandPartRemoteShellTest::RsyncCommandPartRemoteShellTest(QObject *parent) :
     QObject(parent)
 {
 }
 
-void RsyncCommandPartRemoteShellTest::initTestCase()
-{
-    this->m_config = new YamlConfig(":/synchronize.yml");
-
-    this->m_commandPart = new RsyncCommandPartRemoteShell("/dir2/", this->m_config);
-}
-
 void RsyncCommandPartRemoteShellTest::testBuild()
 {
+    SshSettings settings = SshSettingsFactory::create(Entry("/dir2/"), new JsonConfig(":/synchronize.json"));
+
+    RsyncCommandPartRemoteShell part(&settings);
+
     QCOMPARE(
-        this->m_commandPart->build(),
+        part.build(),
         QString("-e \"ssh -i /home/user/.ssh/id_rsa -F /etc/sshConfig -p 2222 -o StrictHostKeyChecking=no\"")
+    );
+
+    settings = SshSettings(QStringList(), "", "", "", 0, QStringList());
+
+    part = RsyncCommandPartRemoteShell(&settings);
+
+    QCOMPARE(
+        part.build(),
+        QString()
     );
 }
 

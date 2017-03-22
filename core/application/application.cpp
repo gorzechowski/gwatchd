@@ -1,24 +1,47 @@
-#include <QDebug>
+/*
+ * Copyright (C) 2015 - 2016 Gracjan Orzechowski
+ *
+ * This file is part of GWatchD
+ *
+ * GWatchD is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GWatchD; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ */
+
 #include <QSystemSemaphore>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
 #include "application.h"
-#include "job/jobmanager.h"
-#include "logger/loggercomposite.h"
-#include "logger/filelogger.h"
-#include "logger/simplelogger.h"
-#include "logger/decorator/loggertimestampdecorator.h"
-#include "logger/decorator/loggerleveldecorator.h"
+#include "job/jobsloader.h"
+#include "job/jobscollector.h"
+#include "job/jobsrunner.h"
+#include "logger/factory/defaultloggerfactory.h"
 #include "watcher/watcher.h"
 #include "notification/notificationmanager.h"
 #include "notification/notifier/socketnotifier.h"
+#include "notification/jobsnotificationmanager.h"
 #include "socket/socketserver.h"
+
+QSystemSemaphore semaphore("gwatchd");
 
 Application::Application(CommandLineParser *parser, int &argc, char **argv) : QCoreApplication(argc, argv)
 {
     this->m_parser = parser;
+
+    this->setApplicationName("GWatchD");
+    this->setApplicationVersion(VERSION);
 
     this->parseArguments();
 }
@@ -30,7 +53,7 @@ void Application::removePidFile()
     pidFile.remove();
 }
 
-void Application::init(Config *config)
+void Application::init(ApplicationConfig *config)
 {
     switch(this->m_mode) {
         case Application::Standard:
@@ -55,28 +78,9 @@ QString Application::configDir()
     return this->m_parser->configDir();
 }
 
-Logger* Application::getLogger(Config *config)
+Logger* Application::getLogger(ApplicationConfig *config)
 {
-    LoggerLevelDecorator *fileLogger = new LoggerLevelDecorator(
-        new LoggerTimestampDecorator(
-            new FileLogger(config->value("log.dirPath", "logs").toString() + "/gwatchd.log", config)
-        )
-    );
-
-    LoggerLevelDecorator *simpleLogger = new LoggerLevelDecorator(
-        new LoggerTimestampDecorator(
-            new SimpleLogger()
-        )
-    );
-
-    LoggerComposite *logger = new LoggerComposite();
-
-    logger->add(fileLogger);
-    logger->add(simpleLogger);
-
-    logger->setDebug(this->isDebug());
-
-    return logger;
+    return DefaultLoggerFactory::create(config->logsDirPath() + "/gwatchd.log", config, this->isDebug());
 }
 
 void Application::parseArguments()
@@ -107,21 +111,38 @@ void Application::parseArguments()
     }
 }
 
-void Application::initStandardMode(Config *config)
+void Application::initStandardMode(ApplicationConfig *config)
 {
     Logger *logger = this->getLogger(config);
 
-    JobManager *manager = new JobManager(this->isDebug(), logger, config);
+    JobsCollector *collector = new JobsCollector(
+        config->fileInfo().path() + "/job",
+        this->applicationDirPath() + "/jobs",
+        logger
+    );
+    JobsLoader *loader = new JobsLoader(config, logger);
+    JobsRunner *runner = new JobsRunner(loader, logger);
+    JobsNotificationManager *manager = new JobsNotificationManager(logger);
 
-    manager->loadAvailableJobs();
+    foreach(JobDescriptor descriptor, collector->collectedJobs()) {
+        loader->loadJob(descriptor, this->isDebug());
+    }
 
     Watcher *watcher = new Watcher(logger);
 
-    foreach(Job *job, manager->getLoadedJobs().values()) {
-        watcher->addDirs(job->getDirs());
+    foreach(Job *job, loader->getLoadedJobs().values()) {
+        watcher->addEntries(job->getEntries());
+
+        QObject *jobInstance = dynamic_cast<QObject*>(job);
+
+        connect(jobInstance, SIGNAL(started()), manager, SLOT(slot_jobStarted()));
+        connect(jobInstance, SIGNAL(running(Payload*)), manager, SLOT(slot_jobRunning(Payload*)));
+        connect(jobInstance, SIGNAL(finished(int)), manager, SLOT(slot_jobFinished(int)));
+        connect(jobInstance, SIGNAL(runRequested(QString, Entry)), runner, SLOT(run(QString, Entry)));
+        connect(jobInstance, SIGNAL(runRequested(QString, Predefine)), runner, SLOT(run(QString, Predefine)));
     }
 
-    connect(watcher, SIGNAL(fileChanged(QString)), manager, SLOT(slot_runJobs(QString)));
+    connect(watcher, SIGNAL(fileChanged(QString)), runner, SLOT(runAll(QString)));
 
     QEventLoop loop;
 
@@ -140,27 +161,50 @@ void Application::initStandardMode(Config *config)
     notificationManager->addNotifier(new SocketNotifier(socketServer));
 
     connect(manager, SIGNAL(notification(Notification*)), notificationManager, SLOT(slot_notification(Notification*)));
+
+    #ifdef Q_OS_MAC
+        QFile file(this->m_parser->pidFile());
+
+        if(file.open(QIODevice::ReadOnly)) {
+            if(file.readAll().toInt() == ::getpid()) {
+                semaphore.release();
+
+                ::close(STDIN_FILENO);
+                ::close(STDOUT_FILENO);
+                ::close(STDERR_FILENO);
+            }
+
+            file.close();
+        }
+    #endif
 }
 
-void Application::initSingleMode(Config *config)
+void Application::initSingleMode(ApplicationConfig *config)
 {
     Logger *logger = this->getLogger(config);
 
-    JobManager *manager = new JobManager(this->isDebug(), logger, config);
+    JobsCollector *collector = new JobsCollector(
+        config->fileInfo().path() + "/job",
+        this->applicationDirPath() + "/jobs",
+        logger
+    );
+    JobsLoader *loader = new JobsLoader(config, logger);
+    JobsRunner *runner = new JobsRunner(loader, logger);
 
-    manager->loadAvailableJobs();
+    foreach(JobDescriptor descriptor, collector->collectedJobs()) {
+        loader->loadJob(descriptor, this->isDebug());
+    }
 
     QString runJobName = this->m_parser->runJobName();
     QStringList runJobArgs = this->m_parser->runJobArgs();
 
-    manager->runJob(runJobName, runJobArgs);
+    runner->run(runJobName, runJobArgs);
 
     ::exit(0);
 }
 
-void Application::initDaemonMode(Config *config)
+void Application::initDaemonMode(ApplicationConfig *config)
 {
-    QSystemSemaphore semaphore("gwatchd");
     QFile pidFile;
 
     pid_t pid, sid;
@@ -190,6 +234,25 @@ void Application::initDaemonMode(Config *config)
     }
 
     // we are in child process...
+
+    #ifdef Q_OS_MAC
+        char *debug = NULL;
+
+        if(this->m_parser->isSetDebug()) {
+            debug = QByteArray("-d").data();
+        }
+
+        char* const argv[] = {
+            this->applicationFilePath().toUtf8().data(),
+            QByteArray("--no-daemon").data(),
+            debug,
+            NULL
+        };
+
+        ::execv(this->applicationFilePath().toUtf8().data(), argv);
+
+        ::exit(0);
+    #endif
 
     umask(0);
 

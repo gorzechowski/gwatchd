@@ -21,21 +21,24 @@
 #ifndef RSYNCCOMMANDBUILDER_H
 #define RSYNCCOMMANDBUILDER_H
 
+#include <QFileInfo>
+
 #include "command/commandbuilder.h"
 #include "command/commandpart.h"
-#include "config/config.h"
+#include "config/settings/rsyncsettings.h"
+#include "config/settings/sshsettings.h"
 
 class RsyncCommandBuilder : public CommandBuilder
 {
 public:
-    RsyncCommandBuilder(QString dir, Config *config);
+    RsyncCommandBuilder(RsyncSettings *rsyncSettings, SshSettings *sshSettings);
 
     QStringList build();
 
 protected:
+    RsyncSettings *m_rsyncSettings;
+    SshSettings *m_sshSettings;
     QList<CommandPart*> m_parts;
-    QString m_dir;
-    Config *m_config;
 };
 
 #endif // RSYNCCOMMANDBUILDER_H

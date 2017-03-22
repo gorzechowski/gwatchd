@@ -34,6 +34,8 @@ void LoggerComposite::log(QString content)
 
 void LoggerComposite::debug(QString content)
 {
+    if(!this->m_isDebug) return;
+
     foreach(Logger *logger, this->m_loggers) {
         logger->debug(content);
     }
@@ -46,10 +48,10 @@ void LoggerComposite::error(QString content)
     }
 }
 
-void LoggerComposite::setDebug(bool isDebug)
+void LoggerComposite::warning(QString content)
 {
     foreach(Logger *logger, this->m_loggers) {
-        logger->setDebug(isDebug);
+        logger->warning(content);
     }
 }
 

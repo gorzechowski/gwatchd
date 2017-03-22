@@ -3,12 +3,10 @@ QT += testlib
 
 TEMPLATE = app
 
-CONFIG += console
+CONFIG += console testcase
 CONFIG -= app_bundle
 
 INCLUDEPATH += \
     $$PWD/../core/ \
-    $$PWD/../libs/yaml-cpp/include \
+    $$PWD/../share/ \
     /usr/local/include
-
-QMAKE_RPATHDIR += $$OUT_PWD/../../../libs/yaml-cpp

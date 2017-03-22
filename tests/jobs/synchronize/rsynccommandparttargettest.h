@@ -24,7 +24,7 @@
 #include <QObject>
 
 #include "../../../jobs/synchronize/command/rsync/rsynccommandparttarget.h"
-#include "config/yamlconfig.h"
+#include "config/jsonconfig.h"
 
 class RsyncCommandPartTargetTest : public QObject
 {
@@ -32,12 +32,7 @@ class RsyncCommandPartTargetTest : public QObject
 public:
     RsyncCommandPartTargetTest(QObject *parent = 0);
 
-private:
-    Config *m_config;
-    RsyncCommandPartTarget *m_commandPart;
-
 private slots:
-    void initTestCase();
 
     void testBuild();
 

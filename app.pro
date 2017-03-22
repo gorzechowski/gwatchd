@@ -33,7 +33,9 @@ defineTest(minQtVersion) {
 
 CONFIG += ordered
 TEMPLATE = subdirs
-SUBDIRS += libs core jobs tests
+SUBDIRS += core jobs tests
+
+include(app.pri)
 
 OTHER_FILES += \
     CHANGELOG.md \
@@ -41,37 +43,47 @@ OTHER_FILES += \
     README.md \
     .gitignore \
     .travis.yml \
-    scripts/*
+    scripts/* \
+    docs/*
+
+TARGET_DIR = $$OUT_PWD/gwatchd-$${GWATCHD_VERSION}
 
 unix {
-    core.path = $$OUT_PWD/bin
+    core.path = $$TARGET_DIR
     core.files = $$OUT_PWD/core/gwatchd
 
-    jobs.path = $$OUT_PWD/bin/jobs
+    jobs.path = $$TARGET_DIR/jobs
     jobs.files = $$OUT_PWD/jobs/synchronize/lib*
+    jobs.files += $$OUT_PWD/jobs/command/lib*
 
-    libs.path = $$OUT_PWD/bin/libs
-    libs.files = $$OUT_PWD/libs/yaml-cpp/lib*
+    libs.path = $$TARGET_DIR/libs
 
-    tests.path = $$OUT_PWD/bin/tests
-    tests.files = \
-        $$OUT_PWD/tests/core/config/*Test \
-        $$OUT_PWD/tests/core/notification/*Test \
-        $$OUT_PWD/tests/core/watcher/*Test \
-        $$OUT_PWD/tests/jobs/synchronize/*Test
+    !macx {
+        libs.files += $$[QT_INSTALL_LIBS]/libQt5Core.so*
+        libs.files += $$[QT_INSTALL_LIBS]/libQt5Network.so*
+        libs.files += $$[QT_INSTALL_LIBS]/libQt5WebSockets.so*
+        libs.files += $$[QT_INSTALL_LIBS]/libicui18n.so*
+        libs.files += $$[QT_INSTALL_LIBS]/libicuuc.so*
+        libs.files += $$[QT_INSTALL_LIBS]/libicudata.so*
+    } else {
+        libs.files += $$[QT_INSTALL_LIBS]/QtCore.framework
+        libs.files += $$[QT_INSTALL_LIBS]/QtNetwork.framework
+        libs.files += $$[QT_INSTALL_LIBS]/QtWebSockets.framework
+    }
 
-    INSTALLS += core jobs libs tests
+    INSTALLS += core jobs libs
 }
 
 macx {
+    QMAKE_STRIP = strip -x
+
     install_name_tool.target = install_name_tool
     install_name_tool.commands = \
-        install_name_tool -change libyaml-cpp.dylib @executable_path/libs/libyaml-cpp.dylib $$OUT_PWD/core/gwatchd && \
-        install_name_tool -change libyaml-cpp.dylib @executable_path/libs/libyaml-cpp.dylib $$OUT_PWD/jobs/synchronize/lib* && \
-        install_name_tool -change libyaml-cpp.dylib @executable_path/../libs/libyaml-cpp.dylib $$OUT_PWD/tests/core/config/*Test && \
-        install_name_tool -change libyaml-cpp.dylib @executable_path/../libs/libyaml-cpp.dylib $$OUT_PWD/tests/core/notification/*Test && \
-        install_name_tool -change libyaml-cpp.dylib @executable_path/../libs/libyaml-cpp.dylib $$OUT_PWD/tests/core/watcher/*Test && \
-        install_name_tool -change libyaml-cpp.dylib @executable_path/../libs/libyaml-cpp.dylib $$OUT_PWD/tests/jobs/*/*Test
+        install_name_tool -change @rpath/QtWebSockets.framework/Versions/5/QtWebSockets @executable_path/libs/QtWebSockets.framework/Versions/5/QtWebSockets $$TARGET_DIR/gwatchd && \
+        install_name_tool -change @rpath/QtNetwork.framework/Versions/5/QtNetwork @executable_path/libs/QtNetwork.framework/Versions/5/QtNetwork $$TARGET_DIR/gwatchd && \
+        install_name_tool -change @rpath/QtCore.framework/Versions/5/QtCore @executable_path/libs/QtCore.framework/Versions/5/QtCore $$TARGET_DIR/gwatchd && \
+        install_name_tool -change @rpath/QtCore.framework/Versions/5/QtCore @executable_path/libs/QtCore.framework/Versions/5/QtCore $$TARGET_DIR/jobs/libcommandjob.dylib && \
+        install_name_tool -change @rpath/QtCore.framework/Versions/5/QtCore @executable_path/libs/QtCore.framework/Versions/5/QtCore $$TARGET_DIR/jobs/libsynchronizejob.dylib
 
     QMAKE_EXTRA_TARGETS += install_name_tool
 

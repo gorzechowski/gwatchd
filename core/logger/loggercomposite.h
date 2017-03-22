@@ -34,8 +34,7 @@ public:
     void log(QString content);
     void debug(QString content);
     void error(QString content);
-
-    void setDebug(bool isDebug);
+    void warning(QString content);
 
     void add(Logger *logger);
 

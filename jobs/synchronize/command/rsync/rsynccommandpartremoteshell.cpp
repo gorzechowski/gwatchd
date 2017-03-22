@@ -19,66 +19,22 @@
  */
 
 #include "command/rsync/rsynccommandpartremoteshell.h"
+#include "command/ssh/sshcommandbuilder.h"
 
-RsyncCommandPartRemoteShell::RsyncCommandPartRemoteShell(QString dir, Config *config)
+RsyncCommandPartRemoteShell::RsyncCommandPartRemoteShell(SshSettings *sshSettings)
 {
-    this->m_dir = dir;
-    this->m_config = config;
+    this->m_settings = sshSettings;
 }
 
 QString RsyncCommandPartRemoteShell::build()
 {
-    QString rsh = "-e \"ssh %1\"";
-    QStringList args = this->getArgs();
+    QString rsh = "-e \"%1\"";
+    SshCommandBuilder builder(this->m_settings);
+    QStringList commands = builder.build();
 
-    if(args.empty()) {
+    if(commands.count() == 0) {
         return NULL;
     }
 
-    return rsh.arg(args.join(" "));
-}
-
-QStringList RsyncCommandPartRemoteShell::getArgs()
-{
-    QStringList args;
-
-    QString keyFile = this->m_config->value(
-        QString("dirs.%1.ssh.identityFile").arg(this->m_dir),
-        this->m_config->value("ssh.identityFile", "").toString()
-    ).toString();
-
-    if(!keyFile.isEmpty()) {
-        args << "-i " + keyFile;
-    }
-
-    QString configFile = this->m_config->value(
-        QString("dirs.%1.ssh.configFile").arg(this->m_dir),
-        this->m_config->value("ssh.configFile", "").toString()
-    ).toString();
-
-    if(!configFile.isEmpty()) {
-        args << "-F " + configFile;
-    }
-
-    int port = this->m_config->value(
-        QString("dirs.%1.ssh.port").arg(this->m_dir),
-        this->m_config->value("ssh.port", 0).toInt()
-    ).toInt();
-
-    if(port > 0) {
-        args << "-p " + QString::number(port);
-    }
-
-    QStringList options = this->m_config->listValue(
-        QString("dirs.%1.ssh.options").arg(this->m_dir),
-        this->m_config->listValue("ssh.options", QStringList())
-    );
-
-    if(!options.empty()) {
-        foreach(QString option, options) {
-            args << "-o " + option;
-        }
-    }
-
-    return args;
+    return rsh.arg(commands.at(0));
 }

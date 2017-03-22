@@ -30,7 +30,33 @@ LoggerTimestampDecorator::LoggerTimestampDecorator(Logger *logger, QObject *pare
 
 void LoggerTimestampDecorator::log(QString content)
 {
-    content.prepend(QDateTime::currentDateTime().toString("[yyyy-MM-dd hh:mm:ss] "));
+    content.prepend(this->timestamp());
 
     this->m_logger->log(content);
+}
+
+void LoggerTimestampDecorator::debug(QString content)
+{
+    content.prepend(this->timestamp());
+
+    this->m_logger->debug(content);
+}
+
+void LoggerTimestampDecorator::error(QString content)
+{
+    content.prepend(this->timestamp());
+
+    this->m_logger->error(content);
+}
+
+void LoggerTimestampDecorator::warning(QString content)
+{
+    content.prepend(this->timestamp());
+
+    this->m_logger->warning(content);
+}
+
+QString LoggerTimestampDecorator::timestamp()
+{
+    return QDateTime::currentDateTime().toString("[yyyy-MM-dd hh:mm:ss] ");
 }

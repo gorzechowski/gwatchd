@@ -20,7 +20,9 @@
 
 #include <QDir>
 #include <QDirIterator>
+#include <QFileInfo>
 #include <QCoreApplication>
+#include <string.h>
 
 #include <sys/inotify.h>
 #include <unistd.h>
@@ -34,36 +36,45 @@
 #define BUF_LEN    (MAX_EVENTS * (EVENT_SIZE + LEN_NAME))
 #define WATCH_FLAGS (IN_MODIFY | IN_DELETE | IN_CREATE | IN_MOVE)
 
-INotifyThread::INotifyThread(QStringList dirs, QObject *parent) :
+INotifyThread::INotifyThread(QStringList entries, Logger *logger, QObject *parent) :
     QThread(parent)
 {
-    this->m_dirs = dirs;
+    this->m_entries = entries;
+    this->m_logger = logger;
 }
 
 void INotifyThread::run()
 {
-    if(this->m_dirs.isEmpty()) {
+    if(this->m_entries.isEmpty()) {
         return;
     }
 
     this->m_fd = inotify_init();
     int watchDescriptor = 0;
 
-    foreach(QString dir, this->m_dirs) {
-        if(!dir.startsWith("/")) {
+    foreach(QString entry, this->m_entries) {
+        if(!entry.startsWith("/")) {
             continue;
         }
 
-        watchDescriptor = inotify_add_watch(this->m_fd, dir.toUtf8(), WATCH_FLAGS);
+        watchDescriptor = inotify_add_watch(this->m_fd, entry.toUtf8(), WATCH_FLAGS);
 
         if(watchDescriptor >= 0) {
-            this->m_watches.insert(watchDescriptor, dir);
-            emit(watchAdded(dir));
+            this->m_watches.insert(watchDescriptor, entry);
+            this->watchAdded(entry);
         } else {
-            emit(watchAddFailed(dir, errno));
+            this->watchAddFailed(entry, errno);
         }
 
-        QDirIterator it(dir, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+        QFileInfo info(entry);
+
+        if(info.isFile()) {
+            continue;
+        }
+
+        this->m_logger->log("Adding watchers for subdirs...");
+
+        QDirIterator it(entry, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
 
         while(it.hasNext()) {
             QString subDir = it.next();
@@ -74,15 +85,14 @@ void INotifyThread::run()
 
             if(watchDescriptor >= 0) {
                 this->m_watches.insert(watchDescriptor, subDir);
-                emit(watchAdded(subDir));
             } else {
-                emit(watchAddFailed(subDir, errno));
+                this->watchAddFailed(subDir, errno);
             }
-
         }
     }
 
     emit(watchesAddDone());
+    this->m_logger->log("Adding watchers done");
 
     int length;
     int i;
@@ -98,61 +108,75 @@ void INotifyThread::run()
         while(i < length) {
             struct inotify_event *event = (struct inotify_event*) &buffer[i];
 
-            if(event->len) {
-                switch(event->mask) {
-                    case IN_MODIFY:
-                    case IN_DELETE:
-                    case IN_CREATE:
-                        emit(fileChanged(this->m_watches.value(event->wd) + QString(event->name)));
-                        break;
+            switch(event->mask) {
+                case IN_MODIFY:
+                case IN_DELETE:
+                case IN_CREATE:
+                    this->debounce(QDir::cleanPath(this->m_watches.value(event->wd) + "/" + QString(event->name)));
+                    break;
 
-                    case IN_MOVED_FROM:
-                        fileMoving.insert(event->cookie, QString(this->m_watches.value(event->wd) + event->name));
-                        break;
+                case IN_MOVED_FROM:
+                    fileMoving.insert(event->cookie, QString(this->m_watches.value(event->wd) + event->name));
+                    break;
 
-                    case IN_MOVED_TO:
-                        emit(fileChanged(
-                            fileMoving.value(event->cookie) + ">" + this->m_watches.value(event->wd) + QString(event->name)
-                        ));
+                case IN_MOVED_TO:
+                    this->debounce(
+                        fileMoving.value(event->cookie) + ">" + QDir::cleanPath(this->m_watches.value(event->wd) + "/" + QString(event->name))
+                    );
 
-                        fileMoving.remove(event->cookie);
-                        break;
+                    fileMoving.remove(event->cookie);
+                    break;
 
-                    case IN_CREATE | IN_ISDIR:
-                        path = this->m_watches.value(event->wd) + event->name;
+                case IN_CREATE | IN_ISDIR:
+                    path = QDir::cleanPath(this->m_watches.value(event->wd) + "/" + event->name);
 
-                        if(!path.endsWith("/")) {
-                            path.append("/");
-                        }
+                    if(!path.endsWith("/")) {
+                        path.append("/");
+                    }
 
-                        watchDescriptor = inotify_add_watch(this->m_fd, path.toUtf8(), WATCH_FLAGS);
+                    watchDescriptor = inotify_add_watch(this->m_fd, path.toUtf8(), WATCH_FLAGS);
 
-                        if(watchDescriptor >= 0) {
-                            this->m_watches.insert(watchDescriptor, path);
-                        }
+                    if(watchDescriptor >= 0) {
+                        this->m_watches.insert(watchDescriptor, path);
+                    }
 
-                        emit(fileChanged(path));
-                        break;
+                    this->debounce(path);
+                    break;
 
-                    case IN_DELETE | IN_ISDIR:
-                        path = this->m_watches.value(event->wd) + event->name;
+                case IN_DELETE | IN_ISDIR:
+                    path = QDir::cleanPath(this->m_watches.value(event->wd) + "/" + event->name);
 
-                        watchDescriptor = this->m_watches.key(path);
+                    watchDescriptor = this->m_watches.key(path);
 
-                        inotify_rm_watch(this->m_fd, watchDescriptor);
-                        this->m_watches.remove(watchDescriptor);
+                    inotify_rm_watch(this->m_fd, watchDescriptor);
+                    this->m_watches.remove(watchDescriptor);
 
-                        emit(fileChanged(path));
-                        break;
+                    this->debounce(path);
+                    break;
 
-                    default:
-                        break;
-                }
+                default:
+                    break;
             }
 
             i += (event->len + EVENT_SIZE);
         }
     }
+}
+
+void INotifyThread::debounce(QString data)
+{
+    QTime lastEvent = this->m_debounce.value(data);
+    QTime currentTime = QTime::currentTime();
+
+    this->m_debounce.insert(data, currentTime);
+
+    if(lastEvent.isValid()) {
+        if(lastEvent.msecsTo(currentTime) <= 25) {
+            return;
+        }
+    }
+
+    emit(fileChanged(data));
 }
 
 void INotifyThread::slot_stop()
@@ -169,4 +193,14 @@ void INotifyThread::slot_stop()
 
     this->terminate();
     this->wait();
+}
+
+void INotifyThread::watchAdded(QString entry)
+{
+    this->m_logger->log(tr("Watcher added for entry: %1").arg(entry));
+}
+
+void INotifyThread::watchAddFailed(QString entry, int error)
+{
+    this->m_logger->error(tr("Failed to add watcher for entry: %1 - %2").arg(entry).arg(strerror(error)));
 }

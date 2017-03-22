@@ -22,9 +22,13 @@
 #define CONFIG_H
 
 #include <QObject>
-#include <QVariant>
 #include <QStringList>
+#include <QJsonValue>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include <QFileInfo>
+#include <QHash>
 
 class Config : public QObject
 {
@@ -32,12 +36,43 @@ public:
     Config(QString filePath, QObject *parent = 0) : QObject(parent), m_fileInfo(QFileInfo(filePath)) {}
     virtual ~Config() {}
 
-    virtual QVariant value(QString key, QVariant defaultValue = QVariant()) = 0;
-    virtual QStringList listValue(QString key, QStringList defaultValue = QStringList()) = 0;
+    virtual QJsonValue value(QString key) = 0;
+
+    QStringList toStringList(QJsonArray array) {
+        QStringList result;
+
+        foreach(QJsonValue value, array) {
+            result << value.toString();
+        }
+
+        return result;
+    }
+
+    void addDeprecated(QJsonArray deprecatedList) {
+        foreach(QJsonValue deprecated, deprecatedList) {
+            this->addDeprecated(deprecated.toObject());
+        }
+    }
+
+    void addDeprecated(QJsonObject deprecated) {
+        if(deprecated.keys().count() < 1) {
+            return;
+        }
+
+        QString key = deprecated.keys().at(0);
+
+        this->m_deprecated.insert(key, deprecated.value(key).toString());
+    }
+
+    void addDeprecated(QString deprecated, QString replacement = "") {
+        this->m_deprecated.insert(deprecated, replacement);
+    }
+
     QFileInfo fileInfo() { return m_fileInfo; }
 
 protected:
     QFileInfo m_fileInfo;
+    QHash<QString, QString> m_deprecated;
 };
 
 #endif // CONFIG_H

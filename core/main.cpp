@@ -23,7 +23,8 @@
 
 #include "application/application.h"
 #include "application/commandlineparser.h"
-#include "config/yamlconfig.h"
+#include "config/jsonconfig.h"
+#include "config/applicationconfig.h"
 
 Application *app;
 
@@ -40,16 +41,13 @@ int main(int argc, char *argv[])
 {
     app = new Application(new CommandLineParser(), argc, argv);
 
-    app->setApplicationName("GWatchD");
-    app->setApplicationVersion("1.1.0");
-
     signal(SIGINT, unixSignalHandler);
     signal(SIGTERM, unixSignalHandler);
     signal(SIGTSTP, unixSignalHandler);
 
     qsrand(QTime::currentTime().second());
 
-    YamlConfig *config = new YamlConfig(app->configDir() + "/config.yml");
+    ApplicationConfig *config = new ApplicationConfig(app->applicationDirPath(), new JsonConfig(app->configDir() + "/config.json"));
 
     app->init(config);
 

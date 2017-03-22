@@ -19,29 +19,28 @@
  */
 
 #include <QTest>
+#include <QFileInfo>
 
 #include "rsynccommandparttargettest.h"
+#include "config/settings/factory/rsyncsettingsfactory.h"
 
 RsyncCommandPartTargetTest::RsyncCommandPartTargetTest(QObject *parent) :
     QObject(parent)
 {
 }
 
-void RsyncCommandPartTargetTest::initTestCase()
-{
-    this->m_config = new YamlConfig(":/synchronize.yml");
-
-    this->m_commandPart = new RsyncCommandPartTarget("/dir2/", this->m_config);
-}
-
 void RsyncCommandPartTargetTest::testBuild()
 {
-    QStringList hosts = this->m_config->listValue("target.hosts");
+    RsyncSettings settings = RsyncSettingsFactory::create(Entry("/dir2/"), new JsonConfig(":/synchronize.json"));
+
+    RsyncCommandPartTarget part(&settings);
+
+    QStringList hosts = QStringList() << "127.0.0.1";
 
     QCOMPARE(hosts.count(), 1);
 
     foreach(QString host, hosts) {
-        QCOMPARE(this->m_commandPart->build(host), QString("otherUser@%1:/backup/dir2/").arg(host));
+        QCOMPARE(part.build(host), QString("otherUser@%1:/backup/dir2/").arg(host));
     }
 }
 

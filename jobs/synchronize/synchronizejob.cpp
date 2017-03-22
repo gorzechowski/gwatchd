@@ -18,69 +18,162 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#include <QDebug>
 #include <QCryptographicHash>
+#include <QFileInfo>
+#include <QRegularExpression>
+#include <QSystemSemaphore>
 
 #include "synchronizejob.h"
 #include "command/rsync/rsynccommandbuilder.h"
 #include "notification/runningpayload.h"
+#include "config/settings/factory/rsyncsettingsfactory.h"
+#include "config/settings/factory/sshsettingsfactory.h"
+#include "config/settings/factory/hookssettingsfactory.h"
+#include "config/settings/factory/settingsfactory.h"
 
 SynchronizeJob::SynchronizeJob()
 {
-    this->m_timer = new QTimer();
+    this->m_entryTimer = new QTimer();
+    this->m_predefineTimer = new QTimer();
 
-    connect(this->m_timer, SIGNAL(timeout()), this, SLOT(slot_synchronize()));
+    connect(this->m_entryTimer, SIGNAL(timeout()), this, SLOT(synchronize()));
+    connect(this->m_predefineTimer, SIGNAL(timeout()), this, SLOT(synchronize()));
 }
 
-void SynchronizeJob::setConfig(Config *config)
+void SynchronizeJob::run(Entry entry)
 {
-    this->m_config = config;
-}
-
-void SynchronizeJob::setLogger(Logger *logger)
-{
-    this->m_logger = logger;
-}
-
-QStringList SynchronizeJob::getDirs()
-{
-    return this->m_config->listValue("dirs");
-}
-
-void SynchronizeJob::run(QString data)
-{
-    this->m_files << data;
-
-    if(this->m_timer->isActive()) {
-        this->m_timer->stop();
+    if(this->m_entries.indexOf(entry) < 0) {
+        this->m_entries << entry;
     }
 
-    this->m_timer->start(this->m_config->value("delay", 100).toInt());
+    if(this->m_entryTimer->isActive()) {
+        this->m_entryTimer->stop();
+    }
+
+    this->m_entryTimer->start(this->m_config->value("delay").toInt(100));
 }
 
-void SynchronizeJob::slot_synchronize()
+void SynchronizeJob::run(Predefine predefine)
 {
-    if(this->m_timer->isActive()) {
-        this->m_timer->stop();
+    if(this->m_predefines.indexOf(predefine) < 0) {
+        this->m_predefines << predefine;
+    }
+
+    if(this->m_predefineTimer->isActive()) {
+        this->m_predefineTimer->stop();
+    }
+
+    this->m_predefineTimer->start(this->m_config->value("delay").toInt(100));
+}
+
+void SynchronizeJob::synchronize()
+{
+    QTimer *timer = dynamic_cast<QTimer*>(this->sender());
+
+    if(timer == this->m_entryTimer) {
+        this->synchronize(this->m_entries.filterEntries(this->getEntries(), this->m_config));
+    } else if(timer == this->m_predefineTimer) {
+        this->synchronize(this->m_predefines);
+    }
+}
+
+void SynchronizeJob::synchronize(EntryList entries)
+{
+    if(this->m_entryTimer->isActive()) {
+        this->m_entryTimer->stop();
+    }
+
+    EntryList changed = this->m_entries;
+
+    this->m_entries.clear();
+
+    if(entries.isEmpty()) {
+        this->m_logger->debug("Synchronize job has nothing to do");
+
+        emit(finished(0));
+
+        return;
     }
 
     emit(started());
 
-    QStringList dirs;
+    foreach(Entry entry, entries) {
+        RsyncSettings rsyncSettings = RsyncSettingsFactory::create(entry, this->m_config);
+        SshSettings sshSettings = SshSettingsFactory::create(entry, this->m_config);
 
-    foreach(QString dir, this->getDirs()) {
-        foreach(QString file, this->m_files) {
-            if(file.startsWith(dir)) {
-                dirs << dir;
-                break;
+        RsyncCommandBuilder builder(&rsyncSettings, &sshSettings);
+        QStringList commands = builder.build();
+
+        foreach(QString command, commands) {
+            QString hash = QCryptographicHash::hash(command.toUtf8(), QCryptographicHash::Md5).toHex();
+
+            if(!this->m_files.contains(hash)) {
+                this->m_files.insert(hash, changed);
             }
+
+            QProcess *process = new QProcess();
+
+            process->setProcessChannelMode(QProcess::MergedChannels);
+
+            if(this->m_activeProcessList.keys().contains(hash)) {
+                this->m_logger->debug("Synchronize process already exists " + hash);
+
+                process = this->m_activeProcessList.value(hash);
+
+                if(process->state() == QProcess::Running) {
+                    this->m_logger->debug("Stopping synchronize process");
+
+                    disconnect(process, SIGNAL(finished(int)), this, SLOT(slot_finished(int)));
+                    process->close();
+                    connect(process, SIGNAL(finished(int)), this, SLOT(slot_finished(int)));
+
+                    this->m_logger->debug("Synchronize process stopped");
+                }
+            } else {
+                this->m_logger->debug("Creating new synchronize process");
+
+                connect(process, SIGNAL(started()), this, SLOT(slot_start()));
+                connect(process, SIGNAL(finished(int)), this, SLOT(slot_finished(int)));
+                connect(process, SIGNAL(readyRead()), this, SLOT(slot_read()));
+
+                process->setProperty("entry", entry);
+                process->setProperty("hash", hash);
+
+                this->m_activeProcessList.insert(hash, process);
+
+                this->m_logger->debug("New synchronize process created");
+            }
+
+            this->m_logger->debug("Starting synchronize process");
+
+            process->start(command);
         }
     }
+}
 
-    this->m_files.clear();
+void SynchronizeJob::synchronize(QList<Predefine> predefines)
+{
+    if(this->m_predefineTimer->isActive()) {
+        this->m_predefineTimer->stop();
+    }
 
-    foreach(QString dir, dirs) {
-        RsyncCommandBuilder builder(dir, this->m_config);
+    this->m_predefines.clear();
+
+    if(predefines.isEmpty()) {
+        this->m_logger->debug("Synchronize job has nothing to do");
+
+        emit(finished(0));
+
+        return;
+    }
+
+    emit(started());
+
+    foreach(Predefine predefine, predefines) {
+        RsyncSettings rsyncSettings = RsyncSettingsFactory::create(predefine, this->m_config);
+        SshSettings sshSettings = SshSettingsFactory::create(predefine, this->m_config);
+
+        RsyncCommandBuilder builder(&rsyncSettings, &sshSettings);
         QStringList commands = builder.build();
 
         foreach(QString command, commands) {
@@ -111,7 +204,7 @@ void SynchronizeJob::slot_synchronize()
                 connect(process, SIGNAL(finished(int)), this, SLOT(slot_finished(int)));
                 connect(process, SIGNAL(readyRead()), this, SLOT(slot_read()));
 
-                process->setProperty("dir", dir);
+                process->setProperty("predefine", predefine);
                 process->setProperty("hash", hash);
 
                 this->m_activeProcessList.insert(hash, process);
@@ -126,16 +219,41 @@ void SynchronizeJob::slot_synchronize()
     }
 }
 
+void SynchronizeJob::runHooks(QList<HookDescriptor> hooks, EntryList list)
+{
+    foreach(HookDescriptor hook, hooks) {
+        if(!hook.fileMask().isEmpty() && list.filter(QRegularExpression(hook.fileMask())).count() < 1) {
+            continue;
+        }
+
+        QString hookKey = QString("%1:%2").arg(hook.jobName(), hook.predefine());
+
+        this->m_logger->debug(QString("Requesting hook %1").arg(hookKey));
+
+        QSystemSemaphore semaphore(hookKey);
+
+        emit(runRequested(hook.jobName(), hook.predefine()));
+
+        semaphore.acquire();
+
+        this->m_logger->debug("Hook finished work");
+    }
+}
+
 void SynchronizeJob::slot_start()
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
-    QString dir = process->property("dir").toString();
+    QString data = process->property("entry").toString();
 
-    this->m_logger->log(QString("Synchronizing %1 dir...").arg(dir));
+    if(data.isEmpty()) {
+        data = process->property("predefine").toString();
+    }
+
+    this->m_logger->log(QString("Synchronizing %1...").arg(data));
 
     RunningPayload *payload = new RunningPayload();
 
-    payload->addDirInfo(dir, RunningPayload::Started);
+    payload->addEntryInfo(data, RunningPayload::Started);
 
     emit(running(payload));
 }
@@ -144,23 +262,53 @@ void SynchronizeJob::slot_finished(int code)
 {
     QProcess *process = static_cast<QProcess*>(this->sender());
 
-    QString dir = process->property("dir").toString();
     RunningPayload *payload = new RunningPayload();
 
-    payload->addDirInfo(dir, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
+    QString hash = process->property("hash").toString();
+    Entry entry = process->property("entry").toString();
+    Predefine predefine = process->property("predefine").toString();
+    QString data;
+
+    if(!entry.isEmpty()) {
+        payload->addEntryInfo(entry, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
+        data = entry;
+    } else {
+        payload->addEntryInfo(predefine, code > 0 ? RunningPayload::Failed : RunningPayload::Finished);
+        data = predefine;
+    }
 
     emit(running(payload));
 
-    this->m_activeProcessList.remove(process->property("hash").toString());
+    this->m_activeProcessList.remove(hash);
 
     if(code > 0) {
-        this->m_logger->error(QString("Synchronizing %1 dir failed").arg(dir));
+        this->m_logger->error(QString("Synchronizing %1 failed").arg(data));
     } else {
-        this->m_logger->log(QString("Synchronizing %1 dir done").arg(process->property("dir").toString()));
+        this->m_logger->log(QString("Synchronizing %1 done").arg(data));
     }
 
     if(this->m_activeProcessList.isEmpty()) {
         emit(finished(code));
+
+        this->m_logger->debug("Looking for hooks");
+
+        HooksSettings hooksSettings;
+
+        if(!entry.isEmpty()) {
+            hooksSettings = HooksSettingsFactory::create(entry, this->m_config);
+        } else {
+            hooksSettings = HooksSettingsFactory::create(predefine, this->m_config);
+        }
+
+        QList<HookDescriptor> hooks = code > 0 ? hooksSettings.failedHooks() : hooksSettings.finishedHooks();
+
+        if(hooks.count() >= 1) {
+            this->runHooks(hooks, this->m_files.value(hash));
+
+            this->m_files.remove(hash);
+        } else {
+            this->m_logger->debug("No hooks found");
+        }
     }
 }
 

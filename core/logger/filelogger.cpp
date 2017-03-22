@@ -25,7 +25,7 @@
 
 #include "logger/filelogger.h"
 
-FileLogger::FileLogger(QString path, Config *config, QObject *parent) :
+FileLogger::FileLogger(QString path, ApplicationConfig *config, QObject *parent) :
     QObject(parent)
 {
     this->m_config = config;
@@ -41,7 +41,7 @@ FileLogger::FileLogger(QString path, Config *config, QObject *parent) :
         );
     }
 
-    if(!this->m_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+    if(!this->m_file->isOpen() && !this->m_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
         printf(
             "Could not open log file %s: %s\n",
             qPrintable(path),
@@ -52,11 +52,13 @@ FileLogger::FileLogger(QString path, Config *config, QObject *parent) :
 
 void FileLogger::log(QString content)
 {
-    if(!this->m_file->isOpen() || !this->m_file->isWritable()) return;
+    if(!this->m_file->isOpen() || !this->m_file->isWritable()) {
+        return;
+    }
 
     qint64 size = this->m_file->size() + content.length() + 1;
 
-    if(size >= (this->m_config->value("log.maxFileSize", 5 * 1024).toInt() * 1024)) {
+    if(size >= (this->m_config->logsMaxFileSize() * 1024)) {
         this->m_file->copy(this->m_file->fileName() + QString::number(this->getIndex()));
         this->m_file->resize(0);
         this->m_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);

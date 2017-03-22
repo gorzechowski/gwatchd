@@ -20,15 +20,14 @@
 
 #include "command/rsync/rsynccommandpartexcludes.h"
 
-RsyncCommandPartExcludes::RsyncCommandPartExcludes(QString dir, Config *config)
+RsyncCommandPartExcludes::RsyncCommandPartExcludes(RsyncSettings *settings)
 {
-    this->m_dir = dir;
-    this->m_config = config;
+    this->m_settings = settings;
 }
 
 QString RsyncCommandPartExcludes::build()
 {
-    QStringList list = this->m_config->listValue(QString("dirs.%1.excludes").arg(this->m_dir));
+    QStringList list = this->m_settings->excludes();
     QStringList excludes;
 
     foreach(QString file, list) {

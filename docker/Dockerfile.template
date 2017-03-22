@@ -1,0 +1,10 @@
+FROM gorzechowski/qt:{{qt}}
+
+RUN groupadd gwatchd && \
+    useradd -g gwatchd -s /bin/bash gwatchd
+
+COPY . /opt/gwatchd
+
+RUN chown -R gwatchd:gwatchd /opt/gwatchd
+
+USER gwatchd

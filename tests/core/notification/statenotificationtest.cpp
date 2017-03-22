@@ -55,7 +55,7 @@ void StateNotificationTest::testCreateInstance()
 
     QJsonDocument document(object);
 
-    QCOMPARE(notification->toJson(), QString(document.toJson()));
+    QCOMPARE(notification->toJson(), QString(document.toJson(QJsonDocument::Compact)));
 }
 
 #include "moc_statenotificationtest.cpp"

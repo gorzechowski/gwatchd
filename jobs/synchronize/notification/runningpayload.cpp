@@ -25,13 +25,13 @@ RunningPayload::RunningPayload()
 
 }
 
-void RunningPayload::addDirInfo(QString dir, int state)
+void RunningPayload::addEntryInfo(QString entry, int state)
 {
     QHash<QString, QString> details;
 
     details.insert("state", QString::number(state));
 
-    this->m_payload.insert(dir, details);
+    this->m_payload.insert(entry, details);
 }
 
 QJsonObject RunningPayload::toJsonObject()
@@ -47,7 +47,7 @@ QJsonObject RunningPayload::toJsonObject()
         dirs.insert(dir, details);
     }
 
-    root.insert("dirs", dirs);
+    root.insert("entries", dirs);
 
     return root;
 }

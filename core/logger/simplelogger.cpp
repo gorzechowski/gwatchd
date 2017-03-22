@@ -19,6 +19,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 
 #include "simplelogger.h"
 
@@ -29,5 +30,7 @@ SimpleLogger::SimpleLogger(QObject *parent): QObject(parent)
 
 void SimpleLogger::log(QString content)
 {
-    printf("%s\n", qPrintable(content));
+    if(isatty(fileno(stdout))) {
+        printf("%s\n", qPrintable(content));
+    }
 }

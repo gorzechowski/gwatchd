@@ -33,7 +33,9 @@ public:
 
     virtual void error(QString content) { log(content); }
 
-    virtual void debug(QString content) { if(m_isDebug) log(content); }
+    virtual void debug(QString content) { log(content); }
+
+    virtual void warning(QString content) { log(content); }
 
     void setDebug(bool isDebug) { m_isDebug = isDebug; }
 

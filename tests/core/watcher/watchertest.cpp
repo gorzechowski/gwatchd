@@ -21,6 +21,8 @@
 #include <QTest>
 #include <QSignalSpy>
 #include <QEventLoop>
+#include <QThread>
+#include <QProcess>
 
 #include "watchertest.h"
 #include "../../mockups/loggermock.h"
@@ -54,7 +56,7 @@ void WatcherTest::initTestCase()
 
     this->m_watcher = new Watcher(logger);
 
-    this->m_watcher->addDirs(QStringList() << this->m_dir.absolutePath());
+    this->m_watcher->addEntries(QStringList() << this->m_dir.absolutePath());
 
     QEventLoop loop;
 
@@ -67,12 +69,15 @@ void WatcherTest::initTestCase()
 
 void WatcherTest::cleanupTestCase()
 {
-//    this->m_watcher->slot_stop();
-    this->m_dir.removeRecursively();
+    QProcess *process = new QProcess();
+
+    process->start("rm", QStringList() << "-r" << this->m_dir.absolutePath());
 }
 
 void WatcherTest::testCreateFile()
 {
+    QThread::msleep(100);
+
     QSignalSpy spy(this->m_watcher, SIGNAL(fileChanged(QString)));
 
     QFile file;
@@ -92,6 +97,8 @@ void WatcherTest::testCreateFile()
 
 void WatcherTest::testModifyFile()
 {
+    QThread::msleep(100);
+
     QSignalSpy spy(this->m_watcher, SIGNAL(fileChanged(QString)));
 
     QFile file;
@@ -114,6 +121,8 @@ void WatcherTest::testModifyFile()
 
 void WatcherTest::testCopyFile()
 {
+    QThread::msleep(100);
+
     QSignalSpy spy(this->m_watcher, SIGNAL(fileChanged(QString)));
 
     QFile file;
@@ -129,6 +138,8 @@ void WatcherTest::testCopyFile()
         QCOMPARE(spy.count() > 0, true);
 
         spy.clear();
+
+        QThread::msleep(100);
 
         file.setFileName(dest);
 
@@ -147,6 +158,8 @@ void WatcherTest::testCopyFile()
 
 void WatcherTest::testMoveFile()
 {
+    QThread::msleep(100);
+
     QSignalSpy spy(this->m_watcher, SIGNAL(fileChanged(QString)));
 
     QFile file;
@@ -164,6 +177,8 @@ void WatcherTest::testMoveFile()
         QCOMPARE(spy.count() > 0, true);
 
         spy.clear();
+
+        QThread::msleep(100);
 
         file.open(QIODevice::ReadWrite);
         file.write("test");

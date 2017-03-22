@@ -34,41 +34,59 @@
 #define FILTER_FLAGS (NOTE_WRITE | NOTE_DELETE | NOTE_RENAME)
 #define FLAGS        (EV_ADD | EV_CLEAR | EV_ENABLE)
 
-KQueueThread::KQueueThread(QStringList dirs, QObject *parent) :
+KQueueThread::KQueueThread(QStringList entries, Logger *logger, QObject *parent) :
     QThread(parent)
 {
-    this->m_dirs = dirs;
+    this->m_entries = entries;
+    this->m_logger = logger;
 }
 
 void KQueueThread::run()
 {
-    if(this->m_dirs.isEmpty()) {
+    if(this->m_entries.isEmpty()) {
         return;
     }
 
     this->m_kq = kqueue();
 
-    foreach(QString dir, this->m_dirs) {
-        if(!dir.startsWith("/")) {
+    foreach(QString entry, this->m_entries) {
+        if(!entry.startsWith("/")) {
             continue;
         }
 
-        this->addWatcher(dir);
+        if(this->addWatcher(entry)) {
+            this->watchAdded(entry);
+        } else {
+            this->watchAddFailed(entry, errno);
+        }
 
-        QDirIterator it(dir, QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+        QFileInfo info(entry);
+
+        if(info.isFile()) {
+            continue;
+        }
+
+        this->m_logger->log("Adding watchers for subdirs...");
+
+        QDirIterator it(entry, QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
 
         while(it.hasNext()) {
             QString path = it.next();
 
-            bool isFile = QFileInfo(path).isFile();
+            info.setFile(path);
 
-            if(!path.endsWith("/") && !isFile) path.append("/");
+            if(info.isDir() && !path.endsWith("/")) {
+                path.append("/");
+            }
 
-            this->addWatcher(path, !isFile);
+            if(!this->addWatcher(path)) {
+                this->watchAddFailed(path, errno);
+            }
         }
     }
 
     emit(watchesAddDone());
+    this->m_logger->log("Adding watchers done");
 
     while(true) {
         struct kevent event;
@@ -89,24 +107,26 @@ void KQueueThread::run()
                 QStringList entries = this->findNewEntries(path);
 
                 foreach(QString entry, entries) {
-                    this->addWatcher(entry, false);
+                    if(!this->addWatcher(entry)) {
+                        this->watchAddFailed(entry, errno);
+                    }
 
-                    emit(fileChanged(entry));
+                    this->debounce(entry);
                 }
             } else {
-                emit(fileChanged(path));
+                this->debounce(path);
             }
         }
 
         if(event.fflags & NOTE_DELETE || event.fflags & NOTE_RENAME) {
-            emit(fileChanged(path));
+            this->debounce(path);
             this->m_watches.remove(ident);
             close(ident);
         }
     }
 }
 
-bool KQueueThread::addWatcher(QString path, bool emitSignal)
+bool KQueueThread::addWatcher(QString path)
 {
     struct kevent direvent;
     const char *dirname = path.toUtf8();
@@ -130,18 +150,26 @@ bool KQueueThread::addWatcher(QString path, bool emitSignal)
     if(kevent(this->m_kq, &direvent, 1, NULL, 0, NULL) >= 0) {
         this->m_watches.insert(dirDescriptor, path);
 
-        if(emitSignal) {
-            emit(watchAdded(path));
-        }
-    } else {
-        if(emitSignal) {
-           emit(watchAddFailed(path, errno));
-        }
-
-        return false;
+        return true;
     }
 
-    return true;
+    return false;
+}
+
+void KQueueThread::debounce(QString data)
+{
+    QTime lastEvent = this->m_debounce.value(data);
+    QTime currentTime = QTime::currentTime();
+
+    this->m_debounce.insert(data, currentTime);
+
+    if(lastEvent.isValid()) {
+        if(lastEvent.msecsTo(currentTime) <= 25) {
+            return;
+        }
+    }
+
+    emit(fileChanged(data));
 }
 
 QStringList KQueueThread::findNewEntries(QString dir)
@@ -167,6 +195,16 @@ QStringList KQueueThread::getEntriesForDir(QString dir, QMap<int, QString> watch
     }
 
     return result;
+}
+
+void KQueueThread::watchAdded(QString entry)
+{
+    this->m_logger->log(tr("Watcher added for entry: %1").arg(entry));
+}
+
+void KQueueThread::watchAddFailed(QString entry, int error)
+{
+    this->m_logger->error(tr("Failed to add watcher for entry: %1 - %2").arg(entry).arg(strerror(error)));
 }
 
 QStringList KQueueThread::getEntriesForDir(QString dir)

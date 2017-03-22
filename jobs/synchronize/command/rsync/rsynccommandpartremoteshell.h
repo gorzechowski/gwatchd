@@ -21,21 +21,20 @@
 #ifndef RSYNCCOMMANDPARTREMOTESHELL_H
 #define RSYNCCOMMANDPARTREMOTESHELL_H
 
+#include <QFileInfo>
+
 #include "command/commandpart.h"
-#include "config/config.h"
+#include "config/settings/sshsettings.h"
 
 class RsyncCommandPartRemoteShell : public CommandPart
 {
 public:
-    RsyncCommandPartRemoteShell(QString dir, Config *config);
+    RsyncCommandPartRemoteShell(SshSettings *sshSettings);
 
     QString build();
 
 protected:
-    QString m_dir;
-    Config *m_config;
-
-    QStringList getArgs();
+    SshSettings *m_settings;
 };
 
 #endif // RSYNCCOMMANDPARTREMOTESHELL_H

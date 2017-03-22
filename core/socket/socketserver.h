@@ -24,14 +24,14 @@
 #include <QWebSocketServer>
 #include <QWebSocket>
 
-#include "config/config.h"
+#include "config/applicationconfig.h"
 #include "logger/logger.h"
 
 class SocketServer : public QWebSocketServer
 {
     Q_OBJECT
 public:
-    SocketServer(Config *config, Logger *logger, QString serverName = "default");
+    SocketServer(ApplicationConfig *config, Logger *logger, QString serverName = "default");
 
     bool start();
 
@@ -40,7 +40,7 @@ public:
     void sendMessageToAllClients(QString);
 
 protected:
-    Config *m_config;
+    ApplicationConfig *m_config;
     Logger *m_logger;
 
 public slots:

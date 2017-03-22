@@ -20,15 +20,14 @@
 
 #include "command/rsync/rsynccommandpartincludes.h"
 
-RsyncCommandPartIncludes::RsyncCommandPartIncludes(QString dir, Config *config)
+RsyncCommandPartIncludes::RsyncCommandPartIncludes(RsyncSettings *settings)
 {
-    this->m_config = config;
-    this->m_dir = dir;
+    this->m_settings = settings;
 }
 
 QString RsyncCommandPartIncludes::build()
 {
-    QStringList list = this->m_config->listValue(QString("dirs.%1.includes").arg(this->m_dir));
+    QStringList list = this->m_settings->includes();
     QStringList includes;
 
     foreach(QString file, list) {

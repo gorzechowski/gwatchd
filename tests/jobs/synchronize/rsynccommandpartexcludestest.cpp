@@ -21,22 +21,20 @@
 #include <QtTest>
 
 #include "rsynccommandpartexcludestest.h"
+#include "config/settings/factory/rsyncsettingsfactory.h"
 
 RsyncCommandPartExcludesTest::RsyncCommandPartExcludesTest(QObject *parent) :
     QObject(parent)
 {
 }
 
-void RsyncCommandPartExcludesTest::initTestCase()
-{
-    this->m_config = new YamlConfig(":/synchronize.yml");
-
-    this->m_commandPart = new RsyncCommandPartExcludes("/dir1/", this->m_config);
-}
-
 void RsyncCommandPartExcludesTest::testBuild()
 {
-    QCOMPARE(this->m_commandPart->build(), QString("--exclude=\"*.git\" --exclude=\"*.local\""));
+    RsyncSettings settings = RsyncSettingsFactory::create(Entry("/dir1/"), new JsonConfig(":/synchronize.json"));
+
+    RsyncCommandPartExcludes part(&settings);
+
+    QCOMPARE(part.build(), QString("--exclude=\"*.git\" --exclude=\"*.local\""));
 }
 
 #include "moc_rsynccommandpartexcludestest.cpp"

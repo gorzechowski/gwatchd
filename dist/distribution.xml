@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <title>GWatchD</title>
+    <organization>pl.gorzechowski</organization>
+
+    <options customize="always" />
+
+    <pkg-ref id="pl.gorzechowski.gwatchd">#gwatchd.pkg</pkg-ref>
+
+    <choices-outline>
+        <line choice="pl.gorzechowski.gwatchd" />
+    </choices-outline>
+
+    <choice
+        id="pl.gorzechowski.gwatchd"
+        title="GWatchD"
+        enabled="false"
+        selected="true"
+        visible="true"
+        customLocation="/usr/local/gwatchd"
+        customLocationAllowAlternateVolumes="true">
+
+        <pkg-ref id="pl.gorzechowski.gwatchd" />
+    </choice>
+</installer-gui-script>

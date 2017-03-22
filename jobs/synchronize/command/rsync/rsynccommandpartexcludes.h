@@ -21,19 +21,20 @@
 #ifndef RSYNCCOMMANDPARTEXCLUDES_H
 #define RSYNCCOMMANDPARTEXCLUDES_H
 
+#include <QFileInfo>
+
 #include "command/commandpart.h"
-#include "config/config.h"
+#include "config/settings/rsyncsettings.h"
 
 class RsyncCommandPartExcludes : public CommandPart
 {
 public:
-    RsyncCommandPartExcludes(QString dir, Config *config);
+    RsyncCommandPartExcludes(RsyncSettings *settings);
 
     QString build();
 
 protected:
-    QString m_dir;
-    Config *m_config;
+    RsyncSettings *m_settings;
 };
 
 #endif // RSYNCCOMMANDPARTEXCLUDES_H

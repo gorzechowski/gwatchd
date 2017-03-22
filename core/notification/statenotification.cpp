@@ -75,5 +75,5 @@ QString StateNotification::toJson()
 
     QJsonDocument document(root);
 
-    return QString(document.toJson());
+    return QString(document.toJson(QJsonDocument::Compact));
 }
